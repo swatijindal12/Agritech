@@ -7,7 +7,6 @@ CONTRACT:
 Features:
     1. mintNFT:  arguments(uint256 tokenId) In this user has to pass tokenId, & mint their land.
 
-
     2. addMetadata: arguments (uint256 tokenId, string memory tokenURI) in this user can add their metadata & update their metadata.
     
 
