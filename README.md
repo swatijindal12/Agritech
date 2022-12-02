@@ -11,7 +11,7 @@ Features:
     2. addMetadata: arguments (uint256 tokenId, string memory tokenURI) in this user can add their metadata & update their metadata.
     
 
-2.  Marketplace Contract (in this farmer can put their land on sell, buyer can buy)
+2.  Marketplace Contract (in this farmer can put their land on sell, buyer can buy land of farmer based on their choice)
     
 Features:
 
