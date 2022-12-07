@@ -1,0 +1,35 @@
+@startuml
+
+class ERC20{
+*totalSupply() : uint 256
+*balanceOf(owner:address) : uint 256
+*allowance(owner:address, spender : address) : uint 256
+*transfer(to:address, tokens: uint256): bool
+*approve(spender:address, tokens: uint256): bool
+*transferFrom(from:address, to:address, tokens: uint256):bool
+}
+
+class Ownable{
+*owner: address
+-----
+*constructor(): void
+*onlyOwner(): modifier
+
+}
+
+class FarmToken{
+*name: string
+*symbol: string
+*totalSupply: uint256
+---------
+*constructor(name: string, symbol: string)
+*mintToken(initalSupply: uint256) : onlyOwner()
+}
+
+
+@enduml
+
+@startuml
+ERC20<|-- FarmToken
+Ownable<|-- FarmToken
+@enduml
