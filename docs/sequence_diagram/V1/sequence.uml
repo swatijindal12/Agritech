@@ -1,0 +1,21 @@
+LoginPage -> BuyerPage : role is Buyer
+BuyerPage -> Marketplace : Show all NFT which are on sell
+BuyerPage <-- Marketplace : buyer click on buy button & get NFT
+BuyerPage -> Contract : show all Buy's NFT
+
+
+LoginPage -> ValidatorPage : role is Validator
+ValidatorPage -> validateApproved :  Show all NFT & validator click on approve or reject button
+ValidatorPage -> validateRejected : Show all rejected NFT's
+
+
+
+LoginPage -> CompanyPage : role is Company
+FarmerPage -> FarmerPage: ok
+note left
+    Add Button
+    FarmList
+    MarketPlace
+    Contract 
+end note
+@enduml
