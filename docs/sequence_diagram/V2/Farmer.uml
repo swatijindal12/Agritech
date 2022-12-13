@@ -1,0 +1,11 @@
+@startuml
+center header <font size=20 color=red>Farmer</font>
+PlatForm -> AddFarm : Add a farm & Create NFT
+AddFarm -> IPFS : Farm data added
+IPFS --> PlatForm : URL Link && Mint Farm NFT
+PlatForm -> Farm : Call GetFarmList to get all Farms
+PlatForm <-- Farm : Put on sell & Created Agreement NFT
+PlatForm -> MarketPlace : Selled NFT's
+PlatForm -> Contract : Show Agreement NFT's of Loggedin farmer & Click on closeAgreement button
+PlatForm -> Profile :Get /profile api call 
+@enduml

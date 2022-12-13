@@ -1,0 +1,9 @@
+@startuml
+center header <font size=20 color=red>Buyer</font>
+PlatForm -> Marketplace : Show NFT's & can buy
+Marketplace -> EscrowContract : Transfer Payment
+PlatForm -> Contract : Agreement List with Close Button
+Contract -> FarmerAccount : Payment Transfered
+PlatForm -> Profile : Get /profile api call
+@enduml
+
