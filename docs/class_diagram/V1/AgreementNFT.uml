@@ -1,0 +1,41 @@
+
+@startuml
+
+class ERC721Enumerable{
+*totalSupply() : uint256
+*tokenOfOwnerByIndex(owner: address, index: uint256) : uint256
+*tokenByIndex(index: uint256) :uint256
+}
+
+class ERC721URIStorage{
+*name: string
+*symbol: string
+*tokenId: uint256
+-----
+*approve(spender:address, tokens: uint256): bool
+*safeTransferFrom(from:address, to: address, tokenId: uint256)
+*transferFrom(from: address, to: address, tokenId: uint256)
+*balanceOf(owner: address): uint256
+*ownerOf(tokenId:uint256): address
+*tokenURI(tokenId: uint256): string
+}
+
+class AgreementNFT{
+
+*name : string
+*symbol : string
+*tokenId : uint256
+* event CreateAgreement(tokenId: uint256, tokenURI: string)
+----------
+*constructor(name : string, symbol : string)
+*createAgreement(tokenURI : string) : onlyOwner()
+}
+
+
+@enduml
+
+@startuml
+ERC721URIStorage<|-- AgreementNFT
+ERC721Enumerable<|-- AgreementNFT
+@enduml
+
