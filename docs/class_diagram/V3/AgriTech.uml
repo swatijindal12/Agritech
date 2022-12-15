@@ -1,0 +1,189 @@
+@startuml
+skinparam linetype polyline
+skinparam linetype ortho
+skinparam groupInheritance 1
+
+interface IERC20{
+*totalSupply() : uint 256
+*balanceOf(owner:address) : uint 256
+*allowance(owner:address, spender : address) : uint 256
+*transfer(to:address, tokens: uint256): bool
+*approve(spender:address, tokens: uint256): bool
+*transferFrom(from:address, to:address, tokens: uint256):bool
+}
+
+
+interface IAgreementNFT{
+*createAgreement(user: address, tokenURI: string)
+*closeAgreement(buyerAddr: address, agreementId: uint256)
+*acceptAgreement(buyerAddr: address)
+}
+
+interface IEscrow{
+*withdraw(amount:uint256, receiver: address)
+}
+
+class Ownable{
+~owner: address
+------------
+*constructor(): void
+*onlyOwner(): modifier
+}
+
+class Marketplace{
+~ IERC20 farmToken
+~ IAgreementNFT agreementNFT
+~ IERC721 farmNFT
+~ IEscrow escrowAddr
+*struct SellInfo{
+sellerAddr: address, buyerAddr: address, tokenId: uint256, contractId:uint256, price: uint256, isValid: uint256}
+*mapping(uint256 => SellInfo) : sellDetails
+*mapping(address => uint256) : validatorList
+*event Sell(tokenId: uint256, sellerAddr: address, price: uint256)
+*event Buy(buyerAddr: address, tokenId: uint256)
+-----------
+*constructor(farmNFT: address, farmToken: address, agreementNFT: address, escrowAddr: address)
+*putFarmOnSell(tokenId: uint256, price: uint256, endDate:uint256)
+*buyFarmLand(tokenId : uint256)
+*soldFarm(tokenId: uint256)
+*validateFarm(tokenId: uint256, action: uint256) 
+*addValidator(validatorAddr[]: address) : onlyOwner()
+*getSellDetailByTokenId(tokenID[]: uint256) : SellInfo[]
+}
+
+
+
+class ERC721Enumerable{
+~_allTokens :uint256[]
+~mapping(address => mapping(uint256 => uint256))  _ownedTokens: uint256
+~mapping(uint256 => uint256)  _ownedTokensIndex: uint256
+~ mapping(uint256 => uint256)  _allTokensIndex:uint256
+--------
+*totalSupply() : uint256
+*tokenOfOwnerByIndex(owner: address, index: uint256) : uint256
+*tokenByIndex(index: uint256) :uint256
+*tokenArray() :uint256[]
+}
+
+class ERC721URIStorage{
+~_name: string
+~_symbol: string
+~mapping(uint256 -> string) _tokenURIs : string
+~mapping(uint256 -> address) _owners : address
+~mapping(address => uint256) _balances : uint256
+~mapping(uint256 => address) _tokenApprovals: address
+~mapping(address => mapping(address => bool)) _operatorApprovals: bool
+
+
+-----
+*approve(spender:address, tokens: uint256): bool
+*safeTransferFrom(from:address, to: address, tokenId: uint256)
+*transferFrom(from: address, to: address, tokenId: uint256)
+*balanceOf(owner: address): uint256
+*ownerOf(tokenId:uint256): address
+*tokenURI(tokenId: uint256): string
+}
+
+class FarmNFT{
+
+*name : string
+*symbol : string
+~_tokenIdCounter : uint256
+*mapping(address => uint256[]) : FarmList
+* event Mint(minterAddr: address, tokenId: uint256, tokenURI: string)
+--
+*constructor(name : string, symbol : string)
+*mint(tokenURI : string)
+*getFarmList(farmerAddr: address) : uint256[]
+}
+
+class ERC20{
+~_name: string
+~_symbol: string
+~_totalSupply: uint256
+~mapping(address -> uint256) _balances: uint256
+~mapping(address -> mapping(address-> uint256) _allowances : uint256
+---------------
+*totalSupply() : uint 256
+*balanceOf(owner:address) : uint 256
+*allowance(owner:address, spender : address) : uint 256
+*transfer(to:address, tokens: uint256): bool
+*approve(spender:address, tokens: uint256): bool
+*transferFrom(from:address, to:address, tokens: uint256):bool
+}
+
+
+
+class FarmToken{
+*name: string
+*symbol: string
+*decimal : uint256
+*totalSupply: uint256
+---------
+*constructor(name: string, symbol: string, decimal: uint256)
+*mintToken(initalSupply: uint256) : onlyOwner()
+}
+
+
+class SafeERC20{
+*totalSupply() : uint 256
+*balanceOf(owner:address) : uint 256
+*allowance(owner:address, spender : address) : uint 256
+*transfer(to:address, tokens: uint256): bool
+*approve(spender:address, tokens: uint256): bool
+*transferFrom(from:address, to:address, tokens: uint256):bool
+}
+
+
+class Escrow{
+*IERC20 farmTokenAddr
+---------
+*constructor(farmTokenAddr: address)
+*withdraw(amount: uint256, receiver:address): modifier
+}
+
+
+class AgreementNFT{
+
+*name : string
+*symbol : string
+*agreementTokenId : uint256
+*struct AgreementDetails{ agreementId: uint256, startDate : uint256, endDate:uint256, sellerAddr: address, buyerAddr: address }
+*mapping(uint256 -> AgreementDetails)AgreementInfo :AgreementDetails
+*mapping(address-> uint256[]) AgreementList: uint256[]
+*event CreateAgreement(tokenId: uint256, tokenURI: string)
+----------
+*constructor(name : string, symbol : string)
+*createAgreement(user: address, endDate:uint256, tokenURI : string)
+*acceptAgreement(buyerAddr: address)
+*closeAgreement(buyerAddr: address, agreementId: uint256)
+*getAgreementList(userAddr: address) : uint256[]
+}
+
+@enduml
+
+@startuml
+FarmNFT -right-> ERC721URIStorage
+AgreementNFT -> ERC721URIStorage
+
+
+
+IERC20 <|-- Marketplace
+Ownable <- Marketplace
+Ownable<|-- Escrow
+Ownable<|-- FarmToken
+
+FarmNFT <|-- Marketplace
+IAgreementNFT <|-- Marketplace
+IEscrow <|-- Marketplace
+
+ERC20<|-- FarmToken
+
+
+SafeERC20<|-- Escrow
+
+
+ERC721Enumerable <- AgreementNFT
+ERC721Enumerable<|-- FarmNFT
+
+@enduml
