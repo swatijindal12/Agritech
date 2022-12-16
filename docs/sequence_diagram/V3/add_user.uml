@@ -1,0 +1,9 @@
+@startuml
+
+title Add User
+company -> "Agritech API" : upload user details
+"Agritech API" -> "IPFS" : Some user data
+"Agritech API" <--"IPFS" : Store IPFS URI
+"Agritech API" -> "Agritech DB" : Some user data + IPFS URI
+
+@enduml

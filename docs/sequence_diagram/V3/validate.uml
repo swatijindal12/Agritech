@@ -1,0 +1,9 @@
+@startuml
+
+title Validate
+
+Validator -> "AgriTech API" : Validate a farm
+"AgriTech API" -> "MarketPlace Contract" : Validate farm from Blockchain
+"AgriTech API" -> "AgriTech DB" : Update farm table
+
+@enduml

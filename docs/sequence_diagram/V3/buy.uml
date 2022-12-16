@@ -1,0 +1,11 @@
+@startuml
+
+title Buy
+
+Buyer ->"Agritech API" :  buy
+"Agritech API" -> "MarketPlace Contract":Buy farm
+"Agritech API"-> "IPFS" : update IPFS 
+"IPFS" --> "Agritech API" : IPFS URI
+"Agritech API" -> "Agreement contract" : update agreementNFT URI from blockchain
+"Agritech API" -> "Agritech DB" : Update Agreement Table 
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+
+title Add Farm
+
+Farmer -> "AgriTech API" : Get farm image upload url
+"AgriTech API" -> Farmer : Signed url to upoad
+"Farmer" -> S3 : Upload farm image
+Farmer -> "AgriTech API" : Upload farm details
+"AgriTech API" -> IPFS : Upload farm details
+IPFS -> "AgriTech API": URI storage
+"AgriTech API" -> "FarmNFT Contract" : mint farm
+"AgriTech API" -> "AgriTech DB" : Store farm URI storage
+
+@enduml

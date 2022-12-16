@@ -1,0 +1,9 @@
+@startuml
+
+title sell
+
+Farmer ->"Agritech API" :  sell
+"Agritech API" -> "MarketPlace Contract":Put farm on Sell
+"Agritech API" <-- "MarketPlace Contract" : Agreement created
+"Agritech API" -> "Agritech DB" : Update Agreement Table 
+@enduml
