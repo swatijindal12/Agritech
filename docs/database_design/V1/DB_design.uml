@@ -1,5 +1,8 @@
 @startuml
 title Agritech DB design
+
+
+left to right direction
 skinparam roundcorner 5
 skinparam linetype ortho
 skinparam shadowing false
@@ -25,6 +28,7 @@ table( users ) {
   mandatorycolumn( mobileNumber ) : Number
   mandatorycolumn( privateKey ) : String
   mandatorycolumn( publicKey ) : String
+  mandatorycolumn( role ) : String
   optionalcolumn( createdAt ) : Date
   optionalcolumn( updatedAt ) : Date
 }
@@ -57,7 +61,6 @@ map Symbol_and_Relation {
  }|-- => One or Many
 }
 
-left to right direction
 
 farms }o--|| users
 farms ||--|| agreements
