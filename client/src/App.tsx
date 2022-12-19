@@ -3,6 +3,7 @@ import './App.css';
 
 // External module exports.
 import Web3 from 'web3';
+import Login from './components/auth/Login';
 
 const App = () => {
 
@@ -14,7 +15,7 @@ const App = () => {
   
   return (
     <div className="App">
-        <h1>Welcome !</h1>
+        <Login />
     </div>
   );
 }
