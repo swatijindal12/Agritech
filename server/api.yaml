@@ -1,0 +1,547 @@
+# DB DESIGN DOCUMENTATION
+openapi: 3.0.3
+info:
+  title: AgriTech API 1.0
+  description: |-
+    It is a platform/ecosystem for agriculture that builds trust and provides traceability. The platform will leverage blockchain technology to build trust amongst different actors in the system like farmers, buyers, the platform provider and validators.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: "1.0"
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local server
+  - url: https://www.swagger.com/api/v1
+    description: Production server
+tags:
+  - name: auth
+    description: Everything about authenticating user.
+  - name: user
+    description: Everything about users.
+  - name : farm
+    description: Everything about farms.
+  - name : agreement
+    description: Everything about agreement.
+
+paths:
+  # LOGIN PATH
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Send OTP.
+      description: Use mobile number to generate OTP.
+      operationId: sendOTP
+      parameters:
+        - name: mobileNumber
+          in: Number
+          description: The user mobile number to get OTP.
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "OTP sent to your number."
+        '404':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Number not found."
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, Internal server error."
+
+  # VERIFY PATH
+  /verify:
+    post:
+      tags:
+        - auth
+      summary: Verify OTP 
+      description: Verify OTP and login into the system.
+      operationId: verifyOTP
+      parameters:
+        - name: mobileNumber
+          in: Number
+          description: The user mobile number on which OTP sent.
+          required: true
+          schema:
+            type: number
+        - name: otp
+          in: Number
+          description: The user mobile number on which OTP sent.
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  jwt:
+                    type: string
+                    example: "sdsdd.fdfersdfdfd.dfdgtrt"
+
+        '404':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again."
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, Internal server error."
+  # LOGOUT PATH
+  /logout:
+    get:
+      tags:
+        - auth
+      summary: Logs out current logged in user session
+      description: ''
+      operationId: logoutUser
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+
+
+  # ADD USER PATH
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create a user 
+      description: Create a new user for the platform with some role (farmer,buyer,validator).
+      operationId: createUser
+      parameters:
+        - name: ipfsHash
+          in: string
+          description: Hash generated from IPFS.
+          required: true
+          schema:
+            type: string
+        - name: mobileNumber
+          in: Number
+          description: The user mobile number.
+          required: true
+          schema:
+            type: number
+        - name: publicKey
+          in: string
+          description: The user public key of wallet.
+          required: true
+          schema:
+            type: number
+        - name: privateKey
+          in: string
+          description: The user private key of wallet.
+          required: true
+          schema:
+            type: number
+        - name: role
+          in: string
+          description: The user private key of wallet.
+          required: true
+          schema:
+            type: string
+            default: farmer
+            enum:
+              - farmer
+              - buyer
+              - validator
+
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  messsage:
+                    type: string
+                    example: "User created."
+
+        '404':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, User creation failed."
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, Internal server error."
+
+  # ADD FARM
+  /farm:
+    post:
+      tags:
+        - farm
+      summary: Create a farm 
+      description: Create a new farm.
+      operationId: createFarm
+      parameters:
+        - name: userId
+          in: string
+          description: User Id of the farmer.
+          required: true
+          schema:
+            type: string
+        - name: farmNFTId
+          in: string
+          description: Farm NFT id.
+          required: true
+          schema:
+            type: string
+        - name: ipfsHash
+          in: string
+          description: IPFS hash farm data.
+          required: true
+          schema:
+            type: string
+        - name: isValidated
+          in: boolean
+          description: farm is validated or not.
+          required: true
+          schema:
+            type: boolean
+
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  messsage:
+                    type: string
+                    example: "Farm added."
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, farm add failed."
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again, Internal server error."
+  # GET LIST OF FARMS
+  /farms:
+    get:
+      tags:
+        - farm
+      summary: Get a List of farms 
+      description: Get a list of farms of a user.
+      operationId: getFarm
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  success: 
+                    type: boolean
+                    example: true
+                  results: 
+                      type: array
+                      items: 
+                        $ref: '#/components/schemas/Farm'    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again,reload page"
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again,Internal server error."
+
+  # Get agreement
+  /agreement:
+    get:
+      tags:
+        - agreement
+      summary: Get a List of agreement  
+      description: Get a list of agreement of a farm.
+      operationId: createAgreement
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  success: 
+                    type: boolean
+                    example: true
+                  results: 
+                      type: array
+                      items: 
+                        $ref: '#/components/schemas/Agreement'    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again,reload page"
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Try again,Internal server error."                  
+              
+
+# Create Schema.
+components:
+  schemas:
+    # Schema User.
+    User: 
+      required:
+        - IpfsHash
+        - mobileNumber
+        - publicKey
+        - privateKey
+        - role
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        ipfsHash:
+          type: string
+          example: Qmc8Lwehj67Azj9FNhtSvzVBPy786owDZVoz8gAy7EZaX
+        mobileNumber:
+          type: number
+          example: 9123145982
+        publicKey: 
+          type: string
+          example: jksdksd878798dhsj3434kjdkdfk34k34jkj
+        privateKey: 
+          type: string
+          example: jksdksd878798dhsj3434kjdkdfk34k34jkj
+        role:
+          type: string
+          description: Choose role.
+          examples: 
+            - farmer
+            - buyer
+            - validator
+          enum: 
+            - farmer
+            - buyer
+            - validator
+            - company  
+        createdAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updatedAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00 
+    # Schema Farm.
+    Farm: 
+      required:
+        - ipfsHash
+        - userId
+        - farmNFTId
+        - isValidated
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        ipfsHash:
+          type: string
+          example: Qmc8Lwehj67Azj9FNhtSvzVBPy786owDZVoz8gAy7EZaX
+        userId:
+          type: string
+          example: ObjectId('674df3hghghsd67sd7') 
+        farmNFTId:
+          type: string
+          example: ObjectId('674df3hghghsd67sd7') 
+        isValidated:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updatedAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+    # Schema Agreement.
+    Agreement: 
+      required:
+        - sellerId
+        - buyerID
+        - agreementNFTId
+        - isSold
+        - isAgreementClose
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        sellerId:
+          type: string
+          example: ObjectId('893hjddf3hghghsd67s34')
+        buyerID:
+          type: string
+          example: ObjectId('8994d4df3hghghsd67sd7')
+        agreementNFTId:
+          type: string
+          example: ObjectId('jd84d4df3hghghsd67s7s')
+        isSold: 
+          type: boolean
+          example: true
+        isAgreementClose: 
+          type: string
+          example: false
+        createdAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updatedAt:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+
+        
+        
+        
+
+
+    
+
+
+      
+
+  
+
