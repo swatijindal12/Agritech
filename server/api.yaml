@@ -36,7 +36,7 @@ paths:
       description: Use mobile number to generate OTP.
       operationId: sendOTP
       parameters:
-        - name: mobileNumber
+        - name: mobile_number
           in: Number
           description: The user mobile number to get OTP.
           required: true
@@ -92,7 +92,7 @@ paths:
       description: Verify OTP and login into the system.
       operationId: verifyOTP
       parameters:
-        - name: mobileNumber
+        - name: mobile_number
           in: Number
           description: The user mobile number on which OTP sent.
           required: true
@@ -168,25 +168,25 @@ paths:
       description: Create a new user for the platform with some role (farmer,buyer,validator).
       operationId: createUser
       parameters:
-        - name: ipfsHash
+        - name: ipfs_hash
           in: string
           description: Hash generated from IPFS.
           required: true
           schema:
             type: string
-        - name: mobileNumber
+        - name: mobile_number
           in: Number
           description: The user mobile number.
           required: true
           schema:
             type: number
-        - name: publicKey
+        - name: public_key
           in: string
           description: The user public key of wallet.
           required: true
           schema:
             type: number
-        - name: privateKey
+        - name: private_key
           in: string
           description: The user private key of wallet.
           required: true
@@ -255,25 +255,25 @@ paths:
       description: Create a new farm.
       operationId: createFarm
       parameters:
-        - name: userId
+        - name: user_id
           in: string
           description: User Id of the farmer.
           required: true
           schema:
             type: string
-        - name: farmNFTId
+        - name: farmnft_id
           in: string
           description: Farm NFT id.
           required: true
           schema:
             type: string
-        - name: ipfsHash
+        - name: ipfs_hash
           in: string
           description: IPFS hash farm data.
           required: true
           schema:
             type: string
-        - name: isValidated
+        - name: validated_status
           in: boolean
           description: farm is validated or not.
           required: true
@@ -343,7 +343,7 @@ paths:
                   results: 
                       type: array
                       items: 
-                        $ref: '#/components/schemas/Farm'    
+                        $ref: '#/components/schemas/farm'    
         '400':
           description: failed operation.
           content: 
@@ -393,7 +393,7 @@ paths:
                   results: 
                       type: array
                       items: 
-                        $ref: '#/components/schemas/Agreement'    
+                        $ref: '#/components/schemas/agreement'    
         '400':
           description: failed operation.
           content: 
@@ -426,28 +426,28 @@ paths:
 components:
   schemas:
     # Schema User.
-    User: 
+    user: 
       required:
-        - IpfsHash
-        - mobileNumber
-        - publicKey
-        - privateKey
+        - ipfs_hash
+        - mobile_number
+        - public_key
+        - private_key
         - role
       type: object
       properties:
         _id: 
           type: string
           example: ObjectId('674df3hghghsd67sd7')
-        ipfsHash:
+        ipfs_hash:
           type: string
           example: Qmc8Lwehj67Azj9FNhtSvzVBPy786owDZVoz8gAy7EZaX
-        mobileNumber:
+        mobile_number:
           type: number
           example: 9123145982
-        publicKey: 
+        public_key: 
           type: string
           example: jksdksd878798dhsj3434kjdkdfk34k34jkj
-        privateKey: 
+        private_key: 
           type: string
           example: jksdksd878798dhsj3434kjdkdfk34k34jkj
         role:
@@ -462,14 +462,14 @@ components:
             - buyer
             - validator
             - company  
-        createdAt:
+        created_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00
-        updatedAt:
+        updated_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00 
     # Schema Farm.
-    Farm: 
+    farm: 
       required:
         - ipfsHash
         - userId
@@ -480,26 +480,26 @@ components:
         _id: 
           type: string
           example: ObjectId('674df3hghghsd67sd7')
-        ipfsHash:
+        ipfs_hash:
           type: string
           example: Qmc8Lwehj67Azj9FNhtSvzVBPy786owDZVoz8gAy7EZaX
-        userId:
+        user_id:
           type: string
           example: ObjectId('674df3hghghsd67sd7') 
-        farmNFTId:
+        farmnft_id:
           type: string
           example: ObjectId('674df3hghghsd67sd7') 
-        isValidated:
+        validated_status:
           type: boolean
           example: false
-        createdAt:
+        created_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00
-        updatedAt:
+        updated_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00
     # Schema Agreement.
-    Agreement: 
+    agreement: 
       required:
         - sellerId
         - buyerID
@@ -511,25 +511,25 @@ components:
         _id: 
           type: string
           example: ObjectId('674df3hghghsd67sd7')
-        sellerId:
+        seller_id:
           type: string
           example: ObjectId('893hjddf3hghghsd67s34')
-        buyerID:
+        buyer_id:
           type: string
           example: ObjectId('8994d4df3hghghsd67sd7')
-        agreementNFTId:
+        agreementnft_id:
           type: string
           example: ObjectId('jd84d4df3hghghsd67s7s')
-        isSold: 
+        sold_status: 
           type: boolean
           example: true
-        isAgreementClose: 
+        agreementclose_status: 
           type: string
           example: false
-        createdAt:
+        created_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00
-        updatedAt:
+        updated_at:
           type: string
           example: 2022-12-15T05:32:17.528+00:00
 
