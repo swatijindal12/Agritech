@@ -4,7 +4,7 @@ import Button from "../common/Button";
 import Input from "../common/Input";
 
 const Login = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   return (
     <>
       {isLoggedIn ? (

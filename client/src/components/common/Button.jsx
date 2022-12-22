@@ -1,7 +1,7 @@
 import React from "react";
 import '../../sass/common/button.scss';
 
-const Button = (props:any) => {
+const Button = (props) => {
   const {text} = props;
   return <div className="btn">{text}</div>;
 };
