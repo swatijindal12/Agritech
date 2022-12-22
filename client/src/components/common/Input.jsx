@@ -2,7 +2,7 @@ import React from 'react';
 import '../../sass/common/input.scss';
 
 // Input box component 
-const Input = (props: any) => {
+const Input = (props) => {
   const {type,placeholder,maxLength} = props;
   return (
     <div className='input-field_wrapper'>
