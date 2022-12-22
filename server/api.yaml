@@ -61,7 +61,10 @@ paths:
                     example: 200
                   data:
                     type: object
-                    example: null  
+                    properties: 
+                      jwt:
+                        type: string
+                        example: "sdsjkdks.sduwiesd.iofdhjsjs" 
         '400':
           description: failed operation.
           content:
@@ -861,7 +864,17 @@ paths:
                     example: 200
                   data: 
                       type: object
-                      example: null  
+                      properties: 
+                        total_farm:
+                          type: number
+                          example: 10
+                        total_farmer:
+                          type: number
+                          example: 20
+                        total_contract:
+                          type: number
+                          example: 5
+                        
         '403':
           description: failed operation.
           content:
