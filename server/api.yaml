@@ -28,7 +28,7 @@ tags:
 
 paths:
   # LOGIN PATH
-  /user/login:
+  /auth/login:
     post:
       tags:
         - auth
@@ -61,10 +61,7 @@ paths:
                     example: 200
                   data:
                     type: object
-                    properties: 
-                      jwt:
-                        type: string
-                        example: "sdsjkdks.sduwiesd.iofdhjsjs" 
+                    example: null 
         '400':
           description: failed operation.
           content:
@@ -105,7 +102,7 @@ paths:
                     example: null  
 
   # VERIFY PATH
-  /user/verify:
+  /auth/verify:
     post:
       tags:
         - auth
@@ -188,7 +185,7 @@ paths:
                     type: object
                     example: null
   # LOGOUT PATH
-  /user/logout:
+  /auth/logout:
     get:
       tags:
         - auth
@@ -283,6 +280,31 @@ paths:
                   message:
                     type: string
                     example: "Try again, User creation failed."
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data: 
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  message:
+                    type: string
+                    example: "Try again, User creation failed."
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data: 
+                    type: object
+                    example: null
         '500':
           description:  failed operation.
           content:
@@ -290,12 +312,18 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: "internal server error,try again"
                   message:
                     type: string
-                    example: "Try again, Internal server error."
+                    example: ""
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data: 
+                    type: object
+                    example: null
 
   # ADD FARM
   /farmer/farm:
@@ -503,7 +531,7 @@ paths:
                     example: null
 
   # GET AGREEMENT
-  /agreement/all:
+  /agreements:
     get:
       security:
         - bearerAuth: []
@@ -572,7 +600,7 @@ paths:
                     type: array
                     example: []
   # SELL AGREEMENT
-  /agreement/sell:
+  /agreement/sell/{id}:
     get:
       security:
         - bearerAuth: []
@@ -660,7 +688,7 @@ paths:
                     type: object
                     example: null
   # BUY AGREEMENT
-  /agreement/buy:
+  /agreement/buy/{id}:
     get:
       security:
         - bearerAuth: []
@@ -748,7 +776,7 @@ paths:
                     type: object
                     example: null
   # CLOSE AGREEMENT
-  /agreement/completed:
+  /agreement/completed/{id}:
     get:
       security:
         - bearerAuth: []
@@ -836,7 +864,7 @@ paths:
                     type: object
                     example: null
   # DASHBOARD OF COMPANY
-  /profile/dashboard:
+  /profile/dashboard/{id}:
     get:
       security:
         - bearerAuth: []
