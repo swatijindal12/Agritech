@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required : [true,"Please check IPFS store."],
         unique:[true, 'Already used.'],
-        trim : true,
+        trim : true
     },
     country_code: {
         type : String,
@@ -44,6 +44,13 @@ const userSchema = new mongoose.Schema({
     },
     
 },  {timestamps:true, createdAt: 'created_at', updatedAt: 'updated_at' } )
+
+// Return JSON Web Token
+userSchema.methods.getJwtToken = function() {
+    return jwt.sign({id : this._id}, process.env.JWT_SECRET,
+             {expiresIn: process.env.JWT_EXPIRES_TIME}
+             );
+ }
 
 
 // Exporting userSchema as User  

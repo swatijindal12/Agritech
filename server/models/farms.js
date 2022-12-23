@@ -11,7 +11,7 @@ const farmSchema = new mongoose.Schema({
     farmnft_id: {
         type : String,
         required:[true, 'Please check farmnft_id.'],
-        default : "+91"
+        unique: [true, 'Already used.']
     },
     validated_status: {
         type: Boolean,
