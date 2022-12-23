@@ -22,8 +22,8 @@ app.use(cors());
 // Setup body parser
 app.use(express.json());
 
-// Routing request to => {BASE_URL}/api/v1/
-app.use('/api/v1',auth)
+// Routing request to => {BASE_URL}/api/v1/auth
+app.use('/api/v1/auth', auth);
 
 // Port on which Server run
 const PORT = process.env.PORT || 3000;
