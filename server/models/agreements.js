@@ -12,11 +12,13 @@ const agreementSchema = new mongoose.Schema({
     buyer_id: {
         type : String,
         required:[true, 'Please check farmnft_id.'],
-        default : "+91"
+        trim : true,
+        unique:[true, 'Already used.']
     },
     agreementnft_id: {
         type: Boolean,
         required:[true, 'Please select validated status.'],
+        unique:[true, 'Already used.']
     },
     sold_status: {
         type : Boolean,
