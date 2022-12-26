@@ -187,6 +187,8 @@ paths:
   # LOGOUT PATH
   /auth/logout:
     get:
+      security:
+        - bearerAuth: []
       tags:
         - auth
       summary: Logs out current logged in user session
@@ -1094,6 +1096,95 @@ components:
       data:
           type: object
           example: { 'id': 1, 'name': 'Test' }
+    #IPFS SCHEMA
+    ipfs_farm:
+      required:
+        - land_size
+        - soil_quality
+        - farm_quality
+        - crop_type
+        - start_date
+        - end_date
+        - practice_followed
+        - price
+        - image_url
+        - product_name
+        - product_quantity
+        - location
+        - state
+        - country
+      type: object
+      properties:
+        land_size:
+          type: number
+          example: 20
+        soil_quality:
+          type: string
+          example: "Black soil"
+        farm_quality:
+          type: string
+          example: SQ-1
+        crop_type: 
+          type: string
+          example: Maize
+        start_date: 
+          type: string
+          example: "26-12-2022"
+        end_date:
+          type: string
+          example: "26-04-2023"
+        practice_followed:
+          type: string
+          example: "organic farming"
+        price:
+          type: number
+          example: 500
+        image_url:
+          type: string
+          example: https://s3.amazonaws.com/bucket/path/image.png
+        product_name:
+          type: string
+          example: "Maize season"
+        product_quantity:
+          type: number
+          example: 50
+        location: 
+          type: string
+          example: Hilalpur
+        state:
+          type: string
+          example: Bihar
+        country:
+          type: string
+          example: India
+    
+    ipfs_user:
+      required:
+        - full_name
+        - address
+        - state
+        - education
+        - expertise
+        - role
+        - mobile_number
+      type: object
+      properties:
+        full_name:
+          type: number
+          example: 
+        address:
+          type: string
+          example: 
+        state:
+          type: string
+          example:
+        education:
+          type: string
+          example: 
+        experience:
+          type: string
+          example: "3 years"
+
   securitySchemes:
     bearerAuth:            # arbitrary name for the security scheme
       type: http
