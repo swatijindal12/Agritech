@@ -12,6 +12,7 @@ const client = require("twilio")(accountSid, authToken);
 // Route to      => api/v1/auth/login
 exports.loginUser = async (req: Request, res: Response, next: NextFunction) => {
   const { mobile_number } = req.body;
+  
   // Checks if mobile_number is entered by user
   if (!mobile_number) {
     return res.status(400).json({
@@ -48,7 +49,7 @@ exports.loginUser = async (req: Request, res: Response, next: NextFunction) => {
           error: null,
           message: "OTP sent to your number.",
           httpStatus: 200,
-          data: verification,
+          data: user.role,
         })
       )
       .catch((error: any) => {
@@ -56,7 +57,6 @@ exports.loginUser = async (req: Request, res: Response, next: NextFunction) => {
           error: "failed operation",
           message: null,
           httpStatus: 400,
-          data: null,
         });
       });
   } catch (error) {
@@ -67,11 +67,14 @@ exports.loginUser = async (req: Request, res: Response, next: NextFunction) => {
       data: null,
     });
   }
-
 };
 
 // Route to      => api/v1/auth/verify
-exports.verifyUser = async (req: Request, res: Response, next: NextFunction ) => {
+exports.verifyUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { mobile_number, otp } = req.body;
 
   // Checks if mobile_number or otp is entered by user
@@ -101,9 +104,11 @@ exports.verifyUser = async (req: Request, res: Response, next: NextFunction ) =>
   client.verify
     .services(serviceId)
     .verificationChecks.create({ to: "+91" + mobile_number, code: otp })
-    .then((verification_check:any) => {
+    .then((verification_check: any) => {
       if (verification_check.status === "approved") {
         // Create JSON Web token
+        console.log("approved", verification_check);
+
         sendToken(user, res);
       } else {
         return res.status(400).json({
@@ -114,7 +119,7 @@ exports.verifyUser = async (req: Request, res: Response, next: NextFunction ) =>
         });
       }
     })
-    .catch((error:any) => {
+    .catch((error: any) => {
       return res.status(500).json({
         error: "failed operation",
         message: null,
@@ -122,8 +127,22 @@ exports.verifyUser = async (req: Request, res: Response, next: NextFunction ) =>
         data: null,
       });
     });
+};
 
-  // Create JSON Web token
-  sendToken(user, res);
-  
+// Route to     => api/v1/auth/logout
+exports.logoutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  res.cookie("token", "none", {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+  return res.status(200).json({
+    error: null,
+    message: "Logout successfully",
+    httpStatus: 200,
+    data: null,
+  });
 };
