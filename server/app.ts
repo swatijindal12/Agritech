@@ -27,10 +27,10 @@ app.use(cookieParser());
 // Setup body parser
 app.use(express.json());
 
-// Routing request to => {BASE_URL}/api/v1/auth
+// Routing request to => {BASE_URL}/api/v1/auth to authenticate User.
 app.use('/api/v1/auth', auth);
 
-// Routing request to => {BASE_URL}/api/v1/register
+// Routing request to => {BASE_URL}/api/v1/register to create User.
 app.use('/api/v1/register', register);
 
 // Port on which Server run
