@@ -611,6 +611,13 @@ paths:
       summary: sell an agreement  
       description: sell an agreement of a farm [blockchain].
       operationId: sellAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -699,6 +706,13 @@ paths:
       summary: buy an agreement  
       description: buy an agreement of a farm [blockchain].
       operationId: buyAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -787,6 +801,13 @@ paths:
       summary: Close an agreement  
       description: close an agreement of a farm [blockchain].
       operationId: closeAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
@@ -875,6 +896,13 @@ paths:
       summary: Dashboard for company 
       description: Get total farm, agreement details.
       operationId: getDashboard
+      parameters:
+        - name: id
+          in: string
+          description: User id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: successful operation
