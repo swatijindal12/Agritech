@@ -8,7 +8,6 @@ exports.isAuthenticatedUser =   async (req, res,next)=>{
     // Checking bearer token
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1];   
-        console.log("token isAuthenticatedUser : " , token);
     }
 
     if(!token) {
@@ -22,17 +21,14 @@ exports.isAuthenticatedUser =   async (req, res,next)=>{
 
     // Verify jwt
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("decoded isAuthenticatedUser :" , decoded);
     req.user = await User.findById(decoded.id);
-
+    
     next();
 };
 
 // Handling users role  [farmer,validator,company,buyer]
 exports.authorizeRoles = (...roles) => {
     return (req,res,next)=>{
-        console.log("req.user authorizeRoles : ", req.user);
-        console.log("user roles : ", roles);
         if(!roles.includes(req.user.role)){
             return next(
                 res.send({
@@ -46,3 +42,4 @@ exports.authorizeRoles = (...roles) => {
         next();
     }
 }
+
