@@ -36,8 +36,7 @@ const userSchema = new mongoose.Schema({
             values : [
                 'Farmer',
                 'Validator',
-                'Buyer',
-                'Company'
+                'Buyer'
             ],
             message : 'Please select correct options for Role.'
         }
