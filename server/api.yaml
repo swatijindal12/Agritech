@@ -17,8 +17,6 @@ security:
 tags:
   - name: auth
     description: Everything about authenticating user.
-  - name : farm
-    description: Everything about farms.
   - name : agreement
     description: Everything about agreement.
   - name: dashboard
@@ -111,19 +109,21 @@ paths:
       summary: Verify OTP 
       description: Verify OTP and login into the system.
       operationId: verifyOTP
-      parameters:
-        - name: mobile_number
-          in: Number
-          description: The user mobile number on which OTP sent.
-          required: true
-          schema:
-            type: number
-        - name: otp
-          in: Number
-          description: The user mobile number on which OTP sent.
-          required: true
-          schema:
-            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mobile_number:
+                  type: number
+                  description: Enter the Mobile  number 
+                  example: 9123145982
+                otp:
+                  type: number
+                  description: Enter the otp received
+                  example: 235687
       responses:
         '200':
           description: successful operation.
@@ -200,211 +200,6 @@ paths:
       responses:
         200:
           description: successful operation
-
-  # ADD FARM
-  /farmer/farm:
-    post:
-      security:
-        - bearerAuth: []
-      tags:
-        - farm
-      summary: Create a farm 
-      description: Create a new farm.
-      operationId: createFarm
-      parameters:
-        - name: user_id
-          in: string
-          description: User Id of the farmer.
-          required: true
-          schema:
-            type: string
-        - name: farmnft_id
-          in: string
-          description: Farm NFT id.
-          required: true
-          schema:
-            type: string
-        - name: ipfs_hash
-          in: string
-          description: IPFS hash farm data.
-          required: true
-          schema:
-            type: string
-        - name: validated_status
-          in: boolean
-          description: farm is validated or not.
-          required: true
-          schema:
-            type: boolean
-
-      responses:
-        '201':
-          description: successful operation.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: object
-                    example: null
-                  messsage:
-                    type: string
-                    example: "Farm added"
-                  httpStatus:
-                    type: number
-                    example: 201
-                  data:
-                    type: object
-                    example: null
-
-        '400':
-          description: failed operation.
-          content:
-            application/json:
-               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "farm add failed, try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 400
-                  data:
-                    type: object
-                    example: null
-        '403':
-          description: failed operation.
-          content:
-            application/json:
-               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "unauthorized,try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 403
-                  data:
-                    type: object
-                    example: null
-
-        '500':
-          description:  failed operation.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "internal server error, try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 500
-                  data:
-                    type: object
-                    example: null
-  # GET LIST OF FARMS
-  /farmer/farms:
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - farm
-      summary: Get a List of farms 
-      description: Get a list of farms of a user.
-      operationId: getFarm
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: object
-                    example: null
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 200
-                  data:
-                    type: array
-                    items: 
-                        $ref: '#/components/schemas/farm'
-        '403':
-          description: failed operation.
-          content:
-            application/json:
-               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "unauthorized,try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 403
-                  data:
-                    type: object
-                    example: null
-
-        '404':
-          description: failed operation.
-          content: 
-            application/json:
-              schema: 
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "not found,try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 200
-                  data:
-                    type: object
-                    example: null
-        '500':
-          description:  failed operation.
-          content:
-            application/json:
-              schema: 
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "internal server error,try again"
-                  messsage:
-                    type: object
-                    example: null
-                  httpStatus:
-                    type: number
-                    example: 200
-                  data:
-                    type: object
-                    example: null
 
   # GET AGREEMENT
   /agreements:
@@ -761,7 +556,7 @@ paths:
                     type: object
                     example: null
   
-   # read json data 
+  #READ JSON DATA FOR VALIDATION
   /admin/data:
     post:
       security:
@@ -860,7 +655,7 @@ paths:
                   data:
                     type: object
                     example: null
-  # Saving json farm data 
+  # SAVING JSON DATA IN DB
   /admin/farm:
     post:
       security:
@@ -959,7 +754,95 @@ paths:
                   data:
                     type: object
                     example: null
+  # GET LIST OF FARMS
+  /admin/farms:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Get a List of farms 
+      description: Get a list of farms of a user.
+      operationId: getFarm
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items: 
+                        $ref: '#/components/schemas/farm'
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
 
+        '404':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null
   # DASHBOARD OF COMPANY
   /admin/dashboard:
     get:
@@ -1061,7 +944,7 @@ paths:
                   data:
                     type: object
                     example: null
-   # Saving json farm data 
+  # SAVING JSON FARMER DATA.
   /admin/farmer:
     post:
       security:
@@ -1540,7 +1423,7 @@ paths:
 # Create Schema.
 components:
   schemas:
-    # Schema User.
+    # Schema Farmer.
     farmer: 
       required:
         - ipfs_hash
@@ -1578,7 +1461,7 @@ components:
           type: string
           example: 2022-12-15T05:32:17.528+00:00 
 
-    # Schema User.
+    # Schema customer.
     customer: 
       required:
         - ipfs_hash
@@ -1711,7 +1594,6 @@ components:
           type: object
           example: { 'id': 1, 'name': 'Test' }
     
-
   securitySchemes:
     bearerAuth:            # arbitrary name for the security scheme
       type: http
@@ -1720,4 +1602,16 @@ components:
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
+
+        
+        
+        
+
+
+    
+
+
+      
+
+  
 
