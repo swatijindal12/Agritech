@@ -1,5 +1,5 @@
 // Importing aws-config
-const s3 = require('../config/aws-config')
+const s3 = require('../config/awsconfig')
 
 // Actual function for uploading file to S3
 async function uploadImage(file) {
@@ -9,8 +9,8 @@ async function uploadImage(file) {
       Body: file.data,
       ACL: "public-read",
     };
+    
     const data = await s3.upload(params).promise();
-    console.log("Data :", data);
     return data.Location; // returns the url location
 }
 
