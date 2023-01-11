@@ -4,7 +4,7 @@
   "description": "A project about agriculture that builds trust and provides traceability",
   "main": "app.js",
   "scripts": {
-    "start": "SET NODE_ENV=production & node ./dist/app.js",
+    "start": "SET NODE_ENV=production & node app.js",
     "dev": "nodemon app.ts"
   },
   "author": "agritech",
