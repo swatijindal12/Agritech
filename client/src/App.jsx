@@ -12,6 +12,7 @@ import Login from "./components/auth/Login";
 import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
 import Dashboard from "./components/company/Dashboard";
+import Farms from "./components/company/Farms";
 
 const App = () => {
   // Checking for web3 connection.
@@ -43,6 +44,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/farms" element={<Farms />} />
       </Routes>
     </Router>
   );

@@ -13,6 +13,7 @@ const Container = styled.div`
   padding: 1rem;
   width: 100%;
   border-bottom: 1px solid #d9c4b7;
+  background-color: #ffffff;
 `;
 
 const Hamburger = styled.img`
