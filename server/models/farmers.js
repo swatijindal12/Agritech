@@ -8,6 +8,10 @@ const validateEmail = function(email) {
 
 // Farmer Model 
 const farmerSchema = new mongoose.Schema({
+    farmer_id:{
+        type: String,
+        required: true
+    },
     name:{
         type: String,
         required: true,
