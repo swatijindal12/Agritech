@@ -26,9 +26,10 @@ exports.isAuthenticatedUser =   async (req, res,next)=>{
     next();
 };
 
-// Handling users role  [farmer,validator,company,buyer]
+// Handling users role  [admin,customer]
 exports.authorizeRoles = (...roles) => {
     return (req,res,next)=>{
+        console.log("req.user.role : ", req.user.role);
         if(!roles.includes(req.user.role)){
             return next(
                 res.send({
