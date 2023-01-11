@@ -5,27 +5,27 @@ const router = express.Router();
 const {validateData,createFarm,createFarmer,getFarmers,createCustomer} = require('../controllers/adminController');
 
 // Importing middleware to check authentication of routes
-// const {isAuthenticatedUser} = require('../middleware/auth')
+const {isAuthenticatedUser,authorizeRoles} = require('../middlewares/auth')
 
 // Route => /api/v1/admin 
 
 // Validate the file Data
-router.route('/validate-data').post(validateData);
+router.route('/validate-data').post(isAuthenticatedUser,authorizeRoles('admin'),validateData);
 
 // Insert farm data into DB.
 router.route('/farm').post(createFarm);
 
 // Get List of farms 
-// router.route('/farms').get(getFarms); //  Working today
+// router.route('/farms').get(getFarms); //Working today
 
 // Insert farmer data into DB.
-router.route('/farmer').post(createFarmer);
+router.route('/farmer').post(isAuthenticatedUser,authorizeRoles('admin'),createFarmer);
 
 // Get List of farmers 
-router.route('/farmers').get(getFarmers);
+router.route('/farmers').get(isAuthenticatedUser,authorizeRoles('admin'), getFarmers);
 
 // Insert company data into DB.
-router.route('/customer').post(createCustomer);
+router.route('/customer').post(isAuthenticatedUser,authorizeRoles('admin'),createCustomer);
 
 module.exports = router;
 
