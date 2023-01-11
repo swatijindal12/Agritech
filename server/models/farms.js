@@ -53,7 +53,7 @@ const farmSchema = new mongoose.Schema({
         trim: true,
     },
     user_id: {
-        type : mongoose.Schema.ObjectId,
+        type : String,
         ref : 'Farmer',
         required: true
     }
