@@ -1,5 +1,5 @@
 // Create and send token and save it cookie
-const sendToken = (user, res) => {
+const sendToken = (user,res) => {
     // Create JWT Token
     const token = user.getJwtToken();
     
@@ -9,10 +9,6 @@ const sendToken = (user, res) => {
         httpOnly: true
     };
 
-    // if (process.env.NODE_ENV.trim() === 'production') {
-    //     options.secure = true;
-    // }
-   
     return res
         .status(200)
         .cookie('token', token, options)
@@ -21,7 +17,8 @@ const sendToken = (user, res) => {
             message: null,
             httpStatus: 200,
             data: {
-                token: token
+                token: token,
+                role: user.role
             }
         })
 }
