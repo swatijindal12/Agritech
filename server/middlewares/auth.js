@@ -14,7 +14,7 @@ exports.isAuthenticatedUser =   async (req, res,next)=>{
         return next(res.send({
             error:'Unauthorized access.',
             message: null,
-            httpStatus: 403,
+            httpStatus: 401,
             data: null
         }))
     }
@@ -33,7 +33,7 @@ exports.authorizeRoles = (...roles) => {
         if(!roles.includes(req.user.role)){
             return next(
                 res.send({
-                    error:'Unauthorized access.',
+                    error:'Forbidden error.',
                     message: null,
                     httpStatus: 403,
                     data: null
