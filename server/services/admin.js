@@ -126,7 +126,7 @@ exports.createFarm = async (req) => {
     // Read Json file and then add it DB
     if (!req.files || !req.files.file) {
         response.error = 'no file selected',
-            response.error = 400
+        response.error = 400
     }
 
     // Read the contents of the file
@@ -136,7 +136,7 @@ exports.createFarm = async (req) => {
     const data = JSON.parse(fileContent);
 
     // remove some field FarmerID
-    const updatedData = data.map(async (item, index) => {
+    const updatedData = data.map( (item, index) => {
 
         const { ...rest } = item;
         // Create an IPFS hash store the hash value 
@@ -151,16 +151,44 @@ exports.createFarm = async (req) => {
 
     // Save Farm data in mongoDB , skip id,s.no key in json
 
-    // Farm.insertMany(updatedData).then(function () {
-    //     res.status(200).json({ error: null, message: "Data Insertion successful", httpStatus: 200, data: updatedData });  // Success
-    // }).catch(function (error) {
-    //     res.status(400).json({ error: `Insertion failed ${error}`, message: null, httpStatus: 400, data: null });      // Failure
-    // });
+    Farm.insertMany(updatedData).then(function () {
+        response.message = "Data Insertion successful",
+        response.httpStatus=200,
+        response.data = updatedData
+        // res.status(200).json({ error: null, message: "Data Insertion successful", httpStatus: 200, data: updatedData });  // Success
+    }).catch(function (error) {
+        response.error = `Insertion failed ${error}`,
+        response.httpStatus=400
+        // response.data = updatedData
+        // res.status(400).json({ error: `Insertion failed ${error}`, message: null, httpStatus: 400, data: null });      // Failure
+    });
 
     if (updatedData) {
         response.message = "Farm created successful"
+        response.httpStatus=200
         response.data = updatedData;
     }
 
+    return response
+}
+
+exports.getFarms = async (req) => {
+    // General response format
+    let response = {
+        error: null,
+        message: null,
+        httpStatus: null,
+        data: null
+    }
+
+    let farms;
+    try {
+        farms = await Farm.find().select('-__v');
+        response.data = farms,
+        response.httpStatus = 200
+    } catch (error) {
+        response.error = "failed operation",
+        response.httpStatus = 400
+    }
     return response
 }
