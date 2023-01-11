@@ -9,6 +9,7 @@ const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 
+// Login service
 exports.login = async (req) => {
 
     // General response format
@@ -31,6 +32,7 @@ exports.login = async (req) => {
     try {
         // Finding user in database
         const user = await User.findOne({ phone });
+        console.log("user : ", user);
 
         // Checking user
         if (!user) {
@@ -47,7 +49,7 @@ exports.login = async (req) => {
             })
             .then((verification) =>
                 response.httpStatus = 200,
-                response.message = "OTP sent to your number.",
+                response.message = `OTP sent to your number`,
                 response.httpStatus = 200
             )
             .catch((error) => {
@@ -61,6 +63,7 @@ exports.login = async (req) => {
     
     return response;
 };
+
 
 exports.verify = async (req) => {
 
@@ -77,7 +80,7 @@ exports.verify = async (req) => {
     // Checks if phone or otp is entered by user
     if (!phone || !otp) {
         response.httpStatus = 400
-        response.error = "Enter phone number & otp"
+        response.error = "Enter phone number and otp"
     }
 
     // Finding user in database
@@ -90,15 +93,15 @@ exports.verify = async (req) => {
     }
 
     // verifying otp with twilio service .
-    
     client.verify
         .services(serviceId)
         .verificationChecks.create({ to: "+91" + phone, code: otp })
         .then((verification_check) => {
             if (verification_check.status === "approved") {
                 // Create JSON Web token
-                let token = user.getJwtToken();
-                response.httpStatus=200;
+                const token = user.getJwtToken();
+                console.log("token : ", token);
+                response.httpStatus = 200,
                 response.data = token
             } else {
                 response.httpStatus = 404

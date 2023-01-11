@@ -1,5 +1,5 @@
 const Farmer = require("../models/farmers");
-const FarmDetail = require("../models/farmDetail");
+const Farm = require("../models/farms");
 const User = require('../models/users');
 
 exports.validate = async (req) => {
@@ -10,9 +10,9 @@ exports.validate = async (req) => {
         httpStatus: null,
         data: null
     }
-    
+
     if (!req.files || !req.files.file) {
-        response.error="no file selected";
+        response.error = "no file selected";
         response.httpStatus = 400
     }
     // Read the contents of the file
@@ -21,14 +21,14 @@ exports.validate = async (req) => {
     // Parse the JSON data
     const data = JSON.parse(fileContent);
 
-    if(data){
-        response.httpStatus=200;
+    if (data) {
+        response.httpStatus = 200;
         response.data = data
     }
     return response;
 }
 
-exports.createFarmer = async (req) =>{
+exports.createFarmer = async (req) => {
     // General response format
     let response = {
         error: null,
@@ -39,8 +39,8 @@ exports.createFarmer = async (req) =>{
 
     // Read Json file and then add it DB
     if (!req.files || !req.files.file) {
-        response.error="no file selected",
-        response.httpStatus=400
+        response.error = "no file selected",
+            response.httpStatus = 400
     }
 
     // Read the contents of the file
@@ -51,12 +51,12 @@ exports.createFarmer = async (req) =>{
 
     // Save Farm data in mongoDB , skip id,s.no key in json
     Farmer.insertMany(data).then(function () {
-        response.message="Data Insertion successful",
-        response.httpStatus=200
-        response.data=data
+        response.message = "Data Insertion successful",
+            response.httpStatus = 200
+        response.data = data
     }).catch(function (error) {
-        response.message=`Insertion failed ${error}`,
-        response.httpStatus=400
+        response.message = `Insertion failed ${error}`,
+            response.httpStatus = 400
     });
 
     return response
@@ -70,20 +70,20 @@ exports.getFarmers = async (req) => {
         httpStatus: null,
         data: null
     }
-    
+
     let farmers;
     try {
         farmers = await Farmer.find().select('-__v');
-        response.data=farmers,
-        response.httpStatus=400
+        response.data = farmers,
+            response.httpStatus = 200
     } catch (error) {
-        response.error="failed operation",
-        response.httpStatus=400
+        response.error = "failed operation",
+            response.httpStatus = 400
     }
     return response
 }
 
-exports.createCustomer= async (req) => {
+exports.createCustomer = async (req) => {
     // General response format
     let response = {
         error: null,
@@ -93,8 +93,8 @@ exports.createCustomer= async (req) => {
     }
 
     if (!req.files || !req.files.file) {
-        response.error="no file selected",
-        response.httpStatus=400
+        response.error = "no file selected",
+            response.httpStatus = 400
     }
 
     // Read the contents of the file
@@ -105,12 +105,62 @@ exports.createCustomer= async (req) => {
 
     // Save Farm data in mongoDB , skip id,s.no key in json
     User.insertMany(data).then(function () {
-        response.message="Data Insertion successful",
-        response.httpStatus=200
-        response.data=data
+        response.message = "Data Insertion successful",
+            response.httpStatus = 200
+        response.data = data
     }).catch(function (error) {
-        response.message=`Insertion failed ${error}`,
-        response.httpStatus=400
+        response.message = `Insertion failed ${error}`,
+            response.httpStatus = 400
     });
+    return response
+}
+
+exports.createFarm = async (req) => {
+    let response = {
+        error: null,
+        message: null,
+        httpStatus: null,
+        data: null
+    }
+
+    // Read Json file and then add it DB
+    if (!req.files || !req.files.file) {
+        response.error = 'no file selected',
+            response.error = 400
+    }
+
+    // Read the contents of the file
+    const fileContent = req.files.file.data.toString();
+
+    // Parse the JSON data
+    const data = JSON.parse(fileContent);
+
+    // remove some field FarmerID
+    const updatedData = data.map(async (item, index) => {
+
+        const { ...rest } = item;
+        // Create an IPFS hash store the hash value 
+        let ipfs_hash = `jsdiu2u3u3jAJHJJSYUDG${index}`;
+        let farmnft_id = `sdjsdksSDFTSD532GSGDG${index}`;
+
+        // Create a farm NFT & store the farm NFT id using BlockChain.
+        return { ...rest, ipfs_hash: ipfs_hash, farmnft_id: farmnft_id, user_id: item.farmer_id };
+    });
+
+    console.log("Updated data : ", updatedData);
+
+    // Save Farm data in mongoDB , skip id,s.no key in json
+
+    // Farm.insertMany(updatedData).then(function () {
+    //     res.status(200).json({ error: null, message: "Data Insertion successful", httpStatus: 200, data: updatedData });  // Success
+    // }).catch(function (error) {
+    //     res.status(400).json({ error: `Insertion failed ${error}`, message: null, httpStatus: 400, data: null });      // Failure
+    // });
+
+    if (updatedData) {
+        response.message = "Farm created successful"
+        response.data = updatedData;
+    }
+
     return response
 }
