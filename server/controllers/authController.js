@@ -9,78 +9,27 @@ const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 
+// Importing all the services
+const authService = require('../services/auth')
+
 // Route to      => api/v1/auth/login
 exports.loginUser = async (req, res, next) => {
-  const { mobile_number } = req.body;
-
-  // Checks if mobile_number is entered by user
-  if (!mobile_number) {
-    return res.status(400).json({
-      error: "Enter mobile number",
-      message: null,
-      httpStatus: 400,
-      data: null,
-    });
-  }
-
-  try {
-    // Finding user in database
-    const user = await User.findOne({ mobile_number });
-
-    // Checking user
-    if (!user) {
-      return res.status(404).json({
-        error: "User not found",
-        message: null,
-        httpStatus: 404,
-        data: null,
-      });
-    }
-
-    // Twilio send OTP service
-    client.verify.v2
-      .services(serviceId)
-      .verifications.create({
-        to: "+91" + user.mobile_number,
-        channel: "sms",
-      })
-      .then((verification) =>
-        res.status(200).json({
-          error: null,
-          message: "OTP sent to your number.",
-          httpStatus: 200,
-          data: user.role,
-        })
-      )
-      .catch((error) => {
-        return res.status(400).json({
-          error: "failed operation",
-          message: null,
-          httpStatus: 400,
-        });
-      });
-  } catch (error) {
-    return res.status(400).json({
-      error: "failed operation",
-      message: null,
-      httpStatus: 400,
-      data: null,
-    });
-  }
+  authService.login(req)
+    .then(response => {
+      console.log("response : ", response);
+      res.status(response.httpStatus).json(response)
+    })
+    .catch(err => res.json(err))
 };
 
 // Route to      => api/v1/auth/verify
-exports.verifyUser = async (
-  req,
-  res,
-  next
-) => {
-  const { mobile_number, otp } = req.body;
+exports.verifyUser = async (req, res, next ) => {
+ const { phone, otp } = req.body;
 
-  // Checks if mobile_number or otp is entered by user
-  if (!mobile_number || !otp) {
+  // Checks if phone or otp is entered by user
+  if (!phone || !otp) {
     return res.status(400).json({
-      error: "Enter mobile number & otp",
+      error: "Enter phone number & otp",
       message: null,
       httpStatus: 400,
       data: null,
@@ -88,7 +37,7 @@ exports.verifyUser = async (
   }
 
   // Finding user in database
-  const user = await User.findOne({ mobile_number });
+  const user = await User.findOne({ phone });
 
   // checking
   if (!user) {
@@ -103,13 +52,11 @@ exports.verifyUser = async (
   // verifying otp with twilio service .
   client.verify
     .services(serviceId)
-    .verificationChecks.create({ to: "+91" + mobile_number, code: otp })
+    .verificationChecks.create({ to: "+91" + phone, code: otp })
     .then((verification_check) => {
       if (verification_check.status === "approved") {
         // Create JSON Web token
-        console.log("approved", verification_check);
-
-        sendToken(user, res);
+        sendToken(user,res);
       } else {
         return res.status(400).json({
           error: "failed operation",
@@ -130,15 +77,13 @@ exports.verifyUser = async (
 };
 
 // Route to     => api/v1/auth/logout
-exports.logoutUser = async (
-  req,
-  res,
-  next
-) => {
+exports.logoutUser = async (req, res, next ) => {
+
   res.cookie("token", "none", {
     expires: new Date(Date.now()),
     httpOnly: true,
   });
+
   return res.status(200).json({
     error: null,
     message: "Logout successfully",
