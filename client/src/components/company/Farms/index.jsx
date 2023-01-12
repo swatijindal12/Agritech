@@ -16,7 +16,7 @@ const FilterContainer = styled.div`
 `;
 
 const Farms = () => {
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter, setShowFilter] = useState(false);
   const toggleFilter = () => setShowFilter(!showFilter);
 
   return (

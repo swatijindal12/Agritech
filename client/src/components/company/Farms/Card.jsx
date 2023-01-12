@@ -4,6 +4,7 @@ import ExpandIcon from "../../../assets/down-arrow.svg";
 import Flexbox from "../../common/Flexbox";
 import stars from "./stars";
 import LocationIcon from "../../../assets/farms/location.svg";
+import Button from "../../common/Button";
 
 const Container = styled.div`
   background-color: #f0ead2;
@@ -60,6 +61,11 @@ const ViewMore = styled.p`
 const Card = ({ data }) => {
   const [opened, setOpened] = useState(false);
 
+  const createContract = () => {
+    localStorage.setItem("current-selected-farm", JSON.stringify(data));
+    window.location.href = "/create-contract";
+  };
+
   return (
     <Container>
       <Image src={data.image} />
@@ -98,6 +104,7 @@ const Card = ({ data }) => {
 
           <Id>{data.crops}</Id>
           <ViewMore onClick={() => window.open(data.pdf)}>view more</ViewMore>
+          <Button text="CREATE CONTRACT" onClick={createContract} />
         </>
       )}
     </Container>

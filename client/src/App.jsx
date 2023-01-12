@@ -11,6 +11,7 @@ import Web3 from "web3";
 import Login from "./components/auth/Login";
 import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
+import CreateContract from "./components/company/CreateContract";
 import Dashboard from "./components/company/Dashboard";
 import Farms from "./components/company/Farms";
 
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/farms" element={<Farms />} />
+        <Route path="/create-contract" element={<CreateContract />} />
       </Routes>
     </Router>
   );

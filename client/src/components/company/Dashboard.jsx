@@ -41,11 +41,14 @@ const Number = styled.p`
 `;
 
 const Dashboard = () => {
+  const navigateTo = url => {
+    window.location.href = `/${url}`;
+  };
   return (
     <Container>
       <Title>Dashboard</Title>
       <CardContainer wrap="wrap">
-        <Card color="#718355">
+        <Card color="#718355" onClick={() => navigateTo("farms")}>
           <img src={FarmImg} />
           <CardData>
             <Number>26</Number>
