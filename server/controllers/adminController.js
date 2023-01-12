@@ -1,6 +1,3 @@
-const Farmer = require("../models/farmers");
-const Farm= require("../models/farms");
-const User = require('../models/users');
 const adminService = require('../services/admin')
 
 // Route to      => api/v1/admin/validate-data
@@ -49,13 +46,14 @@ exports.createFarm =  async (
     res,
     next
 ) => {
+    console.log("Inside createFarm controllers.");
     adminService.createFarm(req)
     .then(response=>{
         res.json(response)
     })
     .catch(error=>{
         res.status(400).json({
-            error:"failed operation",
+            error: `failed operation ${error}`,
             message: null,
             httpStatus:400,
             data:null
@@ -118,4 +116,36 @@ exports.createCustomer = async (
     })
     
 };
+
+// Route to     => api/v1/admin/customers
+exports.getCustomers = async (req,res, next) => {
+    adminService.getCustomers(req)
+        .then(response=>{
+            res.json(response)
+        })
+        .catch(error=>{
+            res.status(400).json({
+                error:"failed operation",
+                message: null,
+                httpStatus:400,
+                data:null
+            })
+        })
+}
+
+// Route to     => api/v1/admin/dashboard
+exports.getdashBoard = async( req, res,next) => {
+    adminService.getdashBoard(req)
+        .then(response=>{
+            res.json(response)
+        })
+        .catch(error=>{
+            res.status(400).json({
+                error:"failed operation",
+                message: null,
+                httpStatus:400,
+                data:null
+            })
+        })
+}
 
