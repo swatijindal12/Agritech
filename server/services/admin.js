@@ -151,23 +151,31 @@ exports.createFarm = async (req) => {
 
     // Save Farm data in mongoDB , skip id,s.no key in json
 
-    Farm.insertMany(updatedData).then(function () {
+    try {
+        const farms = await Farm.create(updatedData);
+        console.log("farms : ", farms);
+        farms.save();
         response.message = "Data Insertion successful",
         response.httpStatus=200,
         response.data = updatedData
-        // res.status(200).json({ error: null, message: "Data Insertion successful", httpStatus: 200, data: updatedData });  // Success
-    }).catch(function (error) {
+    } catch (error) {
         response.error = `Insertion failed ${error}`,
         response.httpStatus=400
-        // response.data = updatedData
-        // res.status(400).json({ error: `Insertion failed ${error}`, message: null, httpStatus: 400, data: null });      // Failure
-    });
-
-    if (updatedData) {
-        response.message = "Farm created successful"
-        response.httpStatus=200
-        response.data = updatedData;
     }
+
+    // Farm.insertMany(updatedData).then(function () {
+    //     response.message = "Data Insertion successful",
+    //     response.httpStatus=200,
+    //     response.data = updatedData
+    //     // res.status(200).json({ error: null, message: "Data Insertion successful", httpStatus: 200, data: updatedData });  // Success
+    // }).catch(function (error) {
+    //     response.error = `Insertion failed ${error}`,
+    //     response.httpStatus=400
+    //     // response.data = updatedData
+    //     // res.status(400).json({ error: `Insertion failed ${error}`, message: null, httpStatus: 400, data: null });      // Failure
+    // });
+
+   
 
     return response
 }

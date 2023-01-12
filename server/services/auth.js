@@ -32,7 +32,6 @@ exports.login = async (req) => {
     try {
         // Finding user in database
         const user = await User.findOne({ phone });
-        console.log("user : ", user);
 
         // Checking user
         if (!user) {
@@ -54,11 +53,11 @@ exports.login = async (req) => {
             )
             .catch((error) => {
                 response.httpStatus = 400,
-                response.error= "failed operation"
+                response.error= `failed operation ${error}`
             });
     } catch (error) {
         response.httpStatus = 400,
-        response.error= "failed operation"
+        response.error= `failed operation 2 ${error}`
     }
     
     return response;
@@ -105,7 +104,7 @@ exports.verify = async (req) => {
                 response.data = token
             } else {
                 response.httpStatus = 404
-                response.error = "failed operation"
+                response.error = `failed operation`
             }
         })
         .catch((error) => {
