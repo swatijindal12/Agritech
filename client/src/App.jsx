@@ -13,6 +13,7 @@ import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
 import CreateContract from "./components/company/CreateContract";
 import Dashboard from "./components/company/Dashboard";
+import Farmers from "./components/company/Farmers";
 import Farms from "./components/company/Farms";
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/farms" element={<Farms />} />
         <Route path="/create-contract" element={<CreateContract />} />
+        <Route path="/farmers" element={<Farmers />} />
       </Routes>
     </Router>
   );

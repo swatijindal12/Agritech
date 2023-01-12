@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import ExpandIcon from "../../../assets/down-arrow.svg";
 import Flexbox from "../../common/Flexbox";
-import stars from "./stars";
+import stars from "../../common/stars";
 import LocationIcon from "../../../assets/farms/location.svg";
 import Button from "../../common/Button";
 
