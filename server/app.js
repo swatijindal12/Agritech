@@ -40,6 +40,16 @@ app.use('/api/v1/auth', auth);
 //---- SCOPE CHANGE ----- //
 app.use('/api/v1/admin', adminRoutes)
 
+// Handling unhandled routes
+// app.use('*', (req, res) => {
+//     res.status(404).json({
+//       error:"Route not found",
+//       message:null,
+//       httpStatus: 404,
+//       data:null
+//     });
+// });
+
 // Port on which Server run
 const PORT = process.env.PORT || 3000;
 
