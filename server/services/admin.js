@@ -9,7 +9,7 @@ const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 // Import for Blockchain
 const Web3 = require("web3");
 const farmNFTContractABI = require("../web3/farmContractABI");
-const mintFarm = require("../web3/mintFarm");
+// const mintFarm = require("../web3/mintFarm");
 
 const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
