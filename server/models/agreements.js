@@ -1,35 +1,46 @@
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 
-// User Model 
-const agreementSchema = new mongoose.Schema({
-    seller_id: {
-        type: String,
-        required : [true,"Please check IPFS store."],
-        trim : true,
-        unique:[true, 'Already used.'],
+// User Model
+const agreementSchema = new mongoose.Schema(
+  {
+    customer_id: {
+      type: String,
+      trim: true,
+      required: true,
     },
-    buyer_id: {
-        type : String,
-        required:[true, 'Please check farmnft_id.'],
-        trim : true,
-        unique:[true, 'Already used.']
+    farmer_name: {
+      type: String,
+      required: [true, "Enter farmer Name"],
     },
-    agreementnft_id: {
-        type: Boolean,
-        required:[true, 'Please select validated status.'],
-        unique:[true, 'Already used.']
+    start_date: {
+      type: Date,
+      default: Date.now,
+    },
+    end_date: {
+      type: Date,
+      default: Date.now,
+    },
+    agreement_nft_id: {
+      type: Boolean,
+      required: [true, "Please select validated status."],
+      unique: [true, "Already used."],
+    },
+    ipfs_url: {
+      type: String,
+      required: [true, "Please select ipfs url"],
     },
     sold_status: {
-        type : Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     agreementclose_status: {
-        type : Boolean,
-        default: false
-    }
-},  {timestamps:true, createdAt: 'created_at', updatedAt: 'updated_at' } )
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
+);
 
-
-// Exporting userSchema as User  
-module.exports = mongoose.model('Agreement', agreementSchema);
+// Exporting userSchema as User
+module.exports = mongoose.model("Agreement", agreementSchema);
