@@ -1,28 +1,65 @@
 const mongoose = require('mongoose');
 
-// User Model 
+// farmer Model 
 const farmSchema = new mongoose.Schema({
-    ipfs_hash: {
+    farmer_id:{
+        type: String,
+        required: true,
+    },
+    name:{
+        type: String,
+        required: true,
+        trim: true,
+        minlegth: 3,
+        maxlength: 50
+    },
+    address: {
+        type: String,
+        required: true,
+        trim: true,
+        minlegth: 5,
+        maxlength: 200
+    },
+    pin:{
+        type: Number,
+        required: true,
+        trim: true,
+        minlength: [6, 'Please enter 6 digit Pin.'],
+        maxlength: [6, 'Please enter 6 digit Pin.']
+    },
+    farmnft_id : {
+        type : String,
+        required:[true, 'Please check farmnft_id.'],
+        unique: [true, 'Already used.']
+    },
+    ipfs_hash : {
         type: String,
         required : [true,"Please check IPFS store."],
         trim : true,
         unique:[true, 'Already used.'],
     },
-    farmnft_id: {
-        type : String,
-        required:[true, 'Please check farmnft_id.'],
-        default : "+91"
+    image_url : {
+        type: String
     },
-    validated_status: {
-        type: Boolean,
-        required:[true, 'Please select validated status.'],
+    video_url : {
+        type: String,
+    },
+    location: {
+        type: String,
+        required: true,
+    },
+    farm_size: {
+        type: String,
+        trim: true,
     },
     user_id: {
-        type : mongoose.Schema.ObjectId,
-        ref : 'User',
+        type : String,
+        ref : 'Farmer',
         required: true
     }
 },  {timestamps:true, createdAt: 'created_at', updatedAt: 'updated_at' } )
+
+// Return JSON Web Token
 
 
 // Exporting userSchema as User  

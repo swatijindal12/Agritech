@@ -7,20 +7,24 @@
 const hre = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  
+  const FarmNFT = await ethers.getContractFactory("FarmNFT");
+  const farmNFT = await FarmNFT.deploy("FarmNFT", "FT");
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
+  const AgreementNFT = await ethers.getContractFactory("AgreementNFT");
+  const agreementNFT = await AgreementNFT.deploy("Agreement NFT", "ANFT");
 
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const MarketPlace = await ethers.getContractFactory("Marketplace");
+  const marketplace = await MarketPlace.deploy(farmNFT.address, agreementNFT.address);
+      
+  await farmNFT.deployed();
+  await agreementNFT.deployed();
+  await marketplace.deployed();
 
-  await lock.deployed();
+  console.log("Farm NFT deployed to", farmNFT.address);
+  console.log("Agreement NFT deployed to", agreementNFT.address);
+  console.log("Marketplace NFT deployed to", marketplace.address);
 
-  console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
