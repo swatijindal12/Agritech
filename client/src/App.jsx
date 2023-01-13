@@ -20,7 +20,8 @@ const App = () => {
   // Checking for web3 connection.
 
   const [showSidebar, setShowSidebar] = useState(false);
-  const [user, setUser] = useState(true);
+  // const [user, setUser] = useState(window.user);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
@@ -28,6 +29,7 @@ const App = () => {
     if (!user) {
       redirect("/login");
     }
+    console.log("user", user);
   }, []);
 
   const toggleSidebar = () => {
