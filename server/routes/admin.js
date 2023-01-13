@@ -33,8 +33,8 @@ router.route('/farmer').post(isAuthenticatedUser,authorizeRoles('admin'),createF
 // Get List of farmers 
 router.route('/farmers').get(isAuthenticatedUser,authorizeRoles('admin'), getFarmers);
 
-// Insert company data into DB.
-router.route('/customer').post(isAuthenticatedUser,authorizeRoles('admin'),createCustomer);
+// Insert customer data into DB.
+router.route('/customer').post(createCustomer);
 
 // Get List of customers
 router.route('/customers').get(isAuthenticatedUser,authorizeRoles('admin'), getCustomers);
