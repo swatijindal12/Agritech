@@ -21,7 +21,7 @@ exports.validateData = async (req, res, next) => {
 // Route to     => POST: api/v1/admin/farmer
 // Create farmer
 exports.createFarmer = async (req, res, next) => {
-  console.log("createFarmer Controllers : ", createFarmer);
+  console.log("createFarmer Controllers : ");
   adminService
     .createFarmer(req)
     .then((response) => {
