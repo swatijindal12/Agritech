@@ -47,6 +47,7 @@ exports.validate = async (req) => {
 };
 
 exports.createFarmer = async (req) => {
+  console.log("createFarmer service :", createFarmer);
   // General response format
   let response = {
     error: null,
@@ -57,8 +58,7 @@ exports.createFarmer = async (req) => {
 
   // Read Json file and then add it DB
   if (!req.files || !req.files.file) {
-    response.error = "no file selected",
-    response.httpStatus = 400
+    (response.error = "no file selected"), (response.httpStatus = 400);
   }
 
   // Read the contents of the file
@@ -69,19 +69,18 @@ exports.createFarmer = async (req) => {
 
   // Save Farm data in mongoDB , skip id,s.no key in json
   try {
-    const farmers = await User.create(data);
+    const farmers = await Farmer.create(data);
     console.log("farmers : ", farmers);
-    if (farmers.insertedCount === farmers.length) {
-        response.message = "Data Insertion successful"
-        response.httpStatus = 201
-        response.data = data
+    if (farmers.length != 0) {
+      response.message = "Data Insertion successful";
+      response.httpStatus = 201;
+      response.data = data;
     } else {
-        response.error = "Data Insertion failed duplicate data",
-        response.httpStatus = 500
+      (response.error = "Data Insertion failed, duplicate data"),
+        (response.httpStatus = 500);
     }
   } catch (error) {
-    response.error = `Insertion failed ${error}`,
-    response.httpStatus = 400
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
   }
   return response;
 };
@@ -98,11 +97,9 @@ exports.getFarmers = async (req) => {
   let farmers;
   try {
     farmers = await Farmer.find().select("-__v");
-    response.data = farmers,
-    response.httpStatus = 200
+    (response.data = farmers), (response.httpStatus = 200);
   } catch (error) {
-    response.error = "failed operation",
-    response.httpStatus = 400
+    (response.error = "failed operation"), (response.httpStatus = 400);
   }
   return response;
 };
@@ -119,8 +116,7 @@ exports.createFarm = async (req) => {
 
   // Read Json file and then add it DB
   if (!req.files || !req.files.file) {
-     response.error = "no file selected",
-     response.error = 400
+    (response.error = "no file selected"), (response.error = 400);
   }
 
   // Read the contents of the file
@@ -130,8 +126,10 @@ exports.createFarm = async (req) => {
   const data = JSON.parse(fileContent);
 
   const updatedData = await Promise.all(
-    data.map(async (farm) => {
+    data.map(async (farm, index) => {
       farm.ipfs_url = "";
+
+      // -------------- IPFS --------------------
       const options = {
         pinataMetadata: {
           name: farm.farmer_id.toString(),
@@ -143,93 +141,98 @@ exports.createFarm = async (req) => {
 
       const ipfsHash = await pinata.pinJSONToIPFS(farm, options);
       farm.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
-
-      // BlockChain Start
-      const farmerAddr = process.env.FARMER_ADDR; //wallet adres
-
-      const gasLimit = await farmNFTContract.methods
-        .mint(farmerAddr, `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`)
-        .estimateGas({ from: adminAddr });
-
-      const bufferedGasLimit = Math.round(
-        Number(gasLimit) + Number(gasLimit) * Number(2)
-      );
-
-      const encodedData = farmNFTContract.methods
-        .mint(farmerAddr, `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`)
-        .encodeABI();
-
-      const gasPrice = await web3.eth.getGasPrice();
-      const transactionFee =
-        parseFloat(gasPrice) * parseFloat(bufferedGasLimit.toString());
-
-      console.log("transactionFee : ", transactionFee);
-
-      const tx = {
-        gas: web3.utils.toHex(bufferedGasLimit),
-        to: farmNFTAddr,
-        value: "0x00",
-        data: encodedData,
-        from: adminAddr,
-      };
-
-      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
-      console.log("signedTx : ", signedTx);
-
-      const transaction = await web3.eth.sendSignedTransaction(
-        signedTx.rawTransaction
-      );
-      // console.log('Transaction : ', transaction);
-
-      let farmnft_id = null;
-      web3.eth.getBlockNumber().then((latestBlock) => {
-        farmNFTContract.getPastEvents(
-          "Mint",
-          {
-            fromBlock: latestBlock,
-            toBlock: latestBlock,
-          },
-          function (error, events) {
-            console.log(events[0]);
-            const result = events[0].returnValues;
-            farmnft_id = result[1];
-            console.log("Fram Id", result[1]);
-            console.log("error :", error);
-          }
-        );
-      });
-      console.log("farmnft_id : ", farmnft_id);
-
-      // BlockChain End
-
+      // -------------- IPFS --------------------
       return { ...farm, user_id: farm.farmer_id };
     })
   );
+
   // return from api
-  console.log("updatedData : ", updatedData);
+  // console.log("updatedData : ", updatedData);
+
+  // BlockChain Start
+  const mintPromises = [];
+  for (let index = 0; index < updatedData.length; index++) {
+    const farm = updatedData[index];
+    farm.farm_nft_id = "";
+    console.log(`ipfs ${index}:`, farm.ipfs_url);
+    // BlockChain Start
+    const farmerAddr = process.env.FARMER_ADDR; //wallet adres
+
+    const gasLimit = await farmNFTContract.methods
+      .mint(farmerAddr, `https://ipfs.io/ipfs/${farm.ipfs_url}`)
+      .estimateGas({ from: adminAddr });
+
+    const bufferedGasLimit = Math.round(
+      Number(gasLimit) + Number(gasLimit) * Number(0.2)
+    );
+
+    const encodedData = farmNFTContract.methods
+      .mint(farmerAddr, `https://ipfs.io/ipfs/${farm.ipfs_url}`)
+      .encodeABI();
+
+    const gasPrice = await web3.eth.getGasPrice();
+    const transactionFee =
+      parseFloat(gasPrice) * parseFloat(bufferedGasLimit.toString());
+
+    console.log("transactionFee : ", transactionFee);
+
+    const tx = {
+      gas: web3.utils.toHex(bufferedGasLimit),
+      to: farmNFTAddr,
+      value: "0x00",
+      data: encodedData,
+      from: adminAddr,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+    console.log("signedTx : ", signedTx);
+
+    const transaction = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+    console.log("Transaction : ", transaction);
+
+    let farm_nft_id = null;
+    const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
+      farmNFTContract.getPastEvents(
+        "Mint",
+        {
+          fromBlock: latestBlock,
+          toBlock: latestBlock,
+        },
+        function (error, events) {
+          console.log(events[0]);
+          const result = events[0].returnValues;
+          farm_nft_id = result[1];
+          console.log("Farm Id", result[1]);
+          farm.farm_nft_id = result[1];
+          console.log("error :", error);
+        }
+      );
+    });
+    mintPromises.push(mintPromise);
+    // console.log("farmnft_id : ", farmnft_id);
+  }
+  await Promise.all(mintPromises);
+  // BlockChain End
+
+  console.log("updatedData 2 :- ", updatedData);
 
   // Save Farm data in mongoDB , skip id,s.no key in json
 
-  // try {
-  //     const farms = await Farm.create(updatedData);
-  //     console.log("farms : ", farms);
-  //     if (farms.insertedCount === updatedData.length) {
-  //         response.message = "Data Insertion successful",
-  //         response.httpStatus = 200,
-  //         response.data = updatedData
-  //     } else {
-  //         response.error = "Data Insertion failed duplicate data",
-  //         response.httpStatus = 500
-  //     }
-
-  // } catch (error) {
-  //     response.error = `Insertion failed ${error}`,
-  //     response.httpStatus = 400
-  // }
-
-  if (updatedData) {
-    (response.message = "working"), (response.httpStatus = 200);
-    response.data = updatedData;
+  try {
+    const farms = await Farm.create(updatedData);
+    console.log("farms : ", farms);
+    if (farms.length != 0) {
+      (response.message = "Data Insertion successful"),
+        (response.httpStatus = 200),
+        (response.data = updatedData);
+    } else {
+      (response.error = "Data Insertion failed duplicate data"),
+        (response.httpStatus = 500);
+    }
+  } catch (error) {
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
   }
 
   return response;
@@ -247,11 +250,11 @@ exports.getFarms = async (req) => {
   let farms;
   try {
     farms = await Farm.find().select("-__v");
-    response.data = farms
-    response.httpStatus = 200
+    console.log("farms : ", farms);
+    response.data = farms;
+    response.httpStatus = 200;
   } catch (error) {
-    response.error = "failed operation",
-    response.httpStatus = 400
+    (response.error = "failed operation"), (response.httpStatus = 400);
   }
   return response;
 };
@@ -266,40 +269,42 @@ exports.createCustomer = async (req) => {
   };
 
   if (!req.files || !req.files.file) {
-    response.error = "no file selected",
-    response.httpStatus = 400
+    (response.error = "no file selected"), (response.httpStatus = 400);
   }
 
-  // Read the contents of the file
-  const fileContent = req.files.file.data.toString();
-
-  // Parse the JSON data
-  const data = JSON.parse(fileContent);
-
-  // Save Farm data in mongoDB , skip id,s.no key in json
-
   try {
+    // Read the contents of the file
+    const fileContent = req.files.file.data.toString();
+
+    // Parse the JSON data
+    const data = JSON.parse(fileContent);
+
+    // Save Farm data in mongoDB , skip id,s.no key in json
     const customers = await User.create(data);
+    const prvCustomers = await User.find();
     console.log("farms : ", customers);
-    if (customers.insertedCount === customers.length) {
-        response.message = "Data Insertion successful"
-        response.httpStatus = 200
-        response.data = data
+    console.log("prvCustomers : ", prvCustomers);
+    if (customers.length != 0 && customers != prvCustomers) {
+      console.log("1");
+      response.message = "Data Insertion successful";
+      response.httpStatus = 200;
+      response.data = data;
     } else {
-        response.error = "Data Insertion failed duplicate data",
-        response.httpStatus = 500
+      console.log("2");
+      (response.error = "Data Insertion failed duplicate data"),
+        (response.httpStatus = 500);
     }
   } catch (error) {
-    response.error = `Insertion failed ${error}`,
-    response.httpStatus = 400
+    console.log("3");
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
   }
 
   return response;
 };
 
 exports.getCustomers = async (req) => {
-   // General response format
-   let response = {
+  // General response format
+  let response = {
     error: null,
     message: null,
     httpStatus: null,
@@ -309,11 +314,9 @@ exports.getCustomers = async (req) => {
   let customers;
   try {
     customers = await User.find().select("-__v");
-    response.data = customers,
-    response.httpStatus = 200
+    (response.data = customers), (response.httpStatus = 200);
   } catch (error) {
-    response.error = "failed operation",
-    response.httpStatus = 400
+    (response.error = "failed operation"), (response.httpStatus = 400);
   }
   return response;
 };
@@ -328,25 +331,22 @@ exports.getdashBoard = async (req) => {
       farms: null,
       contracts: null,
       farmers: null,
-      customers: null
+      customers: null,
     },
   };
 
   try {
-      const farms = await Farm.countDocuments();
-      const farmers= await Farmer.countDocuments();
-      const customers = await User.countDocuments(); 
+    const farms = await Farm.countDocuments();
+    const farmers = await Farmer.countDocuments();
+    const customers = await User.countDocuments();
 
-      console.log("farms , farmers, customers :- ",farms ,farmers, customers);
-      response.httpStatus = 200,
-      response.data.farmers=farmers;
-      response.data.customers= customers;
-      response.data.farms= farms;
+    console.log("farms , farmers, customers :- ", farms, farmers, customers);
+    (response.httpStatus = 200), (response.data.farmers = farmers);
+    response.data.customers = customers;
+    response.data.farms = farms;
   } catch (error) {
-      response.error='failed operation',
-      response.httpStatus=500
+    (response.error = "failed operation"), (response.httpStatus = 500);
   }
 
-
   return response;
-}
+};
