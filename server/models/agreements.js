@@ -26,6 +26,14 @@ const agreementSchema = new mongoose.Schema(
       required: [true, "Please select validated status."],
       unique: [true, "Already used."],
     },
+    crop: {
+      type: String,
+      required: [true, "Enter the crops"],
+    },
+    quantity: {
+      type: String,
+      required: [true, "Enter the quantity of crops"],
+    },
     ipfs_url: {
       type: String,
       required: [true, "Please select ipfs url"],
