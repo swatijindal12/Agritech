@@ -23,13 +23,13 @@ exports.login = async (req) => {
     // Reading 
     const { phone } = req.body;
 
-    // Checks if phone is entered by user
-    if (!phone) {
-        response.httpStatus = 400;
-        response.error = "Enter phone number"
-    }
-
     try {
+        // Checks if phone is entered by user
+        if (!phone) {
+            response.httpStatus = 400;
+            response.error = "Enter phone number"
+        }
+
         // Finding user in database
         const user = await User.findOne({ phone });
 
@@ -56,14 +56,14 @@ exports.login = async (req) => {
                 response.error= `failed operation ${error}`
             });
     } catch (error) {
-        response.httpStatus = 400,
-        response.error= `failed operation 2 ${error}`
+        response.httpStatus = 404,
+        response.error= `User not found`
     }
     
     return response;
 };
 
-
+// verify service working...
 exports.verify = async (req) => {
 
     // General response format
