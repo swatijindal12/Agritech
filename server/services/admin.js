@@ -47,7 +47,7 @@ exports.validate = async (req) => {
 };
 
 exports.createFarmer = async (req) => {
-  console.log("createFarmer service :", createFarmer);
+  console.log("createFarmer service inside");
   // General response format
   let response = {
     error: null,
