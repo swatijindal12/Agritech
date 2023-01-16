@@ -13,10 +13,11 @@ const Container = styled.div`
 const OptionContainer = styled(Flexbox)`
   margin: 1rem 0;
   border-bottom: 0.5px solid #71835533;
+  justify-content: space-around;
 `;
 
 const Option = styled.div`
-  width: 50%;
+  width: 35%;
   text-align: center;
   color: #718355;
   font-size: 1.8rem;
