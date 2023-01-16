@@ -27,6 +27,7 @@ contract Marketplace is Ownable {
         address buyer;
         address farmerAddr;
         string razorTransId;
+        bool isClosedContract;
     }
     // Mapping from agreementNFTId to AgreementInfo struct
     mapping(uint256 => AgreementInfo) public agreementDetails;
@@ -122,7 +123,7 @@ contract Marketplace is Ownable {
 
     function soldContractNFT(uint256 agreementNftId_) external {
         require(
-            agreementDetails[agreementNftId_].agreementNftId != 0,
+            !(agreementDetails[agreementNftId_].isClosedContract),
             "Not on sale"
         );
         require(
@@ -130,12 +131,8 @@ contract Marketplace is Ownable {
             "Only Buyer"
         );
 
-        IAgreementNFT(agreementNFT).closeAgreement(
-            agreementDetails[agreementNftId_].buyer,
-            agreementNftId_
-        );
         IERC721(farmNFT).transferFrom(address(this), owner(), agreementDetails[agreementNftId_].farmNFTId);
-        delete agreementDetails[agreementNftId_];
+        agreementDetails[agreementNftId_].isClosedContract = true;
 
         emit ClosedContractNFT(agreementNftId_);
     }
