@@ -68,13 +68,13 @@ const Card = ({ data }) => {
 
   return (
     <Container>
-      <Image src={data.image} />
+      <Image src={data.image_url} />
       <Flexbox justify="space-between" margin="0.5rem">
         {opened ? (
           <Flexbox>
             <NameContainer>
               <Name>{data.name}</Name>
-              <Id>NFT TOKEN ID #{data.nft_token}</Id>
+              <Id>NFT TOKEN ID #{data.farm_nft_id}</Id>
             </NameContainer>
             <Star src={stars[data.stars - 1]} />
           </Flexbox>
@@ -98,7 +98,7 @@ const Card = ({ data }) => {
             />
           </Flexbox>
           <Video height="240" controls>
-            <source src={data.video} type="video/mp4" />
+            <source src={data.video_url} type="video/mp4" />
             Your browser does not support the video tag.
           </Video>
 
