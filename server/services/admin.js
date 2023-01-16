@@ -47,7 +47,6 @@ exports.validate = async (req) => {
 };
 
 exports.createFarmer = async (req) => {
-  console.log("createFarmer service inside");
   // General response format
   let response = {
     error: null,
@@ -70,7 +69,7 @@ exports.createFarmer = async (req) => {
   // Save Farm data in mongoDB , skip id,s.no key in json
   try {
     const farmers = await Farmer.create(data);
-    console.log("farmers : ", farmers);
+
     if (farmers.length != 0) {
       response.message = "Data Insertion successful";
       response.httpStatus = 201;
@@ -112,8 +111,6 @@ exports.createFarm = async (req) => {
     data: null,
   };
 
-  console.log("Inside createFarm services");
-
   // Read Json file and then add it DB
   if (!req.files || !req.files.file) {
     (response.error = "no file selected"), (response.error = 400);
@@ -145,9 +142,6 @@ exports.createFarm = async (req) => {
       return { ...farm, user_id: farm.farmer_id };
     })
   );
-
-  // return from api
-  // console.log("updatedData : ", updatedData);
 
   // BlockChain Start
   const mintPromises = [];
@@ -204,25 +198,22 @@ exports.createFarm = async (req) => {
           console.log(events[0]);
           const result = events[0].returnValues;
           farm_nft_id = result[1];
-          console.log("Farm Id", result[1]);
+          // console.log("Farm Id", result[1]);
           farm.farm_nft_id = result[1];
-          console.log("error :", error);
+          // console.log("error :", error);
         }
       );
     });
     mintPromises.push(mintPromise);
-    // console.log("farmnft_id : ", farmnft_id);
   }
   await Promise.all(mintPromises);
   // BlockChain End
-
-  console.log("updatedData 2 :- ", updatedData);
 
   // Save Farm data in mongoDB , skip id,s.no key in json
 
   try {
     const farms = await Farm.create(updatedData);
-    console.log("farms : ", farms);
+
     if (farms.length != 0) {
       (response.message = "Data Insertion successful"),
         (response.httpStatus = 200),
@@ -250,7 +241,7 @@ exports.getFarms = async (req) => {
   let farms;
   try {
     farms = await Farm.find().select("-__v");
-    console.log("farms : ", farms);
+
     response.data = farms;
     response.httpStatus = 200;
   } catch (error) {
@@ -282,9 +273,8 @@ exports.createCustomer = async (req) => {
     // Save Farm data in mongoDB , skip id,s.no key in json
     const customers = await User.create(data);
     const prvCustomers = await User.find();
-    console.log("farms : ", customers);
-    console.log("prvCustomers : ", prvCustomers);
-    if (customers.length != 0 && customers != prvCustomers) {
+
+    if (customers.length != 0) {
       console.log("1");
       response.message = "Data Insertion successful";
       response.httpStatus = 200;
@@ -295,7 +285,6 @@ exports.createCustomer = async (req) => {
         (response.httpStatus = 500);
     }
   } catch (error) {
-    console.log("3");
     (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
   }
 
@@ -339,8 +328,6 @@ exports.getdashBoard = async (req) => {
     const farms = await Farm.countDocuments();
     const farmers = await Farmer.countDocuments();
     const customers = await User.countDocuments();
-
-    console.log("farms , farmers, customers :- ", farms, farmers, customers);
     (response.httpStatus = 200), (response.data.farmers = farmers);
     response.data.customers = customers;
     response.data.farms = farms;
