@@ -25,11 +25,12 @@ exports.createFarmer = async (req, res, next) => {
   adminService
     .createFarmer(req)
     .then((response) => {
+      console.log("res controller :- ", response);
       res.json(response);
     })
     .catch((error) => {
       res.status(400).json({
-        error: "failed operation",
+        error: `failed operation 2 ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
