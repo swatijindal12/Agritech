@@ -11,6 +11,9 @@ import Web3 from "web3";
 import Login from "./components/auth/Login";
 import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
+import Buyers from "./components/company/Buyers";
+import Profile from "./components/company/Buyers/Profile";
+import Contracts from "./components/company/Contracts";
 import CreateContract from "./components/company/CreateContract";
 import Dashboard from "./components/company/Dashboard";
 import Farmers from "./components/company/Farmers";
@@ -51,6 +54,9 @@ const App = () => {
         <Route path="/farms" element={<Farms />} />
         <Route path="/create-contract" element={<CreateContract />} />
         <Route path="/farmers" element={<Farmers />} />
+        <Route path="/buyers" element={<Buyers />} />
+        <Route path="/buyers/:slug" element={<Profile />} />
+        <Route path="/contracts" element={<Contracts />} />
       </Routes>
     </Router>
   );
