@@ -37,10 +37,6 @@ contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
         return agreementId;
     }
 
-    function closeAgreement(address _buyerAddr, uint256 _agreementId) external {
-        isClosedContract[_agreementId] = 1;
-    }
-
     function _beforeTokenTransfer(
         address from,
         address to,
