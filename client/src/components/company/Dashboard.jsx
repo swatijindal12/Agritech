@@ -48,7 +48,7 @@ const Dashboard = () => {
       .get(`${process.env.REACT_APP_BASE_URL}/admin/dashboard`, {
         headers: {
           Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
+            "Bearer " + JSON.parse(localStorage.getItem("user"))?.data.token,
         },
       })
       .then(res => {

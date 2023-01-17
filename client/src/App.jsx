@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   redirect,
+  Navigate,
 } from "react-router-dom";
 
 // External module exports.
@@ -47,10 +48,10 @@ const App = () => {
           <Navbar toggleSidebar={toggleSidebar} />
         </>
       )}
-
+      {!user && <Navigate to="/login" replace={true} />}
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/farms" element={<Farms />} />
         <Route path="/create-contract" element={<CreateContract />} />
         <Route path="/farmers" element={<Farmers />} />

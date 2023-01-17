@@ -57,7 +57,7 @@ const Sidebar = ({ show, toggle }) => {
         <Button
           text="DASHBOARD"
           margin="2.5rem 0"
-          onClick={() => handleNavClick({ url: "/dashboard" })}
+          onClick={() => handleNavClick({ url: "/" })}
         />
       </InnerContainer>
     </Container>

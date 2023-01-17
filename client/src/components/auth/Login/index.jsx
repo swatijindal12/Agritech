@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Logo from "../../../assets/logo.svg";
 import Button from "../../common/Button";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
 
 const Container = styled.div`
   height: 100vh;
@@ -37,16 +38,10 @@ const Input = styled.input`
 const Login = () => {
   const [number, setNumber] = useState("");
   const [authorised, setAuthorised] = useState(false);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
   const [otp, setOtp] = useState("");
 
-  useEffect(() => {
-    if (JSON.parse(localStorage.getItem("user"))) {
-      window.location.href = "/dashboard";
-    }
-  }, []);
-
   const getOTP = () => {
-    console.log("Inside handlesubmit");
     axios
       .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, {
         phone: number,
@@ -71,8 +66,8 @@ const Login = () => {
         otp,
       })
       .then(res => {
-        localStorage.setItem("user", JSON.stringify(res.data));
-        window.location.href = "/dashboard";
+        localStorage.setItem("user", JSON.stringify(res?.data));
+        setUser(res?.data);
         console.log("res : ", res);
       })
       .catch(err => {
@@ -81,32 +76,35 @@ const Login = () => {
   };
 
   return (
-    <Container>
-      <Heading>Login</Heading>
-      {!authorised ? (
-        <MiddleContainer>
-          <LogoImage src={Logo} alt="logo" />
-          <Input
-            type="number"
-            placeholder="Enter Moblile Number"
-            value={number}
-            onChange={e => setNumber(e.target.value)}
-          />
-          <Button text="SEND OTP" onClick={getOTP} />
-        </MiddleContainer>
-      ) : (
-        <MiddleContainer>
-          <LogoImage src={Logo} alt="logo" />
-          <Input
-            type="number"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={e => setOtp(e.target.value)}
-          />
-          <Button text="VERIFY" onClick={verifyOTP} />
-        </MiddleContainer>
-      )}
-    </Container>
+    <>
+      {user && <Navigate to="/" replace={true} />}
+      <Container>
+        <Heading>Login</Heading>
+        {!authorised ? (
+          <MiddleContainer>
+            <LogoImage src={Logo} alt="logo" />
+            <Input
+              type="number"
+              placeholder="Enter Moblile Number"
+              value={number}
+              onChange={e => setNumber(e.target.value)}
+            />
+            <Button text="SEND OTP" onClick={getOTP} />
+          </MiddleContainer>
+        ) : (
+          <MiddleContainer>
+            <LogoImage src={Logo} alt="logo" />
+            <Input
+              type="number"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+            />
+            <Button text="VERIFY" onClick={verifyOTP} />
+          </MiddleContainer>
+        )}
+      </Container>
+    </>
   );
 };
 
