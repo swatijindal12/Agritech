@@ -10,6 +10,7 @@ const Container = styled.div`
 
 const Buyers = () => {
   const [buyers, setBuyers] = useState(null);
+
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers`, {
@@ -24,6 +25,7 @@ const Buyers = () => {
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
   }, []);
+
   return (
     <Container>
       <Button text="ADD NEW" margin="0" />

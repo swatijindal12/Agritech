@@ -24,14 +24,13 @@ const App = () => {
   // Checking for web3 connection.
 
   const [showSidebar, setShowSidebar] = useState(false);
-  // const [user, setUser] = useState(window.user);
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
     console.log("web3 : ", web3);
     if (!user) {
-      redirect("/login");
+      // window.location.href = "/login";
     }
     console.log("user", user);
   }, []);
@@ -41,25 +40,27 @@ const App = () => {
   };
 
   return (
-    <Router>
-      {user && (
-        <>
-          <Sidebar show={showSidebar} toggle={toggleSidebar} />
-          <Navbar toggleSidebar={toggleSidebar} />
-        </>
-      )}
-      {!user && <Navigate to="/login" replace={true} />}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/farms" element={<Farms />} />
-        <Route path="/create-contract" element={<CreateContract />} />
-        <Route path="/farmers" element={<Farmers />} />
-        <Route path="/buyers" element={<Buyers />} />
-        <Route path="/buyers/:slug" element={<Profile />} />
-        <Route path="/contracts" element={<Contracts />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        {user && (
+          <>
+            <Sidebar show={showSidebar} toggle={toggleSidebar} />
+            <Navbar toggleSidebar={toggleSidebar} />
+          </>
+        )}
+        {/* {!user && <Navigate to="/login" replace={true} />} */}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/farms" element={<Farms />} />
+          <Route path="/create-contract" element={<CreateContract />} />
+          <Route path="/farmers" element={<Farmers />} />
+          <Route path="/buyers" element={<Buyers />} />
+          <Route path="/buyers/:slug" element={<Profile />} />
+          <Route path="/contracts" element={<Contracts />} />
+        </Routes>
+      </Router>
+    </>
   );
 };
 
