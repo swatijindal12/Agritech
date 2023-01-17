@@ -1,17 +1,17 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 // Importing to read file
 const fileupload = require("express-fileupload");
 
 // Importing External Package.
-const cors = require('cors');
-const cookieParser = require('cookie-parser')
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 // Importing environment setup file.
-require("dotenv").config({ path: './config/config.env' });
+require("dotenv").config({ path: "./config/config.env" });
 
 // Importing database.
-const connectDatabase = require('./config/database');
+const connectDatabase = require("./config/database");
 
 // Connecting to databse.
 connectDatabase();
@@ -20,10 +20,10 @@ connectDatabase();
 app.use(fileupload());
 
 // Importing all routes.
-const auth = require('./routes/auth');
+const auth = require("./routes/auth");
 
 // Scope change new routes
-const adminRoutes = require('./routes/admin');
+const adminRoutes = require("./routes/admin");
 
 // Setup CORS - accessible by other domains
 app.use(cors());
@@ -35,27 +35,26 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Routing request to => {BASE_URL}/api/v1/auth to authenticate User.
-app.use('/api/v1/auth', auth);
+app.use("/api/v1/auth", auth);
 
 //---- SCOPE CHANGE ----- //
-app.use('/api/v1/admin', adminRoutes)
+app.use("/api/v1/admin", adminRoutes);
 
 // Handling unhandled routes
-app.use('*', (req, res) => {
-    res.status(404).json({
-      error:"Route not found",
-      message:null,
-      httpStatus: 404,
-      data:null
-    });
+app.use("*", (req, res) => {
+  res.status(404).json({
+    error: "Route not found",
+    message: null,
+    httpStatus: 404,
+    data: null,
+  });
 });
 
 // Port on which Server run
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`Server started on port ${process.env.PORT} in ${process.env.NODE_ENV} mode.`);
+  console.log(
+    `Server started on port ${process.env.PORT} in ${process.env.NODE_ENV} mode.`
+  );
 });
-
-
-
