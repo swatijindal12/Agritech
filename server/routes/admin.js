@@ -42,7 +42,9 @@ router
   .get(isAuthenticatedUser, authorizeRoles("admin"), getFarmers);
 
 // Insert customer data into DB.
-router.route("/customer").post(createCustomer);
+router
+  .route("/customer")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createCustomer);
 
 // Get List of customers
 router
