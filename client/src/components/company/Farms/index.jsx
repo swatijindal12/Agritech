@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Title from "../../common/Title";
 import FilterIcon from "../../../assets/filter.svg";
-import { data } from "./tempData";
 import Card from "./Card";
 import Filter from "./Filter";
 import axios from "axios";
@@ -23,7 +22,7 @@ const Farms = () => {
   const [farms, setFarms] = useState(null);
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/v1/admin/farms", {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/farms`, {
         headers: {
           Authorization:
             "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,

@@ -42,7 +42,12 @@ const Email = styled.p`
 const Card = ({ data }) => {
   return (
     <Container>
-      <Image src={data.image} />
+      <Image
+        src={
+          data.image ||
+          "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg"
+        }
+      />
       <Name>{data.name}</Name>
       <Address>{data.address}</Address>
       <Number>{data.number}</Number>

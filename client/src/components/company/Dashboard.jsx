@@ -45,7 +45,7 @@ const Dashboard = () => {
   const [data, setData] = useState(null);
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/v1/admin/dashboard", {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/dashboard`, {
         headers: {
           Authorization:
             "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,

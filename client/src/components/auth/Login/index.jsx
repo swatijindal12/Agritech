@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Logo from "../../../assets/logo.svg";
 import Button from "../../common/Button";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 const Container = styled.div`
   height: 100vh;
@@ -49,7 +48,7 @@ const Login = () => {
   const getOTP = () => {
     console.log("Inside handlesubmit");
     axios
-      .post(`http://localhost:8000/api/v1/auth/login`, {
+      .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, {
         phone: number,
       })
       .then(res => {
@@ -67,7 +66,7 @@ const Login = () => {
   const verifyOTP = () => {
     console.log("Inside verify otp");
     axios
-      .post(`http://localhost:8000/api/v1/auth/verify`, {
+      .post(`${process.env.REACT_APP_BASE_URL}/auth/verify`, {
         phone: number,
         otp,
       })
