@@ -60,14 +60,15 @@ exports.createFarmer = async (req) => {
     (response.error = "no file selected"), (response.httpStatus = 400);
   }
 
-  // Read the contents of the file
-  const fileContent = req.files.file.data.toString();
-
-  // Parse the JSON data
-  const data = JSON.parse(fileContent);
-
   // Save Farm data in mongoDB , skip id,s.no key in json
+
   try {
+    // Read the contents of the file
+    const fileContent = req.files.file.data.toString();
+
+    // Parse the JSON data
+    const data = JSON.parse(fileContent);
+
     const farmers = await Farmer.create(data);
 
     if (farmers.length != 0) {
