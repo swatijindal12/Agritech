@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-
 // User Model
 const agreementSchema = new mongoose.Schema(
   {
