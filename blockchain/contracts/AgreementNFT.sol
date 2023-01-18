@@ -15,14 +15,19 @@ contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
         uint256 farmId,
         string tokenURI
     );
-
-    mapping(uint256 => uint256) public isClosedContract;
-
+    
+    
     constructor(
         string memory name_,
         string memory symbol_
     ) ERC721(name_, symbol_) {}
 
+    /**
+    @dev mint farm NFT & set token URI.
+    @param _farmerAddr address of farmer
+    @param _tokenURI Ipfs URL of farm
+    * emits a {CreateAgreement} event.
+     */
     function createAgreement(
         address _farmerAddr,
         string memory _tokenURI

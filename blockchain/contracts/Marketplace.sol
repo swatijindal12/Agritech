@@ -46,7 +46,15 @@ contract Marketplace is Ownable {
         farmNFT = IERC721(farmNFT_);
         agreementNFT = IAgreementNFT(agreementNFT_);
     }
-
+    
+    /**
+    @dev put contract NFT on sell & call createAgreement() to create Contract NFT
+    * Requirements:
+    * - `price_` must be greater than 0
+    - `startDate_` must be greater than current timestamp
+    - `endDate_` must be greater than startDate_
+    Emits a {Sell} event.
+    */
     function putContractOnSell(
         address farmerAddr_,
         uint256 farmNFTId_,
@@ -82,6 +90,15 @@ contract Marketplace is Ownable {
 
         emit Sell(farmNFTId_, price_, agreementNftId_);
     }
+
+    /**
+    @dev to buy contract NFT
+    @param agreementNftId_ array of contract NFT id
+    @param transactionId array of razorpay transaction id
+    Requirements:
+    -`agreementNftId_ & transactionId` length of array must be equal
+    -`msg.sender` must not be equal to farmerAddr & owner
+     */
 
     function buyContract(
         uint256[] memory agreementNftId_,
@@ -121,6 +138,15 @@ contract Marketplace is Ownable {
         }
     }
 
+    /**
+    @dev to closed contract NFT
+    @param agreementNftId_ contract NFT id
+    Requirements:
+    -`isClosedContract` to check whether contract NFT is on sale or not.
+    -`buyer` msg.sender must equal to buyer address
+    Emits a {ClosedContractNFT} event.
+     */
+
     function soldContractNFT(uint256 agreementNftId_) external {
         require(
             !(agreementDetails[agreementNftId_].isClosedContract),
@@ -137,6 +163,12 @@ contract Marketplace is Ownable {
         emit ClosedContractNFT(agreementNftId_);
     }
 
+    /**
+    @dev to get sell detail
+    @param agreementNFTId array of contract NFT Id
+    - returns a agreement data.
+     */
+
     function getSellDetailByTokenId(
         uint256[] calldata agreementNFTId
     ) external view returns (AgreementInfo[] memory) {
@@ -149,6 +181,11 @@ contract Marketplace is Ownable {
         return agreementData;
     }
 
+    /**
+    @dev to get all active contract list of particular buyer
+    @param _buyerAddr buyer address
+    - returns all array of contract list of buyer
+     */
     function getAcceptedContractList(
         address _buyerAddr
     ) external view returns (uint256[] memory) {
