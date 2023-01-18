@@ -24,15 +24,15 @@ const App = () => {
   // Checking for web3 connection.
 
   const [showSidebar, setShowSidebar] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
     console.log("web3 : ", web3);
-    if (!user) {
-      // window.location.href = "/login";
+    setUser(JSON.parse(localStorage.getItem("user")));
+    if (!user && window.location.href.indexOf("login") === -1) {
+      window.location.href = "/login";
     }
-    console.log("user", user);
   }, []);
 
   const toggleSidebar = () => {
@@ -48,7 +48,6 @@ const App = () => {
             <Navbar toggleSidebar={toggleSidebar} />
           </>
         )}
-        {/* {!user && <Navigate to="/login" replace={true} />} */}
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
