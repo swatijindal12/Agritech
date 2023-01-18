@@ -30,7 +30,10 @@ const App = () => {
     const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
     console.log("web3 : ", web3);
     setUser(JSON.parse(localStorage.getItem("user")));
-    if (!user && window.location.href.indexOf("login") === -1) {
+    if (
+      !JSON.parse(localStorage.getItem("user"))?.data.token &&
+      window.location.href.indexOf("login") === -1
+    ) {
       window.location.href = "/login";
     }
   }, []);
