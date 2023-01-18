@@ -37,10 +37,24 @@ const NavItem = styled.div`
   margin: 2.5rem 0;
 `;
 
+const Logout = styled.p`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #d62828cc;
+`;
+
 const Sidebar = ({ show, toggle }) => {
   const handleNavClick = item => {
     toggle();
     window.location.href = item.url;
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   };
 
   return (
@@ -59,6 +73,7 @@ const Sidebar = ({ show, toggle }) => {
           margin="2.5rem 0"
           onClick={() => handleNavClick({ url: "/" })}
         />
+        <Logout onClick={handleLogout}>LOGOUT</Logout>
       </InnerContainer>
     </Container>
   );
