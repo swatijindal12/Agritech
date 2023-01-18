@@ -81,7 +81,12 @@ const Login = () => {
 
   return (
     <>
-      {user && <Navigate to="/" replace={true} />}
+      {user && (
+        <Navigate
+          to={user.data.role === "admin" ? "/" : "/contracts"}
+          replace={true}
+        />
+      )}
       <Container>
         <Heading>Login</Heading>
         {!authorised ? (

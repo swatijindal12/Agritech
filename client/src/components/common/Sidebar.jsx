@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import CrossIcon from "../../assets/cross.svg";
-import { navItems } from "../../metaData/navItems";
 import Button from "./Button";
+import { adminNavItems, buyerNavItems } from "../../metaData/navItems";
 
 const Container = styled.div`
   display: ${props => (props.show ? "block" : "none")};
@@ -47,6 +47,9 @@ const Logout = styled.p`
 `;
 
 const Sidebar = ({ show, toggle }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const currentNavItem =
+    user.data.role === "customer" ? buyerNavItems : adminNavItems;
   const handleNavClick = item => {
     toggle();
     window.location.href = item.url;
@@ -61,18 +64,21 @@ const Sidebar = ({ show, toggle }) => {
     <Container show={show}>
       <InnerContainer>
         <Cross src={CrossIcon} onClick={toggle} />
-        {navItems.map(navItem => {
+        {currentNavItem.map(navItem => {
           return (
             <NavItem onClick={() => handleNavClick(navItem)}>
               {navItem.title}
             </NavItem>
           );
         })}
-        <Button
-          text="DASHBOARD"
-          margin="2.5rem 0"
-          onClick={() => handleNavClick({ url: "/" })}
-        />
+        {user.data.role === "admin" && (
+          <Button
+            text="DASHBOARD"
+            margin="2.5rem 0"
+            onClick={() => handleNavClick({ url: "/" })}
+          />
+        )}
+
         <Logout onClick={handleLogout}>LOGOUT</Logout>
       </InnerContainer>
     </Container>

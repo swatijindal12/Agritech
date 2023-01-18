@@ -1,4 +1,4 @@
-export const navItems = [
+export const adminNavItems = [
   {
     title: "Farms",
     url: "/farms",
@@ -11,6 +11,17 @@ export const navItems = [
     title: "Buyers",
     url: "/buyers",
   },
+  {
+    title: "Marketplace",
+    url: "/marketplace",
+  },
+  {
+    title: "Contracts",
+    url: "/contracts",
+  },
+];
+
+export const buyerNavItems = [
   {
     title: "Marketplace",
     url: "/marketplace",

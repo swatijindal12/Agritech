@@ -7,6 +7,7 @@ import FarmersImg from "../../assets/dashboard/farmers.svg";
 import BuyersImage from "../../assets/dashboard/buyers.svg";
 import ContractsImage from "../../assets/dashboard/contracts.svg";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
 
 const Container = styled.div`
   padding: 1rem;
@@ -43,6 +44,8 @@ const Number = styled.p`
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/dashboard`, {
@@ -62,39 +65,47 @@ const Dashboard = () => {
     window.location.href = `/${url}`;
   };
   return (
-    <Container>
-      <Title>Dashboard</Title>
-      <CardContainer wrap="wrap">
-        <Card color="#718355" onClick={() => navigateTo("farms")}>
-          <img src={FarmImg} />
-          <CardData>
-            <Number>{data?.farms || 0}</Number>
-            <p>Farms</p>
-          </CardData>
-        </Card>
-        <Card color="#FCBF49" onClick={() => navigateTo("farmers")}>
-          <img src={FarmersImg} />
-          <CardData>
-            <Number>{data?.farmers || 0}</Number>
-            <p>Farmers</p>
-          </CardData>
-        </Card>
-        <Card color="#F77F00" onClick={() => navigateTo("buyers")}>
-          <img src={BuyersImage} />
-          <CardData>
-            <Number>{data?.customers || 0}</Number>
-            <p>Buyers</p>
-          </CardData>
-        </Card>
-        <Card color="#D62828" onClick={() => navigateTo("contracts")}>
-          <img src={ContractsImage} />
-          <CardData>
-            <Number>{data?.contracts || 0}</Number>
-            <p>Contracts</p>
-          </CardData>
-        </Card>
-      </CardContainer>
-    </Container>
+    <>
+      {user.data.role === "customer" && (
+        <Navigate
+          to="/contracts
+      "
+        />
+      )}
+      <Container>
+        <Title>Dashboard</Title>
+        <CardContainer wrap="wrap">
+          <Card color="#718355" onClick={() => navigateTo("farms")}>
+            <img src={FarmImg} alt="farm-icon" />
+            <CardData>
+              <Number>{data?.farms || 0}</Number>
+              <p>Farms</p>
+            </CardData>
+          </Card>
+          <Card color="#FCBF49" onClick={() => navigateTo("farmers")}>
+            <img src={FarmersImg} alt="farmer-icon" />
+            <CardData>
+              <Number>{data?.farmers || 0}</Number>
+              <p>Farmers</p>
+            </CardData>
+          </Card>
+          <Card color="#F77F00" onClick={() => navigateTo("buyers")}>
+            <img src={BuyersImage} alt="buyer-icon" />
+            <CardData>
+              <Number>{data?.customers || 0}</Number>
+              <p>Buyers</p>
+            </CardData>
+          </Card>
+          <Card color="#D62828" onClick={() => navigateTo("contracts")}>
+            <img src={ContractsImage} alt="contract-icon" />
+            <CardData>
+              <Number>{data?.contracts || 0}</Number>
+              <p>Contracts</p>
+            </CardData>
+          </Card>
+        </CardContainer>
+      </Container>
+    </>
   );
 };
 
