@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const agreementSchema = new mongoose.Schema(
   {
     customer_id: {
-      type: String,
-      trim: true,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     farmer_name: {
       type: String,
@@ -39,6 +38,7 @@ const agreementSchema = new mongoose.Schema(
     sold_status: {
       type: Boolean,
       default: false,
+      required: [true, "Enter the Sold status"],
     },
     agreementclose_status: {
       type: Boolean,
