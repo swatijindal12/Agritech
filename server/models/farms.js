@@ -32,6 +32,10 @@ const farmSchema = new mongoose.Schema(
       type: String,
       unique: [true, "Already used."],
     },
+    tx_hash: {
+      type: String,
+      unique: [true, "Already used."],
+    },
     ipfs_url: {
       type: String,
       required: [true, "Please check IPFS store."],

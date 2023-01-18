@@ -60,14 +60,15 @@ exports.createFarmer = async (req) => {
     (response.error = "no file selected"), (response.httpStatus = 400);
   }
 
-  // Read the contents of the file
-  const fileContent = req.files.file.data.toString();
-
-  // Parse the JSON data
-  const data = JSON.parse(fileContent);
-
   // Save Farm data in mongoDB , skip id,s.no key in json
+
   try {
+    // Read the contents of the file
+    const fileContent = req.files.file.data.toString();
+
+    // Parse the JSON data
+    const data = JSON.parse(fileContent);
+
     const farmers = await Farmer.create(data);
 
     if (farmers.length != 0) {
@@ -145,6 +146,7 @@ exports.createFarm = async (req) => {
 
   // BlockChain Start
   const mintPromises = [];
+  const Tran = "https://mumbai.polygonscan.com/tx";
   for (let index = 0; index < updatedData.length; index++) {
     const farm = updatedData[index];
     farm.farm_nft_id = "";
@@ -168,8 +170,6 @@ exports.createFarm = async (req) => {
     const transactionFee =
       parseFloat(gasPrice) * parseFloat(bufferedGasLimit.toString());
 
-    console.log("transactionFee : ", transactionFee);
-
     const tx = {
       gas: web3.utils.toHex(bufferedGasLimit),
       to: farmNFTAddr,
@@ -184,7 +184,9 @@ exports.createFarm = async (req) => {
     const transaction = await web3.eth.sendSignedTransaction(
       signedTx.rawTransaction
     );
-    console.log("Transaction : ", transaction);
+    // console.log("Transaction : ", transaction.transactionHash);
+    console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+    farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
 
     let farm_nft_id = null;
     const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
