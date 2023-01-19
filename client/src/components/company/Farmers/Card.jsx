@@ -40,7 +40,7 @@ const Card = ({ data }) => {
         <img src={stars[data.rating - 1]} />
         <NameContainer>
           <Name>{data.name}</Name>
-          <Number>{data.number}</Number>
+          <Number>{data.phone}</Number>
         </NameContainer>
       </Flexbox>
       <Number style={{ opacity: "1" }}>{data.address}</Number>

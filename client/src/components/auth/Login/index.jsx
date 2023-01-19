@@ -35,15 +35,47 @@ const Input = styled.input`
   margin: 2rem 0;
 `;
 
+const ResendMessageStyle = styled.p`
+  font-size: 0.7rem;
+  color: blue;
+  margin: 0.5rem 1rem;
+  margin-bottom: 2.5rem;
+  text-align: right;
+  text-decoration: underline;
+`;
+
+const Resend = styled.p`
+  font-size: 1.25rem;
+  color: blue;
+  font-weight: 700;
+  opacity: ${props => (props.active ? 1 : 0.3)};
+`;
+
 const Login = () => {
   const [number, setNumber] = useState("");
   const [authorised, setAuthorised] = useState(false);
   const [user, setUser] = useState(null);
   const [otp, setOtp] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState(30);
 
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
+
+  useEffect(() => {
+    let interval;
+    if (authorised) {
+      interval = setInterval(() => {
+        if (timeRemaining > 0) {
+          setTimeRemaining(timeRemaining => timeRemaining - 1);
+        } else {
+          setTimeRemaining(0);
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [authorised, timeRemaining]);
 
   const getOTP = () => {
     axios
@@ -106,9 +138,18 @@ const Login = () => {
             <Input
               type="number"
               placeholder="Enter OTP"
+              style={{ textAlign: "center" }}
               value={otp}
               onChange={e => setOtp(e.target.value)}
             />
+            {timeRemaining === 0 ? (
+              <ResendMessageStyle onClick={getOTP}>{`Resend OTP`}</ResendMessageStyle>
+            ) : (
+              <ResendMessageStyle>
+                {`Resend OTP in ${timeRemaining} seconds`}
+              </ResendMessageStyle>
+            )}
+            <Resend active={timeRemaining === 0} onClick={getOTP}></Resend>
             <Button text="VERIFY" onClick={verifyOTP} />
           </MiddleContainer>
         )}

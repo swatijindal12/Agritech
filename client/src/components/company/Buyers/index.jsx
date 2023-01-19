@@ -13,14 +13,14 @@ const Buyers = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/customers`, {
         headers: {
           Authorization:
             "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
         },
       })
       .then(res => {
-        console.log("response is ", res);
+        // console.log("response is ", res);
         setBuyers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

@@ -61,7 +61,7 @@ const Filter = ({ toggle }) => {
         <Box />
       </Flexbox>
       <Flexbox justify="space-between" margin="0.5rem 0">
-        <Name>Rating High to low</Name>
+        <Name>Rating Low to high</Name>
         <Box />
       </Flexbox>
       <Flexbox justify="space-between" margin="1rem 0 0">
