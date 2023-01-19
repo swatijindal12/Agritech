@@ -138,7 +138,7 @@ const Login = () => {
               onChange={e => setOtp(e.target.value)}
             />
             {timeRemaining === 0 ? (
-              <ResendMessageStyle>{`Resend OTP`}</ResendMessageStyle>
+              <ResendMessageStyle onClick={getOTP}>{`Resend OTP`}</ResendMessageStyle>
             ) : (
               <ResendMessageStyle>
                 {`Resend OTP in ${timeRemaining} seconds`}
