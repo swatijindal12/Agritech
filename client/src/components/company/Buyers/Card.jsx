@@ -50,7 +50,7 @@ const Card = ({ data }) => {
       />
       <Name>{data.name}</Name>
       <Address>{data.address}</Address>
-      <Number>{data.number}</Number>
+      <Number>{data.phone}</Number>
       <Email>{data.email}</Email>
     </Container>
   );
