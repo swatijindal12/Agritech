@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // External module exports.
 import Web3 from "web3";
 import Login from "./components/auth/Login";
+import MarketPlace from "./components/common/Marketplace";
 import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
 import Buyers from "./components/company/Buyers";
@@ -54,6 +55,7 @@ const App = () => {
           <Route path="/buyers" element={<Buyers />} />
           <Route path="/buyers/:slug" element={<Profile />} />
           <Route path="/contracts" element={<Contracts />} />
+          <Route path="/marketplace" element={<MarketPlace />} />
         </Routes>
       </Router>
     </>
