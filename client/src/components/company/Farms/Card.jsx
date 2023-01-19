@@ -68,13 +68,18 @@ const Card = ({ data }) => {
 
   return (
     <Container>
-      <Image src={data.image_url} />
+      <Image src={data.image_url} key ={data.farm_nft_id}/>
       <Flexbox justify="space-between" margin="0.5rem">
         {opened ? (
           <Flexbox>
             <NameContainer>
               <Name>{data.name}</Name>
-              <Id>NFT TOKEN ID #{data.farm_nft_id}</Id>
+              <Id>
+                NFT TOKEN ID{" "}
+                <a href={data.tx_hash} target="_blank">
+                  #{data.farm_nft_id}
+                </a>
+              </Id>
             </NameContainer>
             <Star src={stars[data.stars - 1]} />
           </Flexbox>
@@ -94,7 +99,7 @@ const Card = ({ data }) => {
             <Address>{data.address}</Address>
             <img
               src={LocationIcon}
-              onClick={() => window.open(data.geo_location)}
+              onClick={() => window.open(data.location)}
             />
           </Flexbox>
           <Video height="240" controls>
