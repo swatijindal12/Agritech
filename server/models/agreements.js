@@ -11,16 +11,16 @@ const agreementSchema = new mongoose.Schema(
       required: [true, "Enter farmer Name"],
     },
     start_date: {
-      type: Date,
+      type: String,
       default: Date.now,
     },
     end_date: {
-      type: Date,
+      type: String,
       default: Date.now,
     },
     agreement_nft_id: {
-      type: Boolean,
-      required: [true, "Please select validated status."],
+      type: String,
+      required: [true, "Please select agreement_nft_id."],
       unique: [true, "Already used."],
     },
     crop: {
@@ -30,6 +30,10 @@ const agreementSchema = new mongoose.Schema(
     quantity: {
       type: String,
       required: [true, "Enter the quantity of crops"],
+    },
+    price: {
+      type: Number,
+      required: [true, "Enter amount"],
     },
     ipfs_url: {
       type: String,
