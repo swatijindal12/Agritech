@@ -81,11 +81,6 @@ contract Marketplace is Ownable {
         agreementDetails[agreementNftId_].startDate = startDate_;
         agreementDetails[agreementNftId_].endDate = endDate_;
 
-        IERC721(farmNFT).transferFrom(
-            msg.sender,
-            address(this),
-            farmNFTId_
-        );
         agreementDetails[agreementNftId_].agreementNftId = agreementNftId_;
 
         emit Sell(farmNFTId_, price_, agreementNftId_);
@@ -157,8 +152,7 @@ contract Marketplace is Ownable {
             "Only Buyer"
         );
 
-        IERC721(farmNFT).transferFrom(address(this), owner(), agreementDetails[agreementNftId_].farmNFTId);
-        agreementDetails[agreementNftId_].isClosedContract = true;
+       agreementDetails[agreementNftId_].isClosedContract = true;
 
         emit ClosedContractNFT(agreementNftId_);
     }
