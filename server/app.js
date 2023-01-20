@@ -25,6 +25,8 @@ const auth = require("./routes/auth");
 // Scope change new routes
 const adminRoutes = require("./routes/admin");
 
+const agreementRoutes = require("./routes/agreement");
+
 // Setup CORS - accessible by other domains
 app.use(cors());
 
@@ -39,6 +41,9 @@ app.use("/api/v1/auth", auth);
 
 //---- SCOPE CHANGE ----- //
 app.use("/api/v1/admin", adminRoutes);
+
+// agreement
+app.use("/api/v1/customer", agreementRoutes);
 
 // Handling unhandled routes
 app.use("*", (req, res) => {

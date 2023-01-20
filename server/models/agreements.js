@@ -1,29 +1,26 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-
 // User Model
 const agreementSchema = new mongoose.Schema(
   {
     customer_id: {
-      type: String,
-      trim: true,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     farmer_name: {
       type: String,
       required: [true, "Enter farmer Name"],
     },
     start_date: {
-      type: Date,
+      type: String,
       default: Date.now,
     },
     end_date: {
-      type: Date,
+      type: String,
       default: Date.now,
     },
     agreement_nft_id: {
-      type: Boolean,
-      required: [true, "Please select validated status."],
+      type: String,
+      required: [true, "Please select agreement_nft_id."],
       unique: [true, "Already used."],
     },
     crop: {
@@ -34,6 +31,10 @@ const agreementSchema = new mongoose.Schema(
       type: String,
       required: [true, "Enter the quantity of crops"],
     },
+    price: {
+      type: Number,
+      required: [true, "Enter amount"],
+    },
     ipfs_url: {
       type: String,
       required: [true, "Please select ipfs url"],
@@ -41,6 +42,7 @@ const agreementSchema = new mongoose.Schema(
     sold_status: {
       type: Boolean,
       default: false,
+      required: [true, "Enter the Sold status"],
     },
     agreementclose_status: {
       type: Boolean,
