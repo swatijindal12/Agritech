@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
@@ -55,11 +55,22 @@ const Amount = styled.p`
 `;
 
 const Card = ({ data }) => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem("user")));
+  }, []);
+ 
   return (
     <Container>
-      <Id>NFT Token ID #{data.id}</Id>
+      <Id>
+        Contract NFT ID{" "}
+        <a href={data.tx_hash} target="_blank">
+          #{data.agreement_nft_id}
+        </a>
+      </Id>
       <Flexbox justify="space-between">
-        <Name>{data.name}</Name>
+        <Name>{data.farmer_name}</Name>
         <div>
           <Date>{`from ${data.start_date}`}</Date>
           <Date>{`to ${data.end_date}`}</Date>
@@ -68,11 +79,12 @@ const Card = ({ data }) => {
       <Address>{data.address}</Address>
       <InnerContainer>
         <Crop>{data.crop}</Crop>
-        <Area>{data.area}</Area>
+        <Area>{data.quantity}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
-        <Amount>{data.amount}</Amount>
-        <Button text="BUY" margin="unset" />
+        <Amount>Rs. {data.price}</Amount>
+        {user.data.role === "customer" && 
+        <Button text="BUY" margin="unset" />}
       </Flexbox>
     </Container>
   );
