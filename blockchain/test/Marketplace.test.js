@@ -41,7 +41,7 @@ const {
 
     describe("Put farm NFT on sell", function() {
       it("only farmer can put farm on sell", async function(){
-        const {farmNFT, marketplace, owner, farmer1} = await loadFixture(deployNFT);
+        const {farmNFT, agreementNFT, marketplace, owner, farmer1} = await loadFixture(deployNFT);
         await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL);
         expect(await farmNFT.balanceOf(owner.address)).to.be.equal("1");
 
