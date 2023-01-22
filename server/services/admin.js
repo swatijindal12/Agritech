@@ -1,6 +1,7 @@
 const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 const User = require("../models/users");
+const Agreement = require("../models/agreements");
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -86,6 +87,8 @@ exports.createFarmer = async (req) => {
 };
 
 exports.getFarmers = async (req) => {
+  const sortOrder = req.query.sortOrder;
+
   // General response format
   let response = {
     error: null,
@@ -96,7 +99,13 @@ exports.getFarmers = async (req) => {
 
   let farmers;
   try {
-    farmers = await Farmer.find().select("-__v");
+    if (sortOrder === "low") {
+      farmers = await Farmer.find().sort({ rating: 1 }).select("-__v");
+    } else if (sortOrder === "high") {
+      farmers = await Farmer.find().sort({ rating: -1 }).select("-__v");
+    } else if (sortOrder === undefined) {
+      farmers = await Farmer.find().select("-__v");
+    }
     (response.data = farmers), (response.httpStatus = 200);
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
@@ -330,9 +339,11 @@ exports.getdashBoard = async (req) => {
     const farms = await Farm.countDocuments();
     const farmers = await Farmer.countDocuments();
     const customers = await User.countDocuments();
+    const agreements = await Agreement.countDocuments();
     (response.httpStatus = 200), (response.data.farmers = farmers);
     response.data.customers = customers;
     response.data.farms = farms;
+    response.data.contracts = agreements;
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 500);
   }
