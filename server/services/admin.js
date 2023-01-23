@@ -253,8 +253,23 @@ exports.getFarms = async (req) => {
   try {
     farms = await Farm.find().select("-__v");
 
-    response.data = farms;
-    response.httpStatus = 200;
+    // filter based on crop types
+    if (req.query.cropTypes) {
+      let cropTypes = req.query.cropTypes.split(",");
+      farms = farms.filter((farm) => {
+        for (let i = 0; i < cropTypes.length; i++) {
+          if (farm[cropTypes[i]] === true) {
+            return true;
+          }
+        }
+        return false;
+      });
+      response.data = farms;
+      response.httpStatus = 200;
+    } else {
+      response.data = farms;
+      response.httpStatus = 200;
+    }
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
   }
