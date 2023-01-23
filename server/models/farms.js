@@ -32,6 +32,9 @@ const farmSchema = new mongoose.Schema(
       type: String,
       unique: [true, "Already used."],
     },
+    rating: {
+      type: Number, //Update after inserting..data in DB
+    },
     tx_hash: {
       type: String,
       unique: [true, "Already used."],
@@ -55,6 +58,31 @@ const farmSchema = new mongoose.Schema(
     farm_size: {
       type: String,
       trim: true,
+    },
+    food_grain: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    vegetable: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    horticulture: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    floriculture: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    exotic_crop: {
+      type: Boolean,
+      default: false,
+      required: true,
     },
     user_id: {
       type: String,
