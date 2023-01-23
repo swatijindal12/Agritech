@@ -241,6 +241,7 @@ exports.createFarm = async (req) => {
 };
 
 exports.getFarms = async (req) => {
+  const sortOrder = req.query.sortOrder;
   // General response format
   let response = {
     error: null,
@@ -252,6 +253,15 @@ exports.getFarms = async (req) => {
   let farms;
   try {
     farms = await Farm.find().select("-__v");
+
+    // sort based on rating.
+    if (sortOrder === "low") {
+      farms = await Farm.find().sort({ rating: 1 }).select("-__v");
+    } else if (sortOrder === "high") {
+      farms = await Farm.find().sort({ rating: -1 }).select("-__v");
+    } else if (sortOrder === undefined) {
+      farms = await Farm.find().select("-__v");
+    }
 
     // filter based on crop types
     if (req.query.cropTypes) {
