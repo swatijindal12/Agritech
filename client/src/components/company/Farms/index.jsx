@@ -29,7 +29,7 @@ const Farms = () => {
         },
       })
       .then(res => {
-        // console.log("response is ", res);
+        console.log("response is ", res);
         setFarms(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

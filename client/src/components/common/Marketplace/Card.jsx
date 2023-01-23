@@ -60,7 +60,7 @@ const Card = ({ data }) => {
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
- 
+
   return (
     <Container>
       <Id>
@@ -83,8 +83,7 @@ const Card = ({ data }) => {
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
         <Amount>Rs. {data.price}</Amount>
-        {user.data.role === "customer" && 
-        <Button text="BUY" margin="unset" />}
+        {user.data.role === "customer" && <Button text="BUY" margin="unset" />}
       </Flexbox>
     </Container>
   );

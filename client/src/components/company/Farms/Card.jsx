@@ -68,7 +68,7 @@ const Card = ({ data }) => {
 
   return (
     <Container>
-      <Image src={data.image_url} key ={data.farm_nft_id}/>
+      <Image src={data.image_url} key={data.farm_nft_id} />
       <Flexbox justify="space-between" margin="0.5rem">
         {opened ? (
           <Flexbox>
@@ -81,7 +81,7 @@ const Card = ({ data }) => {
                 </a>
               </Id>
             </NameContainer>
-            <Star src={stars[data.stars - 1]} />
+            <Star src={stars[Math.floor(data.rating) - 1]} />
           </Flexbox>
         ) : (
           <Name>{data.name}</Name>
