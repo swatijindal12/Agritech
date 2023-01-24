@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Title from "../Title";
 import Card from "./Card";
-// import { contracts } from "./tempData";
 import axios from "axios";
 
 const Container = styled.div`
