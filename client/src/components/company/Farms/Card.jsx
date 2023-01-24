@@ -108,7 +108,16 @@ const Card = ({ data }) => {
           </Video>
 
           <Id>{data.crops}</Id>
-          <ViewMore onClick={() => window.open(data.pdf)}>view more</ViewMore>
+          <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
+            read more about farm practices
+            <Star
+              src={stars[Math.floor(data.farm_practice_rating) - 1]}
+              style={{ width: "25px", height: "25px" }}
+            />
+          </ViewMore>
+          <ViewMore onClick={() => window.open(data.farm_pdf)}>
+            view more
+          </ViewMore>
           <Button text="CREATE CONTRACT" onClick={createContract} />
         </>
       )}
