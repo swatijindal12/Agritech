@@ -84,6 +84,15 @@ const farmSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
+    farm_pdf: {
+      type: String,
+    },
+    farm_practice_pdf: {
+      type: String,
+    },
+    farm_practice_rating: {
+      type: Number,
+    },
     user_id: {
       type: String,
       ref: "Farmer",
