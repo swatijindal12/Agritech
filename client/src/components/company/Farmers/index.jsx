@@ -21,14 +21,18 @@ const CardsContainer = styled.div`
 
 const Farmers = () => {
   const [showFilter, setShowFilter] = useState(false);
-  const toggleFilter = () => setShowFilter(!showFilter);
-
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farmers, setFarmers] = useState(null);
 
+  const toggleFilter = () => setShowFilter(!showFilter);
+
   useEffect(() => {
+    getList();
+  }, []);
+
+  const getList = () => {
     let queryString = "";
-    console.log(selectedFilter.rating)
+    console.log(selectedFilter.rating);
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
       console.log("QUERY IS ", queryString);
@@ -45,7 +49,12 @@ const Farmers = () => {
         setFarmers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
-  }, [selectedFilter]);
+  };
+
+  const applyFilter = () => {
+    getList();
+    setShowFilter(false);
+  };
 
   return (
     <Container>
@@ -58,6 +67,7 @@ const Farmers = () => {
               toggle={toggleFilter}
               setSelectedFilter={setSelectedFilter}
               selectedFilter={selectedFilter}
+              applyFilter ={applyFilter}
             />
           )}
         </FilterContainer>

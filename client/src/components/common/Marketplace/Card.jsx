@@ -61,7 +61,7 @@ const Card = ({ data }) => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
 
-  return (
+  return user ? (
     <Container>
       <Id>
         Contract NFT ID{" "}
@@ -86,7 +86,7 @@ const Card = ({ data }) => {
         {user.data.role === "customer" && <Button text="BUY" margin="unset" />}
       </Flexbox>
     </Container>
-  );
+  ) : null;
 };
 
 export default Card;

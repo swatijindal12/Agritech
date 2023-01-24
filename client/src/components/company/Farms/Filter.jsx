@@ -32,7 +32,7 @@ const Name = styled.p`
 const Box = styled.div`
   height: 1.25rem;
   width: 1.25rem;
-  background-color: #d9d9d9;
+  background-color: ${props => (props.selected ? "#adc178" : "#d9d9d9")};
 `;
 
 const Cancel = styled.div`
@@ -52,20 +52,39 @@ const Cancel = styled.div`
   margin-left: 1rem;
 `;
 
-const Filter = ({ toggle }) => {
+const Filter = ({ toggle, setSelectedFilter, selectedFilter, applyFilter }) => {
+  const handleHighToLowClick = () => {
+    setSelectedFilter({
+      ...selectedFilter,
+      rating: "high",
+    });
+  };
+
+  const handleLowToHighClick = () => {
+    setSelectedFilter({
+      ...selectedFilter,
+      rating: "low",
+    });
+  };
   return (
     <Container>
       <Title>Filters</Title>
       <Flexbox justify="space-between" margin="0.5rem 0">
         <Name>Rating High to low</Name>
-        <Box />
+        <Box
+          onClick={handleHighToLowClick}
+          selected={selectedFilter.rating === "high"}
+        />
       </Flexbox>
       <Flexbox justify="space-between" margin="0.5rem 0">
         <Name>Rating Low to high</Name>
-        <Box />
+        <Box
+          onClick={handleLowToHighClick}
+          selected={selectedFilter.rating === "low"}
+        />
       </Flexbox>
       <Flexbox justify="space-between" margin="1rem 0 0">
-        <Button text="APPLY" />
+        <Button text="APPLY" onClick={applyFilter}/>
         <Cancel onClick={toggle}>CANCEL</Cancel>
       </Flexbox>
     </Container>

@@ -52,7 +52,7 @@ const Cancel = styled.div`
   margin-left: 1rem;
 `;
 
-const Filter = ({ toggle, setSelectedFilter, selectedFilter }) => {
+const Filter = ({ toggle, setSelectedFilter, selectedFilter, applyFilter }) => {
   const handleHighToLowClick = () => {
     setSelectedFilter({
       ...selectedFilter,
@@ -85,7 +85,7 @@ const Filter = ({ toggle, setSelectedFilter, selectedFilter }) => {
         />
       </Flexbox>
       <Flexbox justify="space-between" margin="1rem 0 0">
-        <Button text="APPLY" onClick={() => toggle()} />
+        <Button text="APPLY" onClick={applyFilter} />
         <Cancel onClick={toggle}>CANCEL</Cancel>
       </Flexbox>
     </Container>
