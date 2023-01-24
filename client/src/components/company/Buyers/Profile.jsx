@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import ProfileCard from "./ProfileCard";
+import {useParams} from "react-router-dom"
 
 const Container = styled.div`
   padding: 1rem;
@@ -37,6 +38,12 @@ const Option = styled.div`
 
 const Profile = () => {
   const [currentPage, setCurrentpage] = useState("active");
+  const {slug} = useParams();
+
+useEffect(()=> {
+  console.log("here the user id is ", slug);
+}, [])
+
   return (
     <Container>
       <Image src="https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200" />
