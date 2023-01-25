@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import LogoImg from "../../assets/logo.svg";
 import HamburgerImg from "../../assets/hamburger.svg";
+import CartImg from "../../assets/cart.svg";
 
 const Container = styled.div`
   position: sticky;
@@ -20,10 +21,19 @@ const Hamburger = styled.img`
   margin-left: auto;
 `;
 
+const Cart = styled.img`
+  margin-left: 6.5rem;
+`;
+
 const Navbar = ({ toggleSidebar }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   return (
     <Container>
       <img src={LogoImg} />
+      {user.data.role === "customer" && (
+        <Cart src={CartImg} onClick={() =>  (window.location.href = "/cart")} />
+      )}
       <Hamburger src={HamburgerImg} onClick={toggleSidebar} />
     </Container>
   );
