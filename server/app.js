@@ -42,8 +42,8 @@ app.use("/api/v1/auth", auth);
 //---- SCOPE CHANGE ----- //
 app.use("/api/v1/admin", adminRoutes);
 
-// agreement
-app.use("/api/v1/customer", agreementRoutes);
+// Agreement
+app.use("/api/v1/marketplace", agreementRoutes);
 
 // Handling unhandled routes
 app.use("*", (req, res) => {
