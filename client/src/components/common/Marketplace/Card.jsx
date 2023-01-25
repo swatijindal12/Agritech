@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
@@ -56,10 +56,30 @@ const Amount = styled.p`
 
 const Card = ({ data }) => {
   const [user, setUser] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
+
+  const addToCart = useCallback(() => {
+    if (user.data.role === "customer") {
+      setAddedToCart(!addedToCart);
+    }
+  });
+
+  const incrementQuantity = useCallback(() => {
+    if (quantity < 5) {
+      setQuantity(quantity + 1);
+    }
+  });
+
+  const decrementQuantity = useCallback(() => {
+    if (quantity > 1 && quantity <= 5) {
+      setQuantity(quantity - 1);
+    }
+  });
 
   return user ? (
     <Container>
@@ -79,12 +99,23 @@ const Card = ({ data }) => {
       <Address>{data.address}</Address>
       <InnerContainer>
         <Crop>{data.crop}</Crop>
-        <Area>{data.quantity}</Area>
+        <Area>{data.area}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
         <Amount>Rs. {data.price}</Amount>
         {user.data.role === "customer" && (
-          <Button text="Add to cart" margin="unset" />
+          <div>
+            <Flexbox justify="space-between" margin="0.5rem 0">
+              <Button text="-" margin="0.2rem" onClick={decrementQuantity} />
+              <p>{quantity}</p>
+              <Button text="+" margin="0.2rem" onClick={incrementQuantity} />
+            </Flexbox>
+            <Button
+              text={addedToCart ? `Added to cart ${quantity}` : "Add to cart"}
+              margin="unset"
+              onClick={addToCart}
+            />
+          </div>
         )}
       </Flexbox>
     </Container>
