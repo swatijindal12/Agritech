@@ -10,6 +10,12 @@ const agreementSchema = new mongoose.Schema(
       type: String,
       required: [true, "Enter farmer Name"],
     },
+    farm_id: {
+      type: Number,
+    },
+    address: {
+      type: String,
+    },
     start_date: {
       type: String,
       default: Date.now,
@@ -20,14 +26,16 @@ const agreementSchema = new mongoose.Schema(
     },
     agreement_nft_id: {
       type: String,
-      required: [true, "Please select agreement_nft_id."],
       unique: [true, "Already used."],
+    },
+    tx_hash: {
+      type: String,
     },
     crop: {
       type: String,
       required: [true, "Enter the crops"],
     },
-    quantity: {
+    area: {
       type: String,
       required: [true, "Enter the quantity of crops"],
     },
@@ -39,10 +47,12 @@ const agreementSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please select ipfs url"],
     },
+    farm_nft_id: {
+      type: String,
+    },
     sold_status: {
       type: Boolean,
       default: false,
-      required: [true, "Enter the Sold status"],
     },
     agreementclose_status: {
       type: Boolean,
