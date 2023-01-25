@@ -14,6 +14,7 @@ import CreateContract from "./components/company/CreateContract";
 import Dashboard from "./components/company/Dashboard";
 import Farmers from "./components/company/Farmers";
 import Farms from "./components/company/Farms";
+import Cart from "./components/buyer/Carts";
 
 const App = () => {
   // Checking for web3 connection.
@@ -56,6 +57,7 @@ const App = () => {
           <Route path="/buyers/:slug" element={<Profile />} />
           <Route path="/contracts" element={<Contracts />} />
           <Route path="/marketplace" element={<MarketPlace />} />
+          <Route path="/cart" element={<Cart />} />
         </Routes>
       </Router>
     </>
