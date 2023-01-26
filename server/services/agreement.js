@@ -177,7 +177,6 @@ exports.createAgreement = async (req) => {
 
 // Marketplace
 exports.getAgreements = async (req) => {
-  console.log("Inside get agreement server");
   const searchString = req.query.search;
   // General response format
   let response = {
@@ -190,7 +189,6 @@ exports.getAgreements = async (req) => {
   let agreements;
   try {
     agreements = await Agreement.find().select("-__v");
-    console.log("agreements : ", agreements);
 
     if (!searchString) {
       const groupedFarms = agreements.reduce((result, agreement) => {
@@ -243,9 +241,8 @@ exports.getAgreements = async (req) => {
 exports.addToCart = async (req) => {
   console.log("Inside addToCart service");
   const id = req.user._id.toString();
-  console.log("user.id modifies :- ", id);
-  console.log("ProductId :- ", req.body.productId);
-  const productId = req.body.productId;
+  const agreementIds = req.body.agreementIds;
+  const unitPrice = req.body.unit_price;
 
   // General response format
   let response = {
@@ -257,32 +254,29 @@ exports.addToCart = async (req) => {
 
   // Logic for Creating Cart Start ...
   try {
-    console.log("Inside TRY");
     // Find the user's cart
     const cart = await Cart.findOne({ userId: id });
     if (!cart) {
-      console.log("Inside IF card check");
       // If the cart doesn't exist, create a new one
       const newCart = new Cart({
         userId: id,
         items: [
           {
-            productId: productId,
+            agreementIds: agreementIds,
+            unit_price: unit_price,
           },
         ],
       });
-      console.log("newCart : ", newCart);
+
       await newCart.save();
       response.message = "Item added to cart";
       response.httpStatus = 200;
     } else {
-      console.log("Inside ELSE card check", cart);
       // If the cart exists, check if the item is already in the cart
       const itemIndex = cart.items.findIndex((item) => {
-        console.log("item : ", item);
         return item.productId === req.body.productId;
       });
-      console.log("itemIndex", itemIndex);
+
       if (itemIndex === -1) {
         // If the item is not in the cart, add it
         cart.items.push({
@@ -303,14 +297,9 @@ exports.addToCart = async (req) => {
       // }
     }
   } catch (err) {
-    console.log("Inside catch");
     response.message = err.message;
     response.httpStatus = 500;
   }
-
-  // Logic for Creating Cart End ...
-
-  // (response.message = "addToCart working ..."), (response.httpStatus = 200);
   return response;
 };
 
