@@ -63,6 +63,10 @@ const Card = ({ data }) => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
 
+  const farmProfile = () => {
+    window.location.href = `/farms/${data._id}`;
+  };
+
   const addToCart = useCallback(() => {
     if (user.data.role === "customer") {
       setAddedToCart(!addedToCart);
@@ -90,7 +94,7 @@ const Card = ({ data }) => {
         </a>
       </Id>
       <Flexbox justify="space-between">
-        <Name>{data.farmer_name}</Name>
+        <Name  onClick={farmProfile}>{data.farmer_name}</Name>
         <div>
           <Date>{`from ${data.start_date}`}</Date>
           <Date>{`to ${data.end_date}`}</Date>
