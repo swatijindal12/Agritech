@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
@@ -55,13 +56,9 @@ const Amount = styled.p`
 `;
 
 const Card = ({ data }) => {
-  const [user, setUser] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-
-  useEffect(() => {
-    setUser(JSON.parse(localStorage.getItem("user")));
-  }, []);
+  const user = useSelector(store => store.auth.user);
 
   const addToCart = useCallback(() => {
     if (user.data.role === "customer") {

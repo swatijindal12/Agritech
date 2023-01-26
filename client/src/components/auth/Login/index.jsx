@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import Logo from "../../../assets/logo.svg";
 import Button from "../../common/Button";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { loginUser } from "../../../redux/actions";
 
 const Container = styled.div`
   height: 100vh;
@@ -54,13 +56,10 @@ const Resend = styled.p`
 const Login = () => {
   const [number, setNumber] = useState("");
   const [authorised, setAuthorised] = useState(false);
-  const [user, setUser] = useState(null);
   const [otp, setOtp] = useState("");
   const [timeRemaining, setTimeRemaining] = useState(30);
-
-  useEffect(() => {
-    setUser(JSON.parse(localStorage.getItem("user")));
-  }, []);
+  const dispatch = useDispatch();
+  const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
     let interval;
@@ -95,27 +94,14 @@ const Login = () => {
   };
 
   const verifyOTP = () => {
-    console.log("Inside verify otp");
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/auth/verify`, {
-        phone: number,
-        otp,
-      })
-      .then(res => {
-        localStorage.setItem("user", JSON.stringify(res?.data));
-        setUser(res?.data);
-        console.log("res : ", res);
-      })
-      .catch(err => {
-        console.log("error in submitting otp", err);
-      });
+    dispatch(loginUser({ phone: number, otp }));
   };
 
   return (
     <>
       {user && (
         <Navigate
-          to={user.data.role === "admin" ? "/" : "/contracts"}
+          to={user?.data?.role === "admin" ? "/" : "/contracts"}
           replace={true}
         />
       )}
@@ -143,7 +129,9 @@ const Login = () => {
               onChange={e => setOtp(e.target.value)}
             />
             {timeRemaining === 0 ? (
-              <ResendMessageStyle onClick={getOTP}>{`Resend OTP`}</ResendMessageStyle>
+              <ResendMessageStyle
+                onClick={getOTP}
+              >{`Resend OTP`}</ResendMessageStyle>
             ) : (
               <ResendMessageStyle>
                 {`Resend OTP in ${timeRemaining} seconds`}

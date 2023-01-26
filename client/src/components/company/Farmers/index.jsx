@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
@@ -23,6 +24,7 @@ const Farmers = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farmers, setFarmers] = useState(null);
+  const user = useSelector(store => store.auth.user);
 
   const toggleFilter = () => setShowFilter(!showFilter);
 
@@ -40,8 +42,7 @@ const Farmers = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
         headers: {
-          Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
+          Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {
@@ -67,7 +68,7 @@ const Farmers = () => {
               toggle={toggleFilter}
               setSelectedFilter={setSelectedFilter}
               selectedFilter={selectedFilter}
-              applyFilter ={applyFilter}
+              applyFilter={applyFilter}
             />
           )}
         </FilterContainer>

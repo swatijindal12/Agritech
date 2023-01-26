@@ -6,6 +6,7 @@ import FilterIcon from "../../../assets/filter.svg";
 import Card from "./Card";
 import Filter from "./Filter";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   padding: 1rem;
@@ -19,6 +20,7 @@ const Farms = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farms, setFarms] = useState(null);
+  const user = useSelector(store => store.auth.user);
 
   const toggleFilter = () => setShowFilter(!showFilter);
 
@@ -35,12 +37,11 @@ const Farms = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farms?${queryString}`, {
         headers: {
-          Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
+          Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {
-        console.log("res is", res.data.data)
+        console.log("res is", res.data.data);
         setFarms(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

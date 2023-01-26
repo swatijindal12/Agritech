@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Button from "../../common/Button";
 import Card from "./Card";
@@ -10,13 +11,13 @@ const Container = styled.div`
 
 const Buyers = () => {
   const [buyers, setBuyers] = useState(null);
+  const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/customers`, {
         headers: {
-          Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
+          Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import LogoImg from "../../assets/logo.svg";
 import HamburgerImg from "../../assets/hamburger.svg";
 import CartImg from "../../assets/cart.svg";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   position: sticky;
@@ -26,13 +27,13 @@ const Cart = styled.img`
 `;
 
 const Navbar = ({ toggleSidebar }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = useSelector(store => store.auth.user);
 
   return (
     <Container>
       <img src={LogoImg} />
-      {user.data.role === "customer" && (
-        <Cart src={CartImg} onClick={() =>  (window.location.href = "/cart")} />
+      {user?.data?.role === "customer" && (
+        <Cart src={CartImg} onClick={() => (window.location.href = "/cart")} />
       )}
       <Hamburger src={HamburgerImg} onClick={toggleSidebar} />
     </Container>
