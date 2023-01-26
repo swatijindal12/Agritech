@@ -66,6 +66,7 @@ const Filter = ({ toggle, setSelectedFilter, selectedFilter, applyFilter }) => {
       rating: "low",
     });
   };
+
   return (
     <Container>
       <Title>Filters</Title>
@@ -84,7 +85,7 @@ const Filter = ({ toggle, setSelectedFilter, selectedFilter, applyFilter }) => {
         />
       </Flexbox>
       <Flexbox justify="space-between" margin="1rem 0 0">
-        <Button text="APPLY" onClick={applyFilter}/>
+        <Button text="APPLY" onClick={applyFilter} />
         <Cancel onClick={toggle}>CANCEL</Cancel>
       </Flexbox>
     </Container>

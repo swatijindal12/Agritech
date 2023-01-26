@@ -17,23 +17,39 @@ const FilterContainer = styled.div`
 
 const Farms = () => {
   const [showFilter, setShowFilter] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState({});
+  const [farms, setFarms] = useState(null);
+
   const toggleFilter = () => setShowFilter(!showFilter);
 
-  const [farms, setFarms] = useState(null);
   useEffect(() => {
+    getList();
+  }, []);
+
+  const getList = () => {
+    let queryString = "";
+
+    if (selectedFilter.rating) {
+      queryString += `sortOrder=${selectedFilter.rating}`;
+    }
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farms`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/farms?${queryString}`, {
         headers: {
           Authorization:
             "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
         },
       })
       .then(res => {
-        // console.log("response is ", res);
+        console.log("res is", res.data.data)
         setFarms(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
-  }, []);
+  };
+
+  const applyFilter = () => {
+    getList();
+    setShowFilter(false);
+  };
 
   return (
     <Container>
@@ -41,7 +57,14 @@ const Farms = () => {
         <Title>Farms</Title>
         <FilterContainer>
           <img src={FilterIcon} onClick={toggleFilter} />
-          {showFilter && <Filter toggle={toggleFilter} />}
+          {showFilter && (
+            <Filter
+              toggle={toggleFilter}
+              setSelectedFilter={setSelectedFilter}
+              selectedFilter={selectedFilter}
+              applyFilter={applyFilter}
+            />
+          )}
         </FilterContainer>
       </Flexbox>
       <br />

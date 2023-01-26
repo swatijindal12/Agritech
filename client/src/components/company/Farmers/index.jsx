@@ -4,10 +4,15 @@ import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
 import FilterIcon from "../../../assets/filter.svg";
 import Card from "./Card";
+import Filter from "./Filter";
 import axios from "axios";
 
 const Container = styled.div`
   padding: 1rem;
+`;
+
+const FilterContainer = styled.div`
+  position: relative;
 `;
 
 const CardsContainer = styled.div`
@@ -15,27 +20,57 @@ const CardsContainer = styled.div`
 `;
 
 const Farmers = () => {
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState({});
   const [farmers, setFarmers] = useState(null);
+
+  const toggleFilter = () => setShowFilter(!showFilter);
+
   useEffect(() => {
+    getList();
+  }, []);
+
+  const getList = () => {
+    let queryString = "";
+    console.log(selectedFilter.rating);
+    if (selectedFilter.rating) {
+      queryString += `sortOrder=${selectedFilter.rating}`;
+      console.log("QUERY IS ", queryString);
+    }
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
         headers: {
           Authorization:
             "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
         },
       })
       .then(res => {
-        // console.log("response is ", res);
+        console.log("response is ", res);
         setFarmers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
-  }, []);
+  };
+
+  const applyFilter = () => {
+    getList();
+    setShowFilter(false);
+  };
 
   return (
     <Container>
       <Flexbox justify="space-between">
         <Button text="ADD FARMER" margin="unset" />
-        <img src={FilterIcon} />
+        <FilterContainer>
+          <img src={FilterIcon} onClick={toggleFilter} />
+          {showFilter && (
+            <Filter
+              toggle={toggleFilter}
+              setSelectedFilter={setSelectedFilter}
+              selectedFilter={selectedFilter}
+              applyFilter ={applyFilter}
+            />
+          )}
+        </FilterContainer>
       </Flexbox>
       <CardsContainer>
         {farmers?.map(item => {

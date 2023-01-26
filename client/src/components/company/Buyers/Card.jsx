@@ -40,8 +40,13 @@ const Email = styled.p`
 `;
 
 const Card = ({ data }) => {
+
+  const openProfile = () => {
+    window.location.href = `/buyers/${data._id}`
+  }
+
   return (
-    <Container>
+    <Container onClick={openProfile}>
       <Image
         src={
           data.image ||
