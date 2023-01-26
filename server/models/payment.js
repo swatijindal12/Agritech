@@ -7,7 +7,7 @@ const paymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
     },
-    razorpay_reference_id: {
+    razorpay_order_id: {
       type: String,
     },
     razorpay_payment_id: {
