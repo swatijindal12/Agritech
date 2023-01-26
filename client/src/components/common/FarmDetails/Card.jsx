@@ -110,7 +110,7 @@ const Card = ({ data }) => {
           Read more about farm practices
           <img
             src={stars[Math.floor(data.farm_practice_rating) - 1]}
-            style={{ width: "25px", height: "25px", "margin-right": "0.5rem" }}
+            style={{ width: "25px", height: "25px", "marginRight": "0.5rem" }}
           />
         </ViewMore>
         <ViewMore onClick={() => window.open(data.farm_pdf)}>
