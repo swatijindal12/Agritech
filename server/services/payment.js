@@ -42,16 +42,8 @@ exports.createOrder = async (req) => {
   try {
     // Inserting Data into OrderItem Table
     for (let i = 0; i < length; i++) {
-      // console.log("each :- ", agreements[i]);
       for (let j = 0; j < agreements[i].agreement_ids.length; j++) {
-        // console.log("each Agreements :- ", agreements[i].agreement_ids[j]);
         const unit_price = agreements[i].unit_price;
-
-        console.log(
-          "unit price :- ",
-          agreements[i].agreement_ids[j],
-          unit_price
-        );
 
         // Insert the Data in orderItem Table.
         await OrderItem.create({
@@ -91,8 +83,7 @@ exports.createOrder = async (req) => {
 
 // verify service working...
 exports.paymentVerification = async (req) => {
-  console.log("req.user :", req.user);
-  console.log("PaymentVerification services ");
+  console.log("PaymentVerification Services");
   // General response format
   let response = {
     error: null,
@@ -103,6 +94,7 @@ exports.paymentVerification = async (req) => {
 
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
     req.body;
+
   console.log(
     "Payment detail :- ",
     razorpay_order_id,
@@ -113,29 +105,45 @@ exports.paymentVerification = async (req) => {
   const body = razorpay_order_id + "|" + razorpay_payment_id;
 
   const expectedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_APT_SECRET)
+    .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
     .update(body.toString())
     .digest("hex");
 
   const isAuthentic = expectedSignature === razorpay_signature;
-  console.log("isAuthentic : ", isAuthentic);
+
+  console.log("isAuthentic :", isAuthentic);
   if (isAuthentic) {
     // Database comes here
-    await Payment.create({
-      razorpay_reference_id: razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    });
-    console.log("is authentic");
-    response.message = "Working PaymentVerification...";
-    response.httpStatus = 200;
+
+    Order.find({ razorpay_order_id })
+      .then(async (order_id) => {
+        if (order_id.length > 0) {
+          const id = order_id[0]._id;
+          await Payment.create({
+            order_id: id,
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_payment_signature: razorpay_signature,
+            payment_status: true,
+          });
+          response.message = "Payment Successful";
+          response.httpStatus = 200;
+        } else {
+          response.message = "No order found";
+          response.httpStatus = 404;
+        }
+      })
+      .catch((err) => {
+        response.message = "failed operation";
+        response.httpStatus = 500;
+      });
 
     // res.redirect(
     //   `http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`
     // );
   } else {
-    response.message = "Not Working PaymentVerification...";
-    response.httpStatus = 400;
+    response.error = "Payment failed";
+    response.httpStatus = 500;
   }
 
   return response;
