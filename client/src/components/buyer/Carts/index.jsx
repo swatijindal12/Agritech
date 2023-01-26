@@ -7,18 +7,19 @@ import Flexbox from "../../common/Flexbox";
 import { contracts } from "./tempData";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 10rem;
 `;
 
 const Box = styled.div`
   box-sizing: border-box;
-  position: absolute;
-  width: 390px;
-  height: 109px;
+  position: fixed;
+  width: 100vw;
+  height: fit-content;
   left: 0px;
-  top: 735px;
+  bottom: 0;
   background: #ffffff;
   border-top: 1px solid #000000;
+  padding: 1rem;
 `;
 const FinalAmount = styled.p`
   font-size: 1.25rem;
@@ -34,12 +35,12 @@ const Cart = () => {
         <Title>My Cart</Title>
       </Flexbox>
       <br />
-      {contracts.map((item, index) => {
+      {contracts.map(item => {
         return <Card data={item} key={item.id} />;
       })}
       <Box>
         <FinalAmount>Rs. Final amount</FinalAmount>
-        <Button margin="1rem auto" text="CHECKOUT" />
+        <Button text="CHECKOUT" width="100%" />
       </Box>
     </Container>
   );
