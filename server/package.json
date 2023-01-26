@@ -31,6 +31,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.8.0",
     "multer": "^1.4.5-lts.1",
+    "razorpay": "^2.8.4",
     "twilio": "^3.84.0",
     "web3": "^1.8.1"
   }
