@@ -63,6 +63,10 @@ const Card = ({ data }) => {
     setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
 
+  const farmProfile = () => {
+    window.location.href = `/farms/${data._id}`;
+  };
+
   const addToCart = useCallback(() => {
     if (user.data.role === "customer") {
       setAddedToCart(!addedToCart);
@@ -70,13 +74,13 @@ const Card = ({ data }) => {
   });
 
   const incrementQuantity = useCallback(() => {
-    if (quantity < 5) {
+    if (quantity < data.unit_available) {
       setQuantity(quantity + 1);
     }
   });
 
   const decrementQuantity = useCallback(() => {
-    if (quantity > 1 && quantity <= 5) {
+    if (quantity > 1 && quantity <= data.unit_available) {
       setQuantity(quantity - 1);
     }
   });
@@ -90,7 +94,7 @@ const Card = ({ data }) => {
         </a>
       </Id>
       <Flexbox justify="space-between">
-        <Name>{data.farmer_name}</Name>
+        <Name onClick={farmProfile}>{data.farmer_name}</Name>
         <div>
           <Date>{`from ${data.start_date}`}</Date>
           <Date>{`to ${data.end_date}`}</Date>
@@ -106,9 +110,9 @@ const Card = ({ data }) => {
         {user.data.role === "customer" && (
           <div>
             <Flexbox justify="space-between" margin="0.5rem 0">
-              <Button text="-" margin="0.2rem" onClick={decrementQuantity} />
+              <Button text="-" margin="0.1rem" onClick={decrementQuantity} />
               <p>{quantity}</p>
-              <Button text="+" margin="0.2rem" onClick={incrementQuantity} />
+              <Button text="+" margin="0.1rem" onClick={incrementQuantity} />
             </Flexbox>
             <Button
               text={addedToCart ? `Added to cart ${quantity}` : "Add to cart"}
