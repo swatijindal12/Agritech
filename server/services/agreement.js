@@ -194,8 +194,6 @@ exports.getAgreements = async (req) => {
 
     if (!searchString) {
       const groupedFarms = agreements.reduce((result, agreement) => {
-        console.log("agreement :", agreement);
-
         const key =
           agreement.farmer_name +
           agreement.farm_id +
