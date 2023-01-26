@@ -38,24 +38,6 @@ exports.getAgreements = async (req, res, next) => {
     });
 };
 
-// Route to      => api/v1/agreement/buy/:id
-exports.buyAgreement = (req, res, next) => {
-  console.log("Inside get buyAgreement controllers");
-  agreementServices
-    .buyAgreement(req)
-    .then((response) => {
-      res.json(response);
-    })
-    .catch((error) => {
-      res.status(400).json({
-        error: "failed operation",
-        message: null,
-        httpStatus: 400,
-        data: null,
-      });
-    });
-};
-
 // Route to      => api/v1/cart
 exports.addToCart = (req, res, next) => {
   console.log("Inside AddToCart Controllers");
