@@ -198,7 +198,9 @@ exports.getAgreements = async (req) => {
           agreement.farm_nft_id +
           agreement.area +
           agreement.crop +
-          agreement.address;
+          agreement.address +
+          agreement.start_date +
+          agreement.end_date;
         if (!result[key]) {
           result[key] = {
             farmer_name: agreement.farmer_name,
@@ -207,6 +209,8 @@ exports.getAgreements = async (req) => {
             crop: agreement.crop,
             address: agreement.address,
             price: agreement.price,
+            start_date: agreement.start_date,
+            end_date: agreement.end_date,
             agreements: new Set([agreement._id]),
             ipfs_url: new Set([agreement.ipfs_url]),
             tx_hash: new Set([agreement.tx_hash]),
