@@ -4,6 +4,6 @@ export const addToCart = data => {
   return { type: ADD_TO_CART, payload: data };
 };
 
-export const removeFromCart = ItemId => {
-  return { type: REMOVE_FROM_CART, payload: ItemId };
+export const removeFromCart = newItemArray => {
+  return { type: REMOVE_FROM_CART, payload: newItemArray };
 };

@@ -15,11 +15,18 @@ const Container = styled.div`
   letter-spacing: 1.4px;
   font-weight: 700;
   width: ${props => (props.width ? props.width : "fit-content")};
+  opacity: ${props => (props.disabled ? 0.3 : 1)};
 `;
 
-const Button = ({ color, margin, width, text, onClick }) => {
+const Button = ({ color, margin, width, text, disabled, onClick }) => {
   return (
-    <Container color={color} margin={margin} width={width} onClick={onClick}>
+    <Container
+      color={color}
+      margin={margin}
+      width={width}
+      disabled={disabled}
+      onClick={onClick}
+    >
       {text}
     </Container>
   );

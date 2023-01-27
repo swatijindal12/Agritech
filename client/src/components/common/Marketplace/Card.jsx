@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { addToCart } from "../../../redux/actions/cartActions";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
 
@@ -57,18 +58,17 @@ const Amount = styled.p`
 
 const Card = ({ data }) => {
   const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
   const user = useSelector(store => store.auth.user);
+  const dispatch = useDispatch();
 
   const farmProfile = () => {
     window.location.href = `/farms/${data._id}`;
   };
 
-  const addToCart = useCallback(() => {
-    if (user.data.role === "customer") {
-      setAddedToCart(!addedToCart);
-    }
-  });
+  const handleAddToCart = () => {
+    dispatch(addToCart({ ...data, selected_quantity: quantity }));
+    window.location.href = "/cart";
+  };
 
   const incrementQuantity = useCallback(() => {
     if (quantity < data.unit_available) {
@@ -107,14 +107,24 @@ const Card = ({ data }) => {
         {user.data.role === "customer" && (
           <div>
             <Flexbox justify="space-between" margin="0.5rem 0">
-              <Button text="-" margin="0.1rem" onClick={decrementQuantity} />
+              <Button
+                text="-"
+                margin="0.1rem"
+                onClick={decrementQuantity}
+                disabled={quantity === 1}
+              />
               <p>{quantity}</p>
-              <Button text="+" margin="0.1rem" onClick={incrementQuantity} />
+              <Button
+                text="+"
+                margin="0.1rem"
+                onClick={incrementQuantity}
+                disabled={quantity === data.unit_available}
+              />
             </Flexbox>
             <Button
-              text={addedToCart ? `Added to cart ${quantity}` : "Add to cart"}
+              text="Add to cart"
               margin="unset"
-              onClick={addToCart}
+              onClick={handleAddToCart}
             />
           </div>
         )}
