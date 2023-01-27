@@ -13,6 +13,7 @@ import Dashboard from "./components/company/Dashboard";
 import Farmers from "./components/company/Farmers";
 import Farms from "./components/company/Farms";
 import Cart from "./components/buyer/Carts";
+import FarmDetails from "./components/common/FarmDetails";
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -49,6 +50,7 @@ const Routing = () => {
           <Route path="/contracts" element={<Contracts />} />
           <Route path="/marketplace" element={<MarketPlace />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/farms/:slug" element={<FarmDetails />} />
         </Routes>
       </Router>
     </>
