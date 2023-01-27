@@ -86,9 +86,13 @@ const Card = ({ data }) => {
     <Container>
       <Id>
         Contract NFT ID{" "}
-        <a href={data.tx_hash[0]} target="_blank">
-          #{data.agreement_nft_id[0]}
-        </a>
+        {data.agreement_nft_id.map((nftId, index) => (
+          <React.Fragment key={index}>
+            <a href={data.tx_hash[index]} target="_blank">
+              #{nftId}
+            </a>{" "}
+          </React.Fragment>
+        ))}
       </Id>
       <Flexbox justify="space-between">
         <Name onClick={farmProfile}>{data.farmer_name}</Name>
@@ -99,8 +103,9 @@ const Card = ({ data }) => {
       </Flexbox>
       <Address>{data.address}</Address>
       <InnerContainer>
-        <Crop>{data.crop}</Crop>
+        <Crop>{data.crop.toUpperCase()}</Crop>
         <Area>Quantity: {data.unit_available}</Area>
+        <Area>{data._id}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
         <Amount>Rs. {data.price}</Amount>
