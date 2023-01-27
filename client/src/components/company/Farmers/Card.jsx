@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import stars from "../../common/stars";
+import Star from "../../../assets/farms/star.svg";
 
 const Container = styled.div`
   box-sizing: border-box;
@@ -37,14 +38,19 @@ const Card = ({ data }) => {
   return (
     <Container>
       <Flexbox justify="unset" margin="0 0 1rem">
-        <img src={stars[data.rating - 1]} />
+        <Flexbox justify="space-between">
+          <img src={Star} width="80%"/>
+          <Number>{data.rating}</Number>
+        </Flexbox>
         <NameContainer>
           <Name>{data.name}</Name>
           <Number>{data.phone}</Number>
         </NameContainer>
       </Flexbox>
       <Number style={{ opacity: "1" }}>{data.address}</Number>
-      <ViewMore onClick={() => window.open(data.pdf)}>view more</ViewMore>
+      <ViewMore onClick={() => window.open(data.farmer_pdf)}>
+        view more
+      </ViewMore>
     </Container>
   );
 };
