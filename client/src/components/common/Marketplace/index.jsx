@@ -30,7 +30,7 @@ const MarketPlace = () => {
   return (
     <Container>
       <Title>MarketPlace</Title>
-      {contract?.map((item, index) => {
+      {contract?.map(item => {
         return <Card data={item} key={item.id} />;
       })}
     </Container>

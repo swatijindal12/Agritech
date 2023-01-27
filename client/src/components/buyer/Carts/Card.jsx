@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Checkbox from "../../common/Checkbox";
 import Flexbox from "../../common/Flexbox";
 import CrossIcon from "../../../assets/green-cross.svg";
-import ArrowIcon from "../../../assets/down-arrow.svg";
-
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-`;
+import { useDispatch, useSelector } from "react-redux";
+import { removeFromCart } from "../../../redux/actions/cartActions";
 
 const Cross = styled.img`
   position: absolute;
@@ -21,8 +16,8 @@ const DetailCard = styled.div`
   background-color: #dde5b64d;
   padding: 0.5rem;
   border-radius: 8px;
-  margin: 1rem;
-  min-width: 15.5rem;
+  margin: 1rem 0;
+  width: 95%;
 `;
 
 const NameConatiner = styled.div`
@@ -47,62 +42,40 @@ const Amount = styled.p`
   font-weight: 700;
 `;
 
-const QuantityContainer = styled.div`
-  text-align: center;
+const Area = styled.p`
+  font-size: 1rem;
+  font-weight: 600;
 `;
 
-const UpArrow = styled.img`
-  transform: rotate(180deg);
-  opacity: ${props => (props.disable ? 0.3 : 1)};
-`;
+const Card = ({ data, index }) => {
+  const dispatch = useDispatch();
+  const cart = useSelector(store => store.cart.cart);
 
-const DownArrow = styled.img`
-  opacity: ${props => (props.disable ? 0.3 : 1)};
-`;
-
-const Card = ({ data, checked }) => {
-  const [selecetedAmount, setSelectedAmount] = useState(data.selected_amount);
-
-  const handleUpArrow = () => {
-    if (data.max > selecetedAmount) setSelectedAmount(selecetedAmount + 1);
-  };
-
-  const handleDownArrow = () => {
-    if (selecetedAmount !== 1) setSelectedAmount(selecetedAmount - 1);
+  const removeItemFromCart = () => {
+    dispatch(removeFromCart(index));
   };
 
   return (
-    <Container>
-      <Checkbox checked={checked} />
-      <DetailCard>
-        <Cross src={CrossIcon} />
-        <Flexbox justify="space-between" margin="0.5rem">
-          <NameConatiner margin-left="20%">
-            <Name>{data.name}</Name>
-          </NameConatiner>
-          <p>#{data.id}</p>
-        </Flexbox>
-        <Date>from {data.start_date}</Date>
-        <Date>to {data.end_date}</Date>
-        <Flexbox justify="space-between">
-          <p margin="1rem">{data.area}</p>
-          <Amount>₹ {data.amount * selecetedAmount}</Amount>
-        </Flexbox>
-      </DetailCard>
-      <QuantityContainer>
-        <UpArrow
-          src={ArrowIcon}
-          onClick={handleUpArrow}
-          disable={selecetedAmount === data.max}
-        />
-        <Amount>{selecetedAmount}</Amount>
-        <DownArrow
-          src={ArrowIcon}
-          onClick={handleDownArrow}
-          disable={selecetedAmount === 1}
-        />
-      </QuantityContainer>
-    </Container>
+    <DetailCard>
+      <Cross src={CrossIcon} onClick={removeItemFromCart} />
+      <Flexbox justify="space-between" margin="0.5rem">
+        <NameConatiner margin-left="20%">
+          <Name>{data.farmer_name}</Name>
+        </NameConatiner>
+        <p>#{data.farm_id}</p>
+      </Flexbox>
+      <Flexbox justify="space-between">
+        <div>
+          <Date>from {data.start_date}</Date>
+          <Date>to {data.end_date}</Date>
+        </div>
+        <Area>Selected Unit: {data.selected_quantity}</Area>
+      </Flexbox>
+      <Flexbox justify="space-between">
+        <p margin="1rem">{data._id}</p>
+        <Amount>₹ {data.price * data.selected_quantity}</Amount>
+      </Flexbox>
+    </DetailCard>
   );
 };
 

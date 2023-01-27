@@ -1,4 +1,4 @@
-export const contracts = [
+export const data = [
   {
     id: 101,
     name: "MG FARMS",
