@@ -364,7 +364,7 @@ exports.getdashBoard = async (req) => {
     const farms = await Farm.countDocuments();
     const farmers = await Farmer.countDocuments();
     const customers = await User.countDocuments();
-    const agreements = await Agreement.countDocuments();
+    const agreements = await Agreement.countDocuments({ sold_status: false });
     (response.httpStatus = 200), (response.data.farmers = farmers);
     response.data.customers = customers;
     response.data.farms = farms;
