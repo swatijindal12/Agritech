@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Title from "../Title";
 import Card from "./Card";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   padding: 1rem;
@@ -10,13 +11,13 @@ const Container = styled.div`
 
 const MarketPlace = () => {
   const [contract, setContract] = useState(null);
+  const user = useSelector(store => store.auth.users);
 
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/marketplace/agreements`, {
         headers: {
-          Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user")).data.token,
+          Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {

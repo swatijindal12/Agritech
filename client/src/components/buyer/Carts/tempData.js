@@ -5,7 +5,9 @@ export const contracts = [
     start_date: "22/06/23",
     end_date: "14/03/24",
     area: "130 Acres",
-    amount: "₹ 10,000",
+    amount: 10000,
+    max: 4,
+    selected_amount: 3,
   },
   {
     id: 100,
@@ -13,7 +15,9 @@ export const contracts = [
     start_date: "28/02/23",
     end_date: "09/10/23",
     area: "171 Acres",
-    amount: "₹ 2,000",
+    amount: 2000,
+    max: 6,
+    selected_amount: 2,
   },
   {
     id: 102,
@@ -21,7 +25,9 @@ export const contracts = [
     start_date: "22/02/22",
     end_date: "14/06/23",
     area: "120 Acres",
-    amount: "₹ 9,000",
+    amount: 9000,
+    max: 5,
+    selected_amount: 4,
   },
   {
     id: 101,
@@ -29,6 +35,8 @@ export const contracts = [
     start_date: "13/03/23",
     end_date: "14/01/24",
     area: "5 Acres",
-    amount: "₹ 4,000",
+    amount: 4000,
+    max: 2,
+    selected_amount: 1,
   },
 ];

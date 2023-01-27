@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../common/Flexbox";
 import Title from "../common/Title";
@@ -44,14 +45,13 @@ const Number = styled.p`
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/dashboard`, {
         headers: {
-          Authorization:
-            "Bearer " + JSON.parse(localStorage.getItem("user"))?.data.token,
+          Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {
@@ -66,7 +66,7 @@ const Dashboard = () => {
   };
   return (
     <>
-      {user.data.role === "customer" && (
+      {user?.data?.role === "customer" && (
         <Navigate
           to="/contracts
       "
