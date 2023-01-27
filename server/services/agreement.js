@@ -26,6 +26,23 @@ const marketplaceContract = new web3.eth.Contract(
   marketplaceAddr
 );
 
+exports.getFarmById = async (req) => {
+  console.log("Inside create Agreement service");
+  const farmId = req.params.farm_id;
+  console.log("farmId :- ", farmId);
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  response.httpStatus = 200;
+  response.message = "working on getFarmByID";
+
+  return response;
+};
 // Creating Agreement Bulk Import
 exports.createAgreement = async (req) => {
   console.log("Inside create Agreement service");
@@ -177,7 +194,7 @@ exports.createAgreement = async (req) => {
 
 // Marketplace
 exports.getAgreements = async (req) => {
-  const searchString = req.query.search;
+  // const searchString = req.query.search;
   // General response format
   let response = {
     error: null,
@@ -186,59 +203,39 @@ exports.getAgreements = async (req) => {
     data: null,
   };
 
-  let agreements;
   try {
-    agreements = await Agreement.find().select("-__v");
-
-    if (!searchString) {
-      const groupedFarms = agreements.reduce((result, agreement) => {
-        const key =
-          agreement.farmer_name +
-          agreement.farm_id +
-          agreement.farm_nft_id +
-          agreement.area +
-          agreement.crop +
-          agreement.address +
-          agreement.start_date +
-          agreement.end_date;
-        if (!result[key]) {
-          result[key] = {
-            farmer_name: agreement.farmer_name,
-            farm_id: agreement.farm_id,
-            area: agreement.area,
-            crop: agreement.crop,
-            address: agreement.address,
-            price: agreement.price,
-            start_date: agreement.start_date,
-            end_date: agreement.end_date,
-            agreements: new Set([agreement._id]),
-            ipfs_url: new Set([agreement.ipfs_url]),
-            tx_hash: new Set([agreement.tx_hash]),
-            agreement_nft_id: new Set([agreement.agreement_nft_id]),
-            unit_available: 1,
-          };
-        } else {
-          result[key].agreements.add(agreement._id);
-          result[key].ipfs_url.add(agreement.ipfs_url);
-          result[key].tx_hash.add(agreement.tx_hash);
-          result[key].agreement_nft_id.add(agreement.agreement_nft_id);
-          result[key].unit_available += 1;
-        }
-        return result;
-      }, {});
-      response.data = Object.values(groupedFarms);
-      response.httpStatus = 200;
-    } else {
-      // Filtering on basing of SearchString.
-      const filteredAgreement = agreements.filter((agreement) =>
-        agreement.farmer_name.toLowerCase().includes(searchString.toLowerCase())
-      );
-      response.data = filteredAgreement;
-      response.httpStatus = 200;
-    }
-  } catch (error) {
-    (response.error = "failed operation"), (response.httpStatus = 500);
+    const result = await Agreement.aggregate([
+      {
+        $match: {
+          sold_status: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$area",
+          farmer_name: { $first: "$farmer_name" },
+          farm_id: { $first: "$farm_id" },
+          crop: { $first: "$crop" },
+          address: { $first: "$address" },
+          price: { $first: "$price" },
+          start_date: { $first: "$start_date" },
+          end_date: { $first: "$end_date" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_available: { $sum: 1 },
+        },
+      },
+    ]);
+    // console.log("Result: ", result);
+    response.data = result;
+    response.httpStatus = 200;
+  } catch (err) {
+    response.error = "failed operation";
+    response.httpStatus = 500;
   }
+
   return response;
 };
 
