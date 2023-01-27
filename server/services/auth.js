@@ -11,105 +11,101 @@ const client = require("twilio")(accountSid, authToken);
 
 // Login service
 exports.login = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
 
-    // General response format
-    let response = {
-        error: null,
-        message: null,
-        httpStatus: null,
-        data: null
-    }
+  // Reading
+  const { phone } = req.body;
 
-    // Reading 
-    const { phone } = req.body;
-
-    try {
-        // Checks if phone is entered by user
-        if (!phone) {
-            response.httpStatus = 400;
-            response.error = "Enter phone number"
-        }
-
-        // Finding user in database
-        const user = await User.findOne({ phone });
-
-        // Checking user
-        if (!user) {
-            response.httpStatus = 404;
-            response.error = "User not found"
-        }
-
-        // Twilio send OTP service
-        client.verify.v2
-            .services(serviceId)
-            .verifications.create({
-                to: "+91" + user.phone,
-                channel: "sms",
-            })
-            .then((verification) =>
-                response.httpStatus = 200,
-                response.message = `OTP sent to your number`,
-                response.httpStatus = 200
-            )
-            .catch((error) => {
-                response.httpStatus = 400,
-                response.error= `failed operation ${error}`
-            });
-    } catch (error) {
-        response.httpStatus = 404,
-        response.error= `User not found`
-    }
-    
-    return response;
-};
-
-// verify service working...
-exports.verify = async (req) => {
-
-    // General response format
-    let response = {
-        error: null,
-        message: null,
-        httpStatus: null,
-        data: null
-    }
-
-    const { phone, otp } = req.body;
-
-    // Checks if phone or otp is entered by user
-    if (!phone || !otp) {
-        response.httpStatus = 400
-        response.error = "Enter phone number and otp"
+  try {
+    // Checks if phone is entered by user
+    if (!phone) {
+      response.httpStatus = 400;
+      response.error = "Enter phone number";
     }
 
     // Finding user in database
     const user = await User.findOne({ phone });
-   
-    // checking
+
+    // Checking user
     if (!user) {
-        response.httpStatus = 404
-        response.error = "User not found"
+      response.httpStatus = 404;
+      response.error = "User not found";
     }
 
-    // verifying otp with twilio service .
-    client.verify
-        .services(serviceId)
-        .verificationChecks.create({ to: "+91" + phone, code: otp })
-        .then((verification_check) => {
-            if (verification_check.status === "approved") {
-                // Create JSON Web token
-                const token = user.getJwtToken();
-                console.log("token : ", token);
-                response.httpStatus = 200,
-                response.data = token
-            } else {
-                response.httpStatus = 404
-                response.error = `failed operation`
-            }
-        })
-        .catch((error) => {
-            response.httpStatus = 500
-            response.error = "failed operation"
-        });
-    return response
-}
+    // Twilio send OTP service
+    client.verify.v2
+      .services(serviceId)
+      .verifications.create({
+        to: "+91" + user.phone,
+        channel: "sms",
+      })
+      .then(
+        (verification) => (response.httpStatus = 200),
+        (response.message = `OTP sent to your number`),
+        (response.httpStatus = 200)
+      )
+      .catch((error) => {
+        (response.httpStatus = 400),
+          (response.error = `failed operation ${error}`);
+      });
+  } catch (error) {
+    (response.httpStatus = 404), (response.error = `User not found`);
+  }
+
+  return response;
+};
+
+// verify service working...
+exports.verify = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { phone, otp } = req.body;
+
+  // Checks if phone or otp is entered by user
+  if (!phone || !otp) {
+    response.httpStatus = 400;
+    response.error = "Enter phone number and otp";
+  }
+
+  // Finding user in database
+  const user = await User.findOne({ phone });
+
+  // checking
+  if (!user) {
+    response.httpStatus = 404;
+    response.error = "User not found";
+  }
+
+  // verifying otp with twilio service .
+  client.verify
+    .services(serviceId)
+    .verificationChecks.create({ to: "+91" + phone, code: otp })
+    .then((verification_check) => {
+      if (verification_check.status === "approved") {
+        // Create JSON Web token
+        const token = user.getJwtToken();
+        // console.log("token : ", token);
+        (response.httpStatus = 200), (response.data = token);
+      } else {
+        response.httpStatus = 404;
+        response.error = `failed operation`;
+      }
+    })
+    .catch((error) => {
+      response.httpStatus = 500;
+      response.error = "failed operation";
+    });
+  return response;
+};

@@ -22,31 +22,40 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
 // Route => /api/v1/marketplace/agreement
 // Create agreement (ready for sale)
-router.route("/agreement").post(createAgreement);
+router
+  .route("/agreement")
+  .post(
+    isAuthenticatedUser,
+    authorizeRoles("admin", "customer"),
+    createAgreement
+  );
 
 // Route => /api/v1/marketplace/agreements
 // Get agreements list for MarketPlaces
 router
   .route("/agreements")
   .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getAgreements);
-
 // Route => /api/v1/marketplace/key
 // Key for razorpay
 router
   .route("/key")
-  .get(isAuthenticatedUser, authorizeRoles("customer"), getKeyId);
+  .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getKeyId);
 
 // Route => /api/v1/marketplace/checkout
 // Create Order RazorPay
 router
   .route("/checkout")
-  .post(isAuthenticatedUser, authorizeRoles("customer"), createOrder);
+  .post(isAuthenticatedUser, authorizeRoles("admin", "customer"), createOrder);
 
 // Route => /api/v1/marketplace/paymentVerification
 // Payment Verification RazorPay
 router
   .route("/paymentverification")
-  .post(isAuthenticatedUser, authorizeRoles("customer"), paymentVerification);
+  .post(
+    isAuthenticatedUser,
+    authorizeRoles("admin", "customer"),
+    paymentVerification
+  );
 
 // Route => /api/v1/marketplace/cart
 // Add to cart
