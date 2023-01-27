@@ -7,6 +7,7 @@ import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
 import axios from "axios";
 import { clearCart } from "../../../redux/actions/cartActions";
+import FallbackIcon from "../../../assets/empty-cart.svg";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
@@ -32,6 +33,12 @@ const FinalAmount = styled.p`
   span {
     font-weight: 400;
   }
+`;
+
+const Fallback = styled.img`
+  height: 100px;
+  width: 100px;
+  opacity: 0.3;
 `;
 
 const Cart = () => {
@@ -138,9 +145,16 @@ const Cart = () => {
         <Title>My Cart</Title>
       </Flexbox>
       <br />
-      {data?.map((item, index) => {
-        return <Card data={item} key={item.id} index={index} />;
-      })}
+      {data?.length > 0 ? (
+        data?.map((item, index) => {
+          return <Card data={item} key={item.id} index={index} />;
+        })
+      ) : (
+        <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
+          <Fallback src={FallbackIcon} />
+          <p>Empty</p>
+        </Flexbox>
+      )}
       <Box>
         <FinalAmount>
           <span>Total </span> ₹ {finalAmount}
