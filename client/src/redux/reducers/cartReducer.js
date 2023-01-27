@@ -1,4 +1,4 @@
-import { ADD_TO_CART, REMOVE_FROM_CART } from "../actions/types";
+import { ADD_TO_CART, CLEAR_CART, REMOVE_FROM_CART } from "../actions/types";
 
 const INITIAL_STATE = {
   cart: [],
@@ -21,6 +21,12 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         cart: [...tempCart],
+      };
+
+    case CLEAR_CART:
+      return {
+        ...state,
+        cart: [],
       };
 
     default:
