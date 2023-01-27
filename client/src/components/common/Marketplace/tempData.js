@@ -1,7 +1,7 @@
 export const contracts = [
   {
     id: 100,
-    name: "MG FARMS",
+    farmer_name: "MG FARMS",
     start_date: "22/02/22",
     end_date: "22/03/22",
     address: "c/o MG Contractors Panchkula Ind Are PKL Haryana, India",
@@ -11,7 +11,7 @@ export const contracts = [
   },
   {
     id: 100,
-    name: "MG FARMS",
+    farmer_name: "MG FARMS",
     start_date: "22/02/22",
     end_date: "22/03/22",
     address: "c/o MG Contractors Panchkula Ind Are PKL Haryana, India",
@@ -21,7 +21,7 @@ export const contracts = [
   },
   {
     id: 100,
-    name: "MG FARMS",
+    farmer_name: "MG FARMS",
     start_date: "22/02/22",
     end_date: "22/03/22",
     address: "c/o MG Contractors Panchkula Ind Are PKL Haryana, India",
@@ -31,7 +31,7 @@ export const contracts = [
   },
   {
     id: 100,
-    name: "MG FARMS",
+    farmer_name: "MG FARMS",
     start_date: "22/02/22",
     end_date: "22/03/22",
     address: "c/o MG Contractors Panchkula Ind Are PKL Haryana, India",

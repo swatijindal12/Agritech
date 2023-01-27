@@ -4,6 +4,7 @@ import Title from "../Title";
 import Card from "./Card";
 import axios from "axios";
 import { useSelector } from "react-redux";
+// import { contracts } from "./tempData";
 
 const Container = styled.div`
   padding: 1rem;
@@ -11,7 +12,7 @@ const Container = styled.div`
 
 const MarketPlace = () => {
   const [contract, setContract] = useState(null);
-  const user = useSelector(store => store.auth.users);
+  const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
     axios

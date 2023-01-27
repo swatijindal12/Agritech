@@ -86,8 +86,8 @@ const Card = ({ data }) => {
     <Container>
       <Id>
         Contract NFT ID{" "}
-        <a href={data.tx_hash} target="_blank">
-          #{data.agreement_nft_id}
+        <a href={data.tx_hash[0]} target="_blank">
+          #{data.agreement_nft_id[0]}
         </a>
       </Id>
       <Flexbox justify="space-between">
@@ -100,7 +100,7 @@ const Card = ({ data }) => {
       <Address>{data.address}</Address>
       <InnerContainer>
         <Crop>{data.crop}</Crop>
-        <Area>{data.area}</Area>
+        <Area>Quantity: {data.unit_available}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
         <Amount>Rs. {data.price}</Amount>
