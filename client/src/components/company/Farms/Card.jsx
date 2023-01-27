@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import ExpandIcon from "../../../assets/down-arrow.svg";
 import Flexbox from "../../common/Flexbox";
-import stars from "../../common/stars";
 import LocationIcon from "../../../assets/farms/location.svg";
-import Button from "../../common/Button";
+import Stars from "../../../assets/farms/star.svg";
 
 const Container = styled.div`
   background-color: #f0ead2;
@@ -58,13 +57,20 @@ const ViewMore = styled.p`
   margin: 1rem 0;
 `;
 
+const RatingNumber = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  color: "#6C584C";
+`;
+
 const Card = ({ data }) => {
   const [opened, setOpened] = useState(false);
 
-  const createContract = () => {
-    localStorage.setItem("current-selected-farm", JSON.stringify(data));
-    window.location.href = "/create-contract";
-  };
+  // const createContract = () => {
+  //   localStorage.setItem("current-selected-farm", JSON.stringify(data));
+  //   window.location.href = "/create-contract";
+  // };
 
   return (
     <Container>
@@ -81,7 +87,10 @@ const Card = ({ data }) => {
                 </a>
               </Id>
             </NameContainer>
-            <Star src={stars[Math.floor(data.rating) - 1]} />
+            <Flexbox justify="space-between">
+              <Star src={Stars} width="80%" />
+              <RatingNumber>{data.rating}</RatingNumber>
+            </Flexbox>
           </Flexbox>
         ) : (
           <Name>{data.name}</Name>
@@ -108,17 +117,19 @@ const Card = ({ data }) => {
           </Video>
 
           <Id>{data.crops}</Id>
-          <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
-            Read more about farm practices
-            <Star
-              src={stars[Math.floor(data.farm_practice_rating) - 1]}
-              style={{ width: "25px", height: "25px" }}
-            />
-          </ViewMore>
+          <Flexbox justify="space-between">
+            <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
+              Read more about farm practices
+              <Flexbox justify="space-content">
+                <img src={Stars} />
+                <RatingNumber>{data.farm_practice_rating}</RatingNumber>
+              </Flexbox>
+            </ViewMore>
+          </Flexbox>
           <ViewMore onClick={() => window.open(data.farm_pdf)}>
             View more
           </ViewMore>
-          <Button text="CREATE CONTRACT" onClick={createContract} />
+          {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
         </>
       )}
     </Container>

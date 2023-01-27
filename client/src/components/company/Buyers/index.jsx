@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import Button from "../../common/Button";
+// import Button from "../../common/Button";
+import Title from "../../common/Title";
 import Card from "./Card";
 
 const Container = styled.div`
@@ -29,7 +30,8 @@ const Buyers = () => {
 
   return (
     <Container>
-      <Button text="ADD NEW" margin="0" />
+      {/* <Button text="ADD NEW" margin="0" /> */}
+      <Title>Buyers</Title>
       {buyers?.map(item => {
         return <Card data={item} />;
       })}

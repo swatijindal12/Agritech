@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Flexbox from "../Flexbox";
 import stars from "../stars";
 import LocationIcon from "../../../assets/farms/location.svg";
+import BackButton from "../../../assets/back-button.svg";
 import Title from "../../common/Title";
 import { useParams } from "react-router-dom";
 
@@ -78,53 +79,48 @@ const Card = ({ data }) => {
   return (
     <div>
       <Flexbox justify="space-between">
+        <img src={BackButton} onClick={() => window.history.go(-1)} />
         <Title>{data.name}</Title>
       </Flexbox>
+      <br />
+      <Image src={data.image_url} key={data.farm_nft_id} />
+      <Flexbox justify="space-between" margin="0.5rem">
+        <NameContainer>
+          <Id>
+            NFT TOKEN ID{" "}
+            <a href={data.tx_hash} target="_blank">
+              #{data.farm_nft_id}
+            </a>
+          </Id>
+        </NameContainer>
+        <Star src={stars[Math.floor(data.rating) - 1]} />
+      </Flexbox>
 
-      <Container>
-        <Image src={data.image_url} key={data.farm_nft_id} />
-        <Flexbox justify="space-between" margin="0.5rem">
-          <NameContainer>
-            <Id>
-              NFT TOKEN ID{" "}
-              <a href={data.tx_hash} target="_blank">
-                #{data.farm_nft_id}
-              </a>
-            </Id>
-          </NameContainer>
-          <Star src={stars[Math.floor(data.rating) - 1]} />
-        </Flexbox>
-
-        <Name>{data.area}</Name>
-        <Flexbox justify="space-between" margin="0.5rem 0.5rem 0.5rem 0">
-          <Address>{data.address}</Address>
-          <img src={LocationIcon} onClick={() => window.open(data.location)} />
-        </Flexbox>
-        <Video height="240" controls>
-          <source src={data.video_url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </Video>
-
-        <Id>{data.crops}</Id>
-        <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
-          Read more about farm practices
-          <img
-            src={stars[Math.floor(data.farm_practice_rating) - 1]}
-            style={{ width: "25px", height: "25px", "marginRight": "0.5rem" }}
-          />
-        </ViewMore>
-        <ViewMore onClick={() => window.open(data.farm_pdf)}>
-          View more
-        </ViewMore>
-        <br />
-        <p color="#6c584c">Farmer Details</p>
-        <FarmerName>{data.farmer_name}</FarmerName>
-        <Number>{data.number}</Number>
+      <Name>{data.area}</Name>
+      <Flexbox justify="space-between" margin="0.5rem 0.5rem 0.5rem 0">
         <Address>{data.address}</Address>
-        <ViewMore onClick={() => window.open(data.farm_pdf)}>
-          View more
-        </ViewMore>
-      </Container>
+        <img src={LocationIcon} onClick={() => window.open(data.location)} />
+      </Flexbox>
+      <Video height="240" controls>
+        <source src={data.video_url} type="video/mp4" />
+        Your browser does not support the video tag.
+      </Video>
+
+      <Id>{data.crops}</Id>
+      <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
+        Read more about farm practices
+        <img
+          src={stars[Math.floor(data.farm_practice_rating) - 1]}
+          style={{ width: "25px", height: "25px", marginRight: "0.5rem" }}
+        />
+      </ViewMore>
+      <ViewMore onClick={() => window.open(data.farm_pdf)}>View more</ViewMore>
+      <br />
+      <p color="#6c584c">Farmer Details</p>
+      <FarmerName>{data.farmer_name}</FarmerName>
+      <Number>{data.number}</Number>
+      <Address>{data.address}</Address>
+      <ViewMore onClick={() => window.open(data.farm_pdf)}>View more</ViewMore>
     </div>
   );
 };

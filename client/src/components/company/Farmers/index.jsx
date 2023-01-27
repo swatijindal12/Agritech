@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import Button from "../../common/Button";
+// import Button from "../../common/Button";
+import Title from "../../common/Title";
 import Flexbox from "../../common/Flexbox";
 import FilterIcon from "../../../assets/filter.svg";
 import Card from "./Card";
@@ -37,7 +38,7 @@ const Farmers = () => {
     console.log(selectedFilter.rating);
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
-      console.log("QUERY IS ", queryString);
+      // console.log("QUERY IS ", queryString);
     }
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
@@ -60,9 +61,10 @@ const Farmers = () => {
   return (
     <Container>
       <Flexbox justify="space-between">
-        <Button text="ADD FARMER" margin="unset" />
+        {/* <Button text="ADD FARMER" margin="unset" /> */}
+        <Title>Farmers</Title>
         <FilterContainer>
-          <img src={FilterIcon} onClick={toggleFilter} />
+          <img src={FilterIcon} onClick={toggleFilter} style={{marginLeft:"10rem"}}/>
           {showFilter && (
             <Filter
               toggle={toggleFilter}
