@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Title from "../../common/Title";
 import Card from "./Card";
 import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
-import { data } from "./tempData";
+// import { data } from "./tempData";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
@@ -34,11 +35,15 @@ const FinalAmount = styled.p`
 
 const Cart = () => {
   const [finalAmount, setFinalAmount] = useState(0);
+  const data = useSelector(store => store.cart.cart);
 
   useEffect(() => {
-    const amount = data.reduce((acc, curr) => curr.amount + acc, 0);
+    const amount = data.reduce(
+      (acc, curr) => curr.price * curr.selected_quantity + acc,
+      0
+    );
     setFinalAmount(amount);
-  }, []);
+  }, [data]);
 
   return (
     <Container>
@@ -46,8 +51,8 @@ const Cart = () => {
         <Title>My Cart</Title>
       </Flexbox>
       <br />
-      {data?.map(item => {
-        return <Card data={item} key={item.id} />;
+      {data?.map((item, index) => {
+        return <Card data={item} key={item.id} index={index} />;
       })}
       <Box>
         <FinalAmount>

@@ -20,7 +20,7 @@ const Routing = () => {
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    console.log("here the user is ", user);
+    // console.log("here the user is ", user);
     if (!user && window.location.href.indexOf("login") === -1) {
       window.location.href = "/login";
     }

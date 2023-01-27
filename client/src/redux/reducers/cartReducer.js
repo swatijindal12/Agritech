@@ -7,14 +7,22 @@ const INITIAL_STATE = {
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case ADD_TO_CART:
-      return { ...state, cart: [...state.cart, action.payload] };
-    // case REMOVE_FROM_CART:
-    //   let itemIndex = -1;
-    //   state.cart.forEach((item, index) => {
-    //     if (item.id === action.payload) itemIndex === index;
-    //   });
-    //   let tempCart = state.cart.splice(itemIndex, 1);
-    //   return { ...state, cart: [...tempCart] };
+      console.log("Inside add to cart ", action.payload);
+      let currentItem = state.cart.filter(
+        item => item.farm_id === action.payload.farm_id
+      );
+      if (currentItem.length > 0) {
+        return state;
+      } else return { ...state, cart: [...state.cart, action.payload] };
+
+    case REMOVE_FROM_CART:
+      let tempCart = state.cart;
+      tempCart.splice(action.payload, 1);
+      return {
+        ...state,
+        cart: [...tempCart],
+      };
+
     default:
       return state;
   }
