@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Flexbox from "../Flexbox";
 import stars from "../stars";
 import LocationIcon from "../../../assets/farms/location.svg";
+import Stars from "../../../assets/farms/star.svg";
 import BackButton from "../../../assets/back-button.svg";
 import Title from "../../common/Title";
 import { useParams } from "react-router-dom";
@@ -35,7 +36,7 @@ const Id = styled.p`
 `;
 
 const Star = styled.img`
-  margin-right: 8.5rem;
+  /* margin-right: 8.5rem; */
 `;
 
 const Address = styled.p`
@@ -69,6 +70,15 @@ const FarmerName = styled.h2`
   color: "#000000";
 `;
 
+const RatingNumber = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  color: "#6C584C";
+  padding: 0;
+  margin-right: 8.5rem;
+`;
+
 const Card = ({ data }) => {
   const { slug } = useParams();
 
@@ -93,7 +103,11 @@ const Card = ({ data }) => {
             </a>
           </Id>
         </NameContainer>
-        <Star src={stars[Math.floor(data.rating) - 1]} />
+        {/* <Star src={stars[Math.floor(data.rating) - 1]} /> */}
+        <Flexbox justify="space-content">
+          <Star src={Stars} width="80%" />
+          <RatingNumber>{data.rating}</RatingNumber>
+        </Flexbox>
       </Flexbox>
 
       <Name>{data.area}</Name>
@@ -109,10 +123,10 @@ const Card = ({ data }) => {
       <Id>{data.crops}</Id>
       <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
         Read more about farm practices
-        <img
-          src={stars[Math.floor(data.farm_practice_rating) - 1]}
-          style={{ width: "25px", height: "25px", marginRight: "0.5rem" }}
-        />
+        <Flexbox justify="space-content">
+          <img src={Stars} />
+          <RatingNumber>{data.farm_practice_rating}</RatingNumber>
+        </Flexbox>
       </ViewMore>
       <ViewMore onClick={() => window.open(data.farm_pdf)}>View more</ViewMore>
       <br />
