@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
@@ -44,6 +45,8 @@ const TypeBox = styled(Flexbox)`
 `;
 
 const ActiveCard = ({ data }) => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
       <Id>NFT Token ID #{data.id}</Id>
@@ -59,9 +62,11 @@ const ActiveCard = ({ data }) => {
         <p>Marginal</p>
         <p>171 Acres</p>
       </TypeBox>
-      <Flexbox justify="space-between"  > 
+      <Flexbox justify="space-between">
         <Id styele={{ opacity: 1 }}>{data.crop_type}</Id>
-        <Button text="CLOSE" margin="0 0 0 2rem" />
+        {user.data.role === "admin" && (
+          <Button text="CLOSE" margin="0 0 0 2rem" />
+        )}
       </Flexbox>
     </Container>
   );
