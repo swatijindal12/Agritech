@@ -33,7 +33,7 @@ const Buyers = () => {
       {/* <Button text="ADD NEW" margin="0" /> */}
       <Title>Buyers</Title>
       {buyers?.map(item => {
-        return <Card data={item} />;
+        return <Card data={item} key={item.id}  />;
       })}
     </Container>
   );
