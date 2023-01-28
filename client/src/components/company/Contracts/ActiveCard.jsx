@@ -49,9 +49,11 @@ const ActiveCard = ({ data }) => {
 
   return (
     <Container>
-      <Id>NFT Token ID #{data.id}</Id>
+      <Id onClick={() => window.open(data.tx_hash)}>
+        NFT Token ID #{data.farm_id}
+      </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data.name}</Name>
+        <Name>{data.farmer_name}</Name>
         <div>
           <Date>{`from ${data.start_date}`}</Date>
           <Date>{`to ${data.end_date}`}</Date>
@@ -59,14 +61,12 @@ const ActiveCard = ({ data }) => {
       </Flexbox>
       <Address>{data.address}</Address>
       <TypeBox>
-        <p>Marginal</p>
-        <p>171 Acres</p>
+        <p>₹{data.price}</p>
+        <p>{data._id}</p>
       </TypeBox>
       <Flexbox justify="space-between">
-        <Id styele={{ opacity: 1 }}>{data.crop_type}</Id>
-        {user.data.role === "admin" && (
-          <Button text="CLOSE" margin="0 0 0 2rem" />
-        )}
+        <Id styele={{ opacity: 1 }}>{data.crop}</Id>
+        <Button text="CLOSE" margin="0 0 0 2rem" />
       </Flexbox>
     </Container>
   );
