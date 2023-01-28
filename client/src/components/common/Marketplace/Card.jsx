@@ -62,12 +62,12 @@ const Card = ({ data }) => {
   const dispatch = useDispatch();
 
   const farmProfile = () => {
-    window.location.href = `/farms/${data._id}`;
+    window.location.href = `/farms/${btoa(data.farm_id)}`;
   };
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...data, selected_quantity: quantity }));
-    window.location.href = "/cart";
+    // window.location.href = "/cart";
   };
 
   const incrementQuantity = useCallback(() => {

@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
@@ -44,6 +45,8 @@ const TypeBox = styled(Flexbox)`
 `;
 
 const ActiveCard = ({ data }) => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
       <Id onClick={() => window.open(data.tx_hash)}>
