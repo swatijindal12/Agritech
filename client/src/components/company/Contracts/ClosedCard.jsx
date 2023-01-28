@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 
@@ -48,21 +49,30 @@ const Amount = styled.p`
 `;
 
 const ClosedCard = ({ data }) => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
-      <Id>NFT Token ID #{data.id}</Id>
+      <Id onClick={() => window.open(data.tx_hash)}>
+        NFT Token ID #{data.farm_id}
+      </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data.name}</Name>
+        <Name>{data.farmer_name}</Name>
         <div>
-          <Date>{data.date}</Date>
+          <Date>{data.start_date}</Date>
+          <Date>{data.end_date}</Date>
         </div>
       </Flexbox>
       <Address>{data.address}</Address>
-      <TypeBox>
-        <Name>{data?.buyer?.name}</Name>
-        <Address>{data?.buyer?.address}</Address>
-      </TypeBox>
-      <Amount>{data.amount}</Amount>
+
+      {user.data.role === "admin" && (
+        <TypeBox>
+          <Name>{data?.buyer?.name}</Name>
+          <Address>{data?.buyer?.address}</Address>
+        </TypeBox>
+      )}
+
+      <Amount>₹{data.price}</Amount>
     </Container>
   );
 };
