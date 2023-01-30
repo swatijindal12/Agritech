@@ -56,9 +56,17 @@ const ActiveCard = ({ data }) => {
   const closeContract = () => {
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/agreement/closed/${data.agreements[0]}`
+        `${process.env.REACT_APP_BASE_URL}/admin/agreement/closed/${data.agreements[0]}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
       )
-      .then(res => console.log("Successfully updated ", res))
+      .then(res => {
+        window.location.reload();
+        console.log("Successfully updated ", res);
+      })
       .catch(err => console.log("Error in closing contract ", err));
   };
 
