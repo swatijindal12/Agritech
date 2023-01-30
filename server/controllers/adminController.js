@@ -126,6 +126,43 @@ exports.getCustomers = async (req, res, next) => {
     });
 };
 
+// Route to     => api/v1/admin/ageeement
+// Give all the agreement active and close
+exports.getAgreementsForAdmin = async (req, res, next) => {
+  adminService
+    .getAgreementsForAdmin(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to     => api/v1/admin/agreement/closed/:id
+// Give all the agreement active and close
+exports.closeAgreement = async (req, res, next) => {
+  console.log("Inside closeAgreement");
+  adminService
+    .closeAgreement(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // Route to     => api/v1/admin/dashboard
 exports.getdashBoard = async (req, res, next) => {
   adminService
