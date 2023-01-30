@@ -35,7 +35,6 @@ const Farmers = () => {
 
   const getList = () => {
     let queryString = "";
-    console.log(selectedFilter.rating);
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
       // console.log("QUERY IS ", queryString);
@@ -64,7 +63,11 @@ const Farmers = () => {
         {/* <Button text="ADD FARMER" margin="unset" /> */}
         <Title>Farmers</Title>
         <FilterContainer>
-          <img src={FilterIcon} onClick={toggleFilter} style={{marginLeft:"10rem"}}/>
+          <img
+            src={FilterIcon}
+            onClick={toggleFilter}
+            style={{ marginLeft: "10rem" }}
+          />
           {showFilter && (
             <Filter
               toggle={toggleFilter}
@@ -77,7 +80,7 @@ const Farmers = () => {
       </Flexbox>
       <CardsContainer>
         {farmers?.map(item => {
-          return <Card data={item} />;
+          return <Card data={item} key={item._id} />;
         })}
       </CardsContainer>
     </Container>

@@ -87,10 +87,10 @@ const Contracts = () => {
       )}
       {currentPage === "active"
         ? active.map(item => {
-            return <ActiveCard data={item} />;
+            return <ActiveCard data={item} key={item.agreements[0]} />;
           })
         : closed.map(item => {
-            return <ClosedCard data={item} />;
+            return <ClosedCard data={item} key={item.agreements[0]} />;
           })}
     </Container>
   );

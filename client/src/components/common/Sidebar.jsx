@@ -74,7 +74,7 @@ const Sidebar = ({ show, toggle }) => {
         <Cross src={CrossIcon} onClick={toggle} />
         {currentNavItem?.map(navItem => {
           return (
-            <NavItem onClick={() => handleNavClick(navItem)}>
+            <NavItem onClick={() => handleNavClick(navItem)} key={navItem.title}>
               {navItem.title}
             </NavItem>
           );

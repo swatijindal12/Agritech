@@ -54,7 +54,14 @@ const ClosedCard = ({ data }) => {
   return (
     <Container>
       <Id onClick={() => window.open(data.tx_hash)}>
-        NFT Token ID #{data.farm_id}
+        Contract NFT ID{" "}
+        {data.agreement_nft_id.map((nftId, index) => (
+          <React.Fragment key={index}>
+            <a href={data.tx_hash[index]} target="_blank">
+              #{nftId}
+            </a>{" "}
+          </React.Fragment>
+        ))}
       </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
         <Name>{data.farmer_name}</Name>
