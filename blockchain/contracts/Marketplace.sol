@@ -64,10 +64,10 @@ contract Marketplace is Ownable {
         string memory agreementNftUri_
     ) external onlyOwner {
         require(price_ != 0, "Invalid price");
-        require(
-            block.timestamp <= startDate_,
-            "startDate less than current time"
-        );
+        // require(
+        //     block.timestamp <= startDate_,
+        //     "startDate less than current time"
+        // );
         require(startDate_ < endDate_, "end date should be less");
 
         uint256 agreementNftId_ = IAgreementNFT(agreementNFT).createAgreement(
@@ -147,10 +147,10 @@ contract Marketplace is Ownable {
             !(agreementDetails[agreementNftId_].isClosedContract),
             "Not on sale"
         );
-        require(
-            msg.sender == agreementDetails[agreementNftId_].buyer,
-            "Only Buyer"
-        );
+        // require(
+        //     msg.sender == agreementDetails[agreementNftId_].buyer,
+        //     "Only Buyer"
+        // );
 
        agreementDetails[agreementNftId_].isClosedContract = true;
 
