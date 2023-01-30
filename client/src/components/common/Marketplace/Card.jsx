@@ -108,7 +108,7 @@ const Card = ({ data }) => {
         <Area>{data._id}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
-        <Amount>Rs. {data.price}</Amount>
+        <Amount>₹ {data.price}</Amount>
         {user.data.role === "customer" && (
           <div>
             <Flexbox justify="space-between" margin="0.5rem 0">

@@ -14,7 +14,7 @@ const Container = styled.div`
 `;
 
 const Id = styled.p`
-  font-size: 0.8rem;
+  font-size: 1.25rem;
   opacity: 60%;
 `;
 
@@ -44,13 +44,18 @@ const TypeBox = styled(Flexbox)`
   justify-content: space-between;
 `;
 
+const Area = styled.p`
+  font-size: 1rem;
+  font-weight: 600;
+`;
+
 const ActiveCard = ({ data }) => {
   const user = useSelector(store => store.auth.user);
 
   return (
     <Container>
       <Id onClick={() => window.open(data.tx_hash)}>
-        NFT Token ID #{data.farm_id}
+        Contract Token ID #{data.agreement_nft_id}
       </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
         <Name>{data.farmer_name}</Name>
@@ -61,12 +66,14 @@ const ActiveCard = ({ data }) => {
       </Flexbox>
       <Address>{data.address}</Address>
       <TypeBox>
-        <p>₹{data.price}</p>
-        <p>{data._id}</p>
+        <Id styele={{ opacity: 1 }}>{data.crop.toUpperCase()}</Id>
+        <Area>{data._id}</Area>
       </TypeBox>
       <Flexbox justify="space-between">
-        <Id styele={{ opacity: 1 }}>{data.crop}</Id>
-        <Button text="CLOSE" margin="0 0 0 2rem" />
+        <Area>₹ {data.price}</Area>
+        {user.data.role === "admin" && (
+          <Button text="CLOSE" margin="0 0 0 2rem" />
+        )}
       </Flexbox>
     </Container>
   );
