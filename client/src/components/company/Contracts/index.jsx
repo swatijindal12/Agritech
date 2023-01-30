@@ -44,11 +44,16 @@ const Contracts = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/marketplace/agreement`, {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
-      })
+      .get(
+        user?.data.role === "admin"
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement`
+          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
       .then(res => {
         console.log("response is ", res);
         setActive(res.data.data.active);

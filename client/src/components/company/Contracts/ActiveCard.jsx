@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
+import axios from "axios";
 
 const Container = styled.div`
   box-sizing: border-box;
@@ -52,6 +53,15 @@ const Area = styled.p`
 const ActiveCard = ({ data }) => {
   const user = useSelector(store => store.auth.user);
 
+  const closeContract = () => {
+    axios
+      .get(
+        `${process.env.REACT_APP_BASE_URL}/admin/agreement/closed/${data.agreements[0]}`
+      )
+      .then(res => console.log("Successfully updated ", res))
+      .catch(err => console.log("Error in closing contract ", err));
+  };
+
   return (
     <Container>
       <Id onClick={() => window.open(data.tx_hash)}>
@@ -72,7 +82,7 @@ const ActiveCard = ({ data }) => {
       <Flexbox justify="space-between">
         <Area>₹ {data.price}</Area>
         {user.data.role === "admin" && (
-          <Button text="CLOSE" margin="0 0 0 2rem" />
+          <Button text="CLOSE" margin="0 0 0 2rem" onClick={closeContract} />
         )}
       </Flexbox>
     </Container>
