@@ -8,6 +8,7 @@ import Flexbox from "../../common/Flexbox";
 import axios from "axios";
 import { clearCart } from "../../../redux/actions/cartActions";
 import FallbackIcon from "../../../assets/empty-cart.svg";
+import Modal from "./Modal";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
@@ -44,9 +45,19 @@ const Fallback = styled.img`
 const Cart = () => {
   const [finalAmount, setFinalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const data = useSelector(store => store.cart.cart);
   const user = useSelector(store => store.auth.user);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (showSuccessModal) {
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        window.location.href = "/contracts";
+      }, 2000);
+    }
+  }, [showSuccessModal]);
 
   useEffect(() => {
     //Update Final Amount on every change in cart array
@@ -119,7 +130,7 @@ const Cart = () => {
           .then(res => {
             console.log("response ", res);
             dispatch(clearCart());
-            alert(res.data.message);
+            setShowSuccessModal(true);
           })
           .catch(err => console.log("Error ", err));
       },
@@ -140,29 +151,33 @@ const Cart = () => {
   };
 
   return (
-    <Container>
-      <Flexbox justify="space-between">
-        <Title>My Cart</Title>
-      </Flexbox>
-      <br />
-      {data?.length > 0 ? (
-        data?.map((item, index) => {
-          return <Card data={item} key={item.id} index={index} />;
-        })
-      ) : (
-        <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
-          <Fallback src={FallbackIcon} />
-          <p>Empty</p>
-        </Flexbox>
-      )}
-      <Box>
-        <FinalAmount>
-          <span>Total </span> ₹ {finalAmount}
-        </FinalAmount>
+    <>
+      {showSuccessModal && <Modal />}
 
-        <Button text="CHECKOUT" width="100%" onClick={handleCheckout} />
-      </Box>
-    </Container>
+      <Container>
+        <Flexbox justify="space-between">
+          <Title>My Cart</Title>
+        </Flexbox>
+        <br />
+        {data?.length > 0 ? (
+          data?.map((item, index) => {
+            return <Card data={item} key={item.id} index={index} />;
+          })
+        ) : (
+          <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
+            <Fallback src={FallbackIcon} />
+            <p>Empty</p>
+          </Flexbox>
+        )}
+        <Box>
+          <FinalAmount>
+            <span>Total </span> ₹ {finalAmount}
+          </FinalAmount>
+
+          <Button text="CHECKOUT" width="100%" onClick={handleCheckout} />
+        </Box>
+      </Container>
+    </>
   );
 };
 

@@ -67,8 +67,8 @@ const ClosedCard = ({ data }) => {
 
       {user.data.role === "admin" && (
         <TypeBox>
-          <Name>{data?.buyer?.name}</Name>
-          <Address>{data?.buyer?.address}</Address>
+          <Name>{data?.buyer?.name || "Buyer Name"}</Name>
+          <Address>{data?.buyer?.address || "Buyer Address"}</Address>
         </TypeBox>
       )}
 

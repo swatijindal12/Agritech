@@ -67,7 +67,6 @@ const Card = ({ data }) => {
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...data, selected_quantity: quantity }));
-    // window.location.href = "/cart";
   };
 
   const incrementQuantity = useCallback(() => {
