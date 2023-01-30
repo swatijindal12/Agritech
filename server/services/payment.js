@@ -1,3 +1,4 @@
+const Web3 = require("web3");
 const Razorpay = require("razorpay");
 const Payment = require("../models/payment");
 const Order = require("../models/order");
@@ -5,6 +6,19 @@ const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 
+//Import Blockchain
+const marketplaceContractABI = require("../web3/marketPlaceABI");
+const marketplaceAddr = process.env.MARKETPLACE_ADDR;
+
+const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
+const web3 = new Web3(provider);
+
+const marketplaceContract = new web3.eth.Contract(
+  marketplaceContractABI,
+  marketplaceAddr
+);
+
+// Creating RazorPay Instance
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_SECRET_KEY,
@@ -85,9 +99,15 @@ exports.createOrder = async (req) => {
   return response;
 };
 
-// verify service working...
+// Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
-  console.log("PaymentVerification Services");
+  const userId = req.user._id;
+  const keyDetails = process.env.KEY_DETAILS;
+
+  let filterUser = JSON.parse(keyDetails).filter(function (user) {
+    return user.user_id === userId.toString();
+  });
+
   // General response format
   let response = {
     error: null,
@@ -115,13 +135,6 @@ exports.paymentVerification = async (req) => {
       .then(async (order_id) => {
         if (order_id) {
           const id = order_id._id;
-          await Payment.create({
-            order_id: id,
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_payment_signature: razorpay_signature,
-            payment_status: true,
-          });
 
           // find the agreement and update its sold_status to true.
           // Query in Order_Item table
@@ -130,8 +143,71 @@ exports.paymentVerification = async (req) => {
           for (let i = 0; i < order_items.length; i++) {
             await Agreement.updateOne(
               { _id: order_items[i].agreement_id },
-              { sold_status: true }
+              { sold_status: true, customer_id: userId } // change Made
             );
+            const single_agreement = await Agreement.findOne({
+              _id: order_items[i].agreement_id,
+            });
+            const Agreement_nft_id = single_agreement.agreement_nft_id;
+
+            // Blockchain Transaction start ...
+            const buyerAddr = filterUser[0].public_key;
+            const privateKeyBuyer = filterUser[0].private_key;
+
+            const gasLimit = await marketplaceContract.methods
+              .buyContract([Agreement_nft_id], [razorpay_payment_id])
+              .estimateGas({ from: buyerAddr });
+
+            const bufferedGasLimit = Math.round(
+              Number(gasLimit) + Number(gasLimit) * Number(0.2)
+            );
+
+            const sell = marketplaceContract.methods
+              .buyContract([Agreement_nft_id], [razorpay_payment_id])
+              .encodeABI();
+
+            const gasPrice = await web3.eth.getGasPrice();
+
+            const tx = {
+              gas: web3.utils.toHex(bufferedGasLimit),
+              to: marketplaceAddr,
+              value: "0x00",
+              data: sell,
+              from: buyerAddr,
+            };
+
+            const signedTx = await web3.eth.accounts.signTransaction(
+              tx,
+              privateKeyBuyer
+            );
+
+            const transaction = await web3.eth.sendSignedTransaction(
+              signedTx.rawTransaction
+            );
+
+            console.log(await web3.eth.getBlockNumber());
+            web3.eth.getBlockNumber().then((latestBlock) => {
+              marketplaceContract.getPastEvents(
+                "Buy",
+                {
+                  fromBlock: latestBlock,
+                  toBlock: latestBlock,
+                },
+                function (error, events) {
+                  console.log(events[0]);
+                }
+              );
+            });
+
+            // BlockChain Transaction End ...
+
+            await Payment.create({
+              order_id: id,
+              razorpay_order_id,
+              razorpay_payment_id,
+              razorpay_payment_signature: razorpay_signature,
+              payment_status: true,
+            });
           }
         } else {
           response.error = "No order found";
