@@ -90,6 +90,9 @@ const Cart = () => {
   }, [data]);
 
   const handleCheckout = async () => {
+    if (data.length == 0) {
+      return;
+    }
     const order = await axios.post(
       `${process.env.REACT_APP_BASE_URL}/marketplace/checkout`,
       checkoutData,
@@ -174,7 +177,12 @@ const Cart = () => {
             <span>Total </span> ₹ {finalAmount}
           </FinalAmount>
 
-          <Button text="CHECKOUT" width="100%" onClick={handleCheckout} />
+          <Button
+            text="CHECKOUT"
+            width="100%"
+            onClick={handleCheckout}
+            disabled={data.length === 0}
+          />
         </Box>
       </Container>
     </>
