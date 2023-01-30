@@ -1,7 +1,6 @@
 const agreementServices = require("../services/agreement");
 
 // Route to      => api/v1/agreement
-
 exports.createAgreement = async (req, res, next) => {
   console.log("Inside create Agreement controller");
   agreementServices
@@ -20,11 +19,44 @@ exports.createAgreement = async (req, res, next) => {
 };
 
 // Route to      => api/v1/agreements
-
 exports.getAgreements = async (req, res, next) => {
   console.log("Inside get agreement controllers");
   agreementServices
     .getAgreements(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+exports.getFarmById = async (req, res, next) => {
+  console.log("Inside get agreement controllers");
+  agreementServices
+    .getFarmById(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+exports.getAgreementsOfCustomer = (req, res, next) => {
+  console.log("Inside get getAgreementsOfCustomer controllers");
+  agreementServices
+    .getAgreementsOfCustomer(req)
     .then((response) => {
       res.json(response);
     })
