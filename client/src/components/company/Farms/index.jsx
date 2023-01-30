@@ -70,7 +70,7 @@ const Farms = () => {
       </Flexbox>
       <br />
       {farms?.map(item => {
-        return <Card data={item} />;
+        return <Card data={item} key={item._id}/>;
       })}
     </Container>
   );

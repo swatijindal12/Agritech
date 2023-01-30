@@ -14,8 +14,9 @@ const Container = styled.div`
 `;
 
 const Id = styled.p`
-  font-size: 1.25rem;
+  font-size: 0.8rem;
   opacity: 60%;
+  font-weight: 700;
 `;
 
 const Name = styled.p`
@@ -54,8 +55,15 @@ const ActiveCard = ({ data }) => {
 
   return (
     <Container>
-      <Id onClick={() => window.open(data.tx_hash)}>
-        Contract Token ID #{data.agreement_nft_id}
+      <Id>
+        Contract NFT ID{" "}
+        {data.agreement_nft_id.map((nftId, index) => (
+          <React.Fragment key={index}>
+            <a href={data.tx_hash[index]} target="_blank">
+              #{nftId}
+            </a>{" "}
+          </React.Fragment>
+        ))}
       </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
         <Name>{data.farmer_name}</Name>

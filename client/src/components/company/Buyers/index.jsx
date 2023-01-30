@@ -22,7 +22,7 @@ const Buyers = () => {
         },
       })
       .then(res => {
-        // console.log("response is ", res);
+        console.log("response is ", res);
         setBuyers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
@@ -33,7 +33,7 @@ const Buyers = () => {
       {/* <Button text="ADD NEW" margin="0" /> */}
       <Title>Buyers</Title>
       {buyers?.map(item => {
-        return <Card data={item} key={item.id}  />;
+        return <Card data={item} key={item._id}  />;
       })}
     </Container>
   );
