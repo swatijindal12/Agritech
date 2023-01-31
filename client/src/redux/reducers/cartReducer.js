@@ -9,7 +9,7 @@ export default (state = INITIAL_STATE, action) => {
     case ADD_TO_CART:
       console.log("Inside add to cart ", action.payload);
       let currentItem = state.cart.filter(
-        item => item.farm_id === action.payload.farm_id
+        item => item.agreements[0] === action.payload.agreements[0]
       );
       if (currentItem.length > 0) {
         return state;
