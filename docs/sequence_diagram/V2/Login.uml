@@ -1,0 +1,12 @@
+@startuml
+center header <font size=20 color=red>Login</font>
+
+Participant-> Login : User(Farmer,Buyer,Validator,Company)
+Login -> Database : User number 
+Login <-- Database : Try again if not DB
+Database -> Twilio : request for OTP
+Login <--Twilio : Send OTP
+Login -> Twilio : Verify OTP
+Login <-- Twilio : Verified
+Login -> Platform : Logged into the Platform
+@enduml

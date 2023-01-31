@@ -1,0 +1,1617 @@
+# DB DESIGN DOCUMENTATION
+openapi: 3.0.3
+info:
+  title: AgriTech API 1.0
+  description: |-
+    It is a platform/ecosystem for agriculture that builds trust and provides traceability. The platform will leverage blockchain technology to build trust amongst different actors in the system like farmers, buyers, the platform provider and validators.
+  contact:
+    email: apiteam@agritech.com
+  version: "1.0"
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local server
+  - url: https://www.swagger.com/api/v1
+    description: Production server
+security:
+- bearerAuth: [] 
+tags:
+  - name: auth
+    description: Everything about authenticating user.
+  - name : agreement
+    description: Everything about agreement.
+  - name: dashboard
+    description: A dashboard for company.
+
+paths:
+  # LOGIN PATH
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Send OTP.
+      description: Use mobile number to generate OTP.
+      operationId: sendOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mobile_number:
+                  type: number
+                  description: Enter the Mobile  number 
+                  example: 9123145982
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: string
+                    example: "OTP sent to your number."
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null 
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: "failed operation"
+                  message:
+                    type: string
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null  
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: "Internal server error"
+                  message:
+                    type: string
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null  
+
+  # VERIFY PATH
+  /auth/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify OTP 
+      description: Verify OTP and login into the system.
+      operationId: verifyOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mobile_number:
+                  type: number
+                  description: Enter the Mobile  number 
+                  example: 9123145982
+                otp:
+                  type: number
+                  description: Enter the otp received
+                  example: 235687
+      responses:
+        '200':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    properties: 
+                      jwt:
+                        type: string
+                        example: "sdsjkdks.sduwiesd.iofdhjsjs" 
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "operation failed,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+  # LOGOUT PATH
+  /auth/logout:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - auth
+      summary: Logs out current logged in user session
+      description: ''
+      operationId: logoutUser
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+
+  # GET AGREEMENT
+  /agreements:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - agreement
+      summary: Get a List of agreement  
+      description: Get a list of agreement of a farm.
+      operationId: getAgreement
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data: 
+                      type: array
+                      items: 
+                        $ref: '#/components/schemas/agreement'    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: array
+                    example: []
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: array
+                    example: []
+  # SELL AGREEMENT
+  /agreement/sell/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - agreement
+      summary: sell an agreement  
+      description: sell an agreement of a farm [blockchain].
+      operationId: sellAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: string
+                    example: "ready to be sold"
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data: 
+                      type: object
+                      example: null   
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+        
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "operation failed,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # BUY AGREEMENT
+  /agreement/buy/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - agreement
+      summary: buy an agreement  
+      description: buy an agreement of a farm [blockchain].
+      operationId: buyAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: string
+                    example: "bought succesfully"
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data: 
+                      type: object
+                      example: null   
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "bought failed,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # CLOSE AGREEMENT
+  /agreement/completed/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - agreement
+      summary: Close an agreement  
+      description: close an agreement of a farm [blockchain].
+      operationId: closeAgreement
+      parameters:
+        - name: id
+          in: string
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: string
+                    example: "Agreement closed successfully"
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data: 
+                      type: object
+                      example: null  
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "Agreement closed failed,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  
+  #READ JSON DATA FOR VALIDATION
+  /admin/data:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Reading data for validation 
+      description: Reading data for validation .
+      operationId: getData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The file to read
+      responses:
+        '201':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: string
+                    example: "Farm added"
+                  httpStatus:
+                    type: number
+                    example: 201
+                  data:
+                    type: object
+                    example: null
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "farm add failed, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # SAVING JSON DATA IN DB
+  /admin/farm:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Adding farm data
+      description: Create a new farm from json Data.
+      operationId: addFarm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The file to read
+      responses:
+        '201':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: string
+                    example: "Farm added"
+                  httpStatus:
+                    type: number
+                    example: 201
+                  data:
+                    type: object
+                    example: null
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "farm add failed, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # GET LIST OF FARMS
+  /admin/farms:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Get a List of farms 
+      description: Get a list of farms of a user.
+      operationId: getFarm
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items: 
+                        $ref: '#/components/schemas/farm'
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '404':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null
+  # DASHBOARD OF COMPANY
+  /admin/dashboard:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Dashboard for company 
+      description: Get total farm, agreement details.
+      operationId: getDashboard
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  error:
+                    type: object
+                    example: null
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data: 
+                      type: object
+                      properties: 
+                        farms:
+                          type: number
+                          example: 3
+                        farmers:
+                          type: number
+                          example: 3
+                        buyers:
+                          type: number
+                          example: 3
+                        contracts:
+                          type: number
+                          example: 5
+                        
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+                    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # SAVING JSON FARMER DATA.
+  /admin/farmer:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Adding farmer data
+      description: Create a new farmer from json Data.
+      operationId: addFarmer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The file to read
+      responses:
+        '201':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: string
+                    example: "Farmer added"
+                  httpStatus:
+                    type: number
+                    example: 201
+                  data:
+                    type: object
+                    example: null
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "farmer add failed, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+
+
+  # DASHBOARD OF COMPANY
+  /admin/farmers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Dashboard for company 
+      description: Get List of farmers available on platform.
+      operationId: getFarmers
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+                    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null     
+  # Create customer data
+  /admin/customer:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Adding customer data
+      description: Create a new customer from json Data.
+      operationId: addCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The file to read
+      responses:
+        '201':
+          description: successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: string
+                    example: "Farmer added"
+                  httpStatus:
+                    type: number
+                    example: 201
+                  data:
+                    type: object
+                    example: null
+
+        '400':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "farmer add failed, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "internal server error, try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null
+  # Get customer data
+  /admin/customers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Get list of the customers 
+      description: Get List of customers available on platform.
+      operationId: getCustomer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: array
+                    items: 
+                        $ref: '#/components/schemas/customer'
+                        
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+                    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null      
+  # DASHBOARD OF COMPANY/ADMIN 
+  /admin/customer/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - dashboard
+      summary: Dashboard for company 
+      description: Get detail for a particular customer.
+      operationId: getCustomerById
+      parameters:
+        - name: id
+          in: String
+          description: Enter the customer Id.
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    example: null
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 200
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/customer'
+                        
+        '403':
+          description: failed operation.
+          content:
+            application/json:
+               schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized,try again"
+                  messsage:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 403
+                  data:
+                    type: object
+                    example: null
+                    
+        '400':
+          description: failed operation.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "not found,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 400
+                  data:
+                    type: object
+                    example: null
+        '500':
+          description:  failed operation.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  error:
+                    type: string
+                    example: "internal server error,try again"
+                  message:
+                    type: object
+                    example: null
+                  httpStatus:
+                    type: number
+                    example: 500
+                  data:
+                    type: object
+                    example: null           
+
+# Create Schema.
+components:
+  schemas:
+    # Schema Farmer.
+    farmer: 
+      required:
+        - ipfs_hash
+        - mobile_number
+        - public_key
+        - private_key
+        - role
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        name:
+          type: string
+          example: Lekhram 
+        phone:
+          type: number
+          example: 7048946004
+        pin:
+          type: number
+          example: 303108
+        address: 
+          type: string
+          example: "c/o Lekhram Nimbu Farms Kotputli - Delhi Highway, Rajasthan"
+        email:
+          type: string
+          example: lyfsoul@gmail.com
+        education:
+          type: string
+          example: PG
+        created_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updated_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00 
+
+    # Schema customer.
+    customer: 
+      required:
+        - ipfs_hash
+        - mobile_number
+        - public_key
+        - private_key
+        - role
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        name:
+          type: string
+          example: Rajeev Kumar 
+        phone:
+          type: number
+          example: 9810006220
+        address: 
+          type: string
+          example: "Noida"
+        email:
+          type: string
+          example: ajeevk@halehitlabs.com
+        foodGrain:
+          type: boolean
+          example: true
+        hortiCulture:
+          type: boolean
+          example: true
+        floriCulture:
+          type: boolean
+          example: true
+        vegetables:
+          type: boolean
+          example: true
+        exoticCrops:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updated_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00 
+
+
+    # Schema Farm.
+    farm: 
+      required:
+        - ipfs_hash
+        - user_id
+        - farmnft_id
+        - validated_status
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        ipfs_hash:
+          type: string
+          example: Qmc8Lwehj67Azj9FNhtSvzVBPy786owDZVoz8gAy7EZaX
+        user_id:
+          type: string
+          example: ObjectId('674df3hghghsd67sd7') 
+        farmnft_id:
+          type: string
+          example: ObjectId('674df3hghghsd67sd7') 
+        validated_status:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updated_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+    # Schema Agreement.
+    agreement: 
+      required:
+        - seller_id
+        - buyer_id
+        - agreementnft_id
+        - sold_status
+        - agreementclose_status
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: ObjectId('674df3hghghsd67sd7')
+        seller_id:
+          type: string
+          example: ObjectId('893hjddf3hghghsd67s34')
+        buyer_id:
+          type: string
+          example: ObjectId('8994d4df3hghghsd67sd7')
+        agreementnft_id:
+          type: string
+          example: ObjectId('jd84d4df3hghghsd67s7s')
+        sold_status: 
+          type: boolean
+          example: true
+        agreementclose_status: 
+          type: string
+          example: false
+        created_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+        updated_at:
+          type: string
+          example: 2022-12-15T05:32:17.528+00:00
+    response:
+     type: object
+     required:
+      - error
+      - message
+      - httpStatus
+      - data
+     properties:
+      error:
+       type: string
+       example: 'Id not found'
+      message:
+          type: string
+          example: 'User created successfully'
+      httpStatus:
+          type: number
+          example: 201
+      data:
+          type: object
+          example: { 'id': 1, 'name': 'Test' }
+    
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+
+        
+        
+        
+
+
+    
+
+
+      
+
+  
+

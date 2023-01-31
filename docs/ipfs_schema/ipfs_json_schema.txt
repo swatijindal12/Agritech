@@ -1,0 +1,24 @@
+﻿Contract IPFS JSON Schema:
+
+{
+"farmerId" :"2",
+"farmerName": "MG Farms",
+"cropName":"Rice",
+"startDate": "1673166521",
+"endDate": "1680942521",
+"price":"Rs 300",
+"quantity":"8 KG"
+}
+
+
+
+Farm IPFS JSON Schema:
+
+{
+"farmerName":"MG FARMS",
+"address": "c/o MG Farms Barwala Disstt Panchkula Haryana",
+"pincode": "134118",
+"farmLocation":"https://goo.gl/maps/RaxSjDS6R3iPMsHUA",
+"farmSize":"171 Acres"
+}
+

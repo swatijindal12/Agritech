@@ -1,0 +1,10 @@
+@startuml
+
+title CloseAgreement
+
+Buyer -> "AgriTech API" : complete agreement
+"AgriTech API" ->"MarketPlace Contract" :  close agreement
+"MarketPlace Contract" ->  Farmer : Payment Transfer
+"AgriTech API" -> "AgriTech DB" : Update agreement table
+
+@enduml
