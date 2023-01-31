@@ -62,7 +62,7 @@ const Card = ({ data }) => {
   const dispatch = useDispatch();
 
   const farmProfile = () => {
-    window.location.href = `/farms/${btoa(data.farm_id)}`;
+    window.location.href = `/farms/${btoa(data?._id.farm_id)}`;
   };
 
   const handleAddToCart = () => {
@@ -85,29 +85,29 @@ const Card = ({ data }) => {
     <Container>
       <Id>
         Contract NFT ID{" "}
-        {data.agreement_nft_id.map((nftId, index) => (
+        {data?.agreement_nft_id.map((nftId, index) => (
           <React.Fragment key={index}>
-            <a href={data.tx_hash[index]} target="_blank">
+            <a href={data?.tx_hash[index]} target="_blank">
               #{nftId}
             </a>{" "}
           </React.Fragment>
         ))}
       </Id>
       <Flexbox justify="space-between">
-        <Name onClick={farmProfile}>{data.farmer_name}</Name>
+        <Name onClick={farmProfile}>{data?.farmer_name}</Name>
         <div>
-          <Date>{`from ${data.start_date}`}</Date>
-          <Date>{`to ${data.end_date}`}</Date>
+          <Date>{`from ${data?._id.start_date}`}</Date>
+          <Date>{`to ${data?._id.end_date}`}</Date>
         </div>
       </Flexbox>
-      <Address>{data.address}</Address>
+      <Address>{data?.address}</Address>
       <InnerContainer>
-        <Crop>{data.crop.toUpperCase()}</Crop>
-        <Area>Quantity: {data.unit_available}</Area>
-        <Area>{data._id}</Area>
+        <Crop>{data?._id.crop}</Crop>
+        <Area>Quantity: {data?.unit_available}</Area>
+        <Area>{data?._id.area}</Area>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
-        <Amount>₹ {data.price}</Amount>
+        <Amount>₹ {data?._id.price}</Amount>
         {user.data.role === "customer" && (
           <div>
             <Flexbox justify="space-between" margin="0.5rem 0">
@@ -122,7 +122,7 @@ const Card = ({ data }) => {
                 text="+"
                 margin="0.1rem"
                 onClick={incrementQuantity}
-                disabled={quantity === data.unit_available}
+                disabled={quantity === data?.unit_available}
               />
             </Flexbox>
             <Button

@@ -47,7 +47,7 @@ const Navbar = ({ toggleSidebar }) => {
   const cartNumberRef = useRef();
 
   useEffect(() => {
-    cartNumberRef.current.animate(
+    cartNumberRef?.current?.animate(
       [
         // keyframes
         { transform: "translateY(-30px)" },
