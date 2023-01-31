@@ -138,7 +138,7 @@ const Cart = () => {
           .catch(err => console.log("Error ", err));
       },
       prefill: {
-        name: "sudhanshu Kumar",
+        name: "",
         email: "sudhanshu.kumar@example.com",
         contact: "9999999999",
       },
