@@ -22,7 +22,7 @@ const MarketPlace = () => {
         },
       })
       .then(res => {
-        console.log("response is ", res);
+        console.log("response is ", res.data.data);
         setContract(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

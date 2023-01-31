@@ -60,20 +60,20 @@ const Card = ({ data, index }) => {
       <Cross src={CrossIcon} onClick={removeItemFromCart} />
       <Flexbox justify="space-between" margin="0.5rem">
         <NameConatiner margin-left="20%">
-          <Name>{data.farmer_name}</Name>
+          <Name>{data?.farmer_name}</Name>
         </NameConatiner>
-        <p>#{data.farm_id}</p>
+        <p>#{data?._id.farm_id}</p>
       </Flexbox>
       <Flexbox justify="space-between">
         <div>
-          <Date>from {data.start_date}</Date>
-          <Date>to {data.end_date}</Date>
+          <Date>from {data?._id.start_date}</Date>
+          <Date>to {data?._id.end_date}</Date>
         </div>
         <Area>Selected Unit: {data.selected_quantity}</Area>
       </Flexbox>
       <Flexbox justify="space-between">
-        <p margin="1rem">{data._id}</p>
-        <Amount>₹ {data.price * data.selected_quantity}</Amount>
+        <p margin="1rem">{data?._id.crop}</p>
+        <Amount>₹ {data?._id.price * data.selected_quantity}</Amount>
       </Flexbox>
     </DetailCard>
   );

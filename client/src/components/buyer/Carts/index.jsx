@@ -62,7 +62,7 @@ const Cart = () => {
   useEffect(() => {
     //Update Final Amount on every change in cart array
     const amount = data.reduce(
-      (acc, curr) => curr.price * curr.selected_quantity + acc,
+      (acc, curr) => curr._id.price * curr.selected_quantity + acc,
       0
     );
     setFinalAmount(amount);
@@ -82,10 +82,11 @@ const Cart = () => {
         ...tempCheckoutData.agreements,
         {
           agreement_ids,
-          unit_price: item.price,
+          unit_price: item._id.price,
         },
       ];
     });
+
     setCheckoutData({ ...tempCheckoutData, price: amount });
   }, [data]);
 
@@ -139,7 +140,7 @@ const Cart = () => {
       },
       prefill: {
         name: "",
-        email: "sudhanshu.kumar@example.com",
+        email: "agritrust@example.com",
         contact: "9999999999",
       },
       notes: {
