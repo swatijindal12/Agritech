@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import Logo from "../../../assets/logo.svg";
+import Logo from "../../../assets/logo.jpg";
 import Button from "../../common/Button";
 import axios from "axios";
 import { Navigate } from "react-router-dom";

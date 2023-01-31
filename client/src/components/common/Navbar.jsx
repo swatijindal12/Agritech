@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
-import LogoImg from "../../assets/logo.svg";
+import LogoImg from "../../assets/logo.jpg";
 import HamburgerImg from "../../assets/hamburger.svg";
 import CartImg from "../../assets/cart.svg";
 import { useSelector } from "react-redux";
@@ -12,7 +12,7 @@ const Container = styled.div`
   left: 0;
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   width: 100%;
   border-bottom: 1px solid #d9c4b7;
   background-color: #ffffff;
@@ -23,7 +23,7 @@ const Hamburger = styled.img`
 `;
 
 const Cart = styled.img`
-  margin-left: 6.5rem;
+  margin-left: 12.5rem;
 `;
 
 const CartContainer = styled.div`
