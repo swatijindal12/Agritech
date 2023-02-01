@@ -14,7 +14,7 @@ import Farmers from "./components/company/Farmers";
 import Farms from "./components/company/Farms";
 import Cart from "./components/buyer/Carts";
 import FarmDetails from "./components/common/FarmDetails";
-
+import Aboutus from "./components/common/Aboutus";
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -51,7 +51,8 @@ const Routing = () => {
           <Route path="/contracts" element={<Contracts />} />
           <Route path="/marketplace" element={<MarketPlace />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/farms/:slug" element={<FarmDetails/>}/>
+          <Route path="/farms/:slug" element={<FarmDetails />} />
+          <Route path="/about-us" element={<Aboutus />} />
         </Routes>
       </Router>
     </>
