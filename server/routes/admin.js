@@ -11,6 +11,8 @@ const {
   getFarms,
   getCustomers,
   getdashBoard,
+  getAgreementsForAdmin,
+  closeAgreement,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -30,6 +32,16 @@ router.route("/farm").post(createFarm);
 router
   .route("/farms")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getFarms);
+
+// Get all agreement of all the customer
+router
+  .route("/agreement")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAgreementsForAdmin);
+
+// Close particular agreement of customer
+router
+  .route("/agreement/closed/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), closeAgreement);
 
 // Insert farmer data into DB.
 router
@@ -57,5 +69,3 @@ router
   .get(isAuthenticatedUser, authorizeRoles("admin"), getdashBoard);
 
 module.exports = router;
-
-// /api/v1/farms get all farms
