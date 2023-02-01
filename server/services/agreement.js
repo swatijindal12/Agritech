@@ -27,9 +27,9 @@ const marketplaceContract = new web3.eth.Contract(
 );
 
 exports.getFarmById = async (req) => {
-  console.log("Inside create Agreement service");
-  const farmId = req.params.farm_id;
-  console.log("farmId :- ", farmId);
+  const { id } = req.params;
+
+  // id of the farm
   // General response format
   let response = {
     error: null,
@@ -38,14 +38,177 @@ exports.getFarmById = async (req) => {
     data: null,
   };
 
-  response.httpStatus = 200;
-  response.message = "working on getFarmByID";
+  // Find the farm By farm id
+  try {
+    const farm = await Farm.findOne({ farmer_id: id });
+    const farmer = await Farmer.findOne({ farmer_id: id });
+    response.httpStatus = 200;
+    response.data = {
+      farm,
+      farmer,
+    };
+  } catch (error) {
+    response.httpStatus = 404;
+    response.error = "Not found";
+  }
 
   return response;
 };
+
+// Get all the active and close agreement of customer
+exports.getAgreementsOfCustomer = async (req) => {
+  const userId = req.user._id; // User Logged In.
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // // Grouping farm... for customer to show in their active/close Tab
+  try {
+    // const activeContractsOfCustomer = await Agreement.aggregate([
+    //   {
+    //     $match: {
+    //       sold_status: true,
+    //       customer_id: userId,
+    //       agreementclose_status: false,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: {
+    //         crop: "$crop",
+    //         start_date: "$start_date",
+    //         end_date: "$end_date",
+    //         price: "$price",
+    //         area: "$area",
+    //         farm_id: "$farm_id",
+    //       },
+    //       address: { $first: "$address" },
+    //       farmer_name: { $first: "$farmer_name" },
+    //       agreements: { $push: "$_id" },
+    //       ipfs_url: { $push: "$ipfs_url" },
+    //       tx_hash: { $push: "$tx_hash" },
+    //       agreement_nft_id: { $push: "$agreement_nft_id" },
+    //       unit_bought: { $sum: 1 },
+    //     },
+    //   },
+    // ]);
+
+    const activeContractsWithCustomerData = await Agreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          customer_id: userId,
+          agreementclose_status: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+    ]);
+
+    const closeContractsWithCustomerData = await Agreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          customer_id: userId,
+          agreementclose_status: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+    ]);
+
+    response.httpStatus = 200;
+    response.data = {
+      active: activeContractsWithCustomerData,
+      close: closeContractsWithCustomerData,
+    };
+  } catch (error) {
+    response.httpStatus = 400;
+    response.error = "failed operation";
+  }
+
+  return response;
+};
+
 // Creating Agreement Bulk Import
 exports.createAgreement = async (req) => {
-  console.log("Inside create Agreement service");
   // General response format
   let response = {
     error: null,
@@ -63,6 +226,7 @@ exports.createAgreement = async (req) => {
 
   // Parse the JSON data
   const data = JSON.parse(fileContent);
+  console.log("data :", data);
 
   // console.log("data :", data);
   // Read the contents of the file
@@ -130,7 +294,6 @@ exports.createAgreement = async (req) => {
       .encodeABI();
 
     const gasPrice = await web3.eth.getGasPrice();
-    console.log(gasPrice);
 
     const tx = {
       gas: web3.utils.toHex(bufferedGasLimit),
@@ -148,7 +311,6 @@ exports.createAgreement = async (req) => {
 
     // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
     contract.tx_hash = `${Tran}/${transaction.transactionHash}`;
-    // console.log("Transaction : ", transaction);
 
     // console.log(await web3.eth.getBlockNumber());
     let agreement_nft_id = null;
@@ -178,7 +340,6 @@ exports.createAgreement = async (req) => {
   // BlockChain end
 
   try {
-    console.log("start inserting...");
     const agreements = await Agreement.create(updatedData);
     console.log("agreements :- ", agreements);
     (response.message = "Data Insertion successful"),
@@ -192,7 +353,7 @@ exports.createAgreement = async (req) => {
   return response;
 };
 
-// Marketplace
+// Marketplace both customer & admin
 exports.getAgreements = async (req) => {
   // const searchString = req.query.search;
   // General response format
@@ -212,14 +373,16 @@ exports.getAgreements = async (req) => {
       },
       {
         $group: {
-          _id: "$area",
-          farmer_name: { $first: "$farmer_name" },
-          farm_id: { $first: "$farm_id" },
-          crop: { $first: "$crop" },
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
           address: { $first: "$address" },
-          price: { $first: "$price" },
-          start_date: { $first: "$start_date" },
-          end_date: { $first: "$end_date" },
+          farmer_name: { $first: "$farmer_name" },
           agreements: { $push: "$_id" },
           ipfs_url: { $push: "$ipfs_url" },
           tx_hash: { $push: "$tx_hash" },
