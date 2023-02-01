@@ -101,12 +101,14 @@ exports.createOrder = async (req) => {
 
 // Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
+  console.log("Inside Payment Verification");
   const userId = req.user._id;
   const keyDetails = process.env.KEY_DETAILS;
 
   let filterUser = JSON.parse(keyDetails).filter(function (user) {
     return user.user_id === userId.toString();
   });
+  console.log("filterUser", filterUser);
 
   // General response format
   let response = {
@@ -153,7 +155,6 @@ exports.paymentVerification = async (req) => {
             // Blockchain Transaction start ...
             const buyerAddr = filterUser[0].public_key;
             const privateKeyBuyer = filterUser[0].private_key;
-
             const gasLimit = await marketplaceContract.methods
               .buyContract([Agreement_nft_id], [razorpay_payment_id])
               .estimateGas({ from: buyerAddr });
@@ -200,15 +201,14 @@ exports.paymentVerification = async (req) => {
             });
 
             // BlockChain Transaction End ...
-
-            await Payment.create({
-              order_id: id,
-              razorpay_order_id,
-              razorpay_payment_id,
-              razorpay_payment_signature: razorpay_signature,
-              payment_status: true,
-            });
           }
+          await Payment.create({
+            order_id: id,
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_payment_signature: razorpay_signature,
+            payment_status: true,
+          });
         } else {
           response.error = "No order found";
           response.httpStatus = 404;
