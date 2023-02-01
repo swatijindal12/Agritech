@@ -25,7 +25,11 @@ const MiddleContainer = styled.div`
   margin-top: 6rem;
 `;
 
-const LogoImage = styled.img``;
+const LogoImage = styled.img`
+  height: 150px;
+  width: 150px;
+  object-fit: cover;
+`;
 
 const Input = styled.input`
   width: 20rem;
