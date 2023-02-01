@@ -8,7 +8,6 @@ const agreementSchema = new mongoose.Schema(
     },
     farmer_name: {
       type: String,
-      required: [true, "Enter farmer Name"],
     },
     farm_id: {
       type: Number,
@@ -26,18 +25,15 @@ const agreementSchema = new mongoose.Schema(
     },
     agreement_nft_id: {
       type: String,
-      unique: [true, "Already used."],
     },
     tx_hash: {
       type: String,
     },
     crop: {
       type: String,
-      required: [true, "Enter the crops"],
     },
     area: {
       type: String,
-      required: [true, "Enter the quantity of crops"],
     },
     price: {
       type: Number,
