@@ -131,6 +131,7 @@ exports.createFarm = async (req) => {
 
   // Parse the JSON data
   const data = JSON.parse(fileContent);
+  console.log("data :", data);
 
   const updatedData = await Promise.all(
     data.map(async (farm, index) => {
@@ -164,7 +165,7 @@ exports.createFarm = async (req) => {
     const farmerAddr = process.env.FARMER_ADDR; //wallet adres
 
     const gasLimit = await farmNFTContract.methods
-      .mint(farmerAddr, `https://ipfs.io/ipfs/${farm.ipfs_url}`)
+      .mint(farmerAddr, `${farm.ipfs_url}`)
       .estimateGas({ from: adminAddr });
 
     const bufferedGasLimit = Math.round(
@@ -172,7 +173,7 @@ exports.createFarm = async (req) => {
     );
 
     const encodedData = farmNFTContract.methods
-      .mint(farmerAddr, `https://ipfs.io/ipfs/${farm.ipfs_url}`)
+      .mint(farmerAddr, `${farm.ipfs_url}`)
       .encodeABI();
 
     const gasPrice = await web3.eth.getGasPrice();
@@ -209,9 +210,9 @@ exports.createFarm = async (req) => {
           console.log(events[0]);
           const result = events[0].returnValues;
           farm_nft_id = result[1];
-          // console.log("Farm Id", result[1]);
+          console.log("Farm Id", result[1]);
           farm.farm_nft_id = result[1];
-          // console.log("error :", error);
+          console.log("error :", error);
         }
       );
     });
@@ -343,6 +344,219 @@ exports.getCustomers = async (req) => {
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
   }
+  return response;
+};
+
+exports.getAgreementsForAdmin = async (req) => {
+  // console.log("Inside getAgreementsOfCustomer Service", req.user);
+
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // // Grouping farm... for Admin to show in their active/close Tab
+  try {
+    const activeContractswithCustomerData = await Agreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          agreementclose_status: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+            customer_id: "$customer_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+    ]);
+
+    // const activeContractsWithCustomerData = await Agreement.aggregate([
+    //   {
+    //     $match: {
+    //       sold_status: true,
+    //       agreementclose_status: false,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$area",
+    //       farmer_name: { $first: "$farmer_name" },
+    //       farm_id: { $first: "$farm_id" },
+    //       crop: { $first: "$crop" },
+    //       address: { $first: "$address" },
+    //       price: { $first: "$price" },
+    //       start_date: { $first: "$start_date" },
+    //       end_date: { $first: "$end_date" },
+    //       agreements: { $push: "$_id" },
+    //       customer_id: { $push: "$customer_id" },
+    //       ipfs_url: { $push: "$ipfs_url" },
+    //       tx_hash: { $push: "$tx_hash" },
+    //       agreement_nft_id: { $push: "$agreement_nft_id" },
+    //       unit_available: { $sum: 1 },
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users",
+    //       localField: "customer_id",
+    //       foreignField: "_id",
+    //       as: "customer_data",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$customer_data",
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       farmer_name: { $first: "$farmer_name" },
+    //       farm_id: { $first: "$farm_id" },
+    //       crop: { $first: "$crop" },
+    //       address: { $first: "$address" },
+    //       price: { $first: "$price" },
+    //       start_date: { $first: "$start_date" },
+    //       end_date: { $first: "$end_date" },
+    //       agreements: { $first: "$agreements" },
+    //       customer_id: { $first: "$customer_id" },
+    //       ipfs_url: { $first: "$ipfs_url" },
+    //       tx_hash: { $first: "$tx_hash" },
+    //       agreement_nft_id: { $first: "$agreement_nft_id" },
+    //       unit_available: { $first: "$unit_available" },
+    //       customer_name: { $first: "$customer_data.name" },
+    //       customer_phone: { $first: "$customer_data.phone" },
+    //       customer_email: { $first: "$customer_data.email" },
+    //       customer_address: { $first: "$customer_data.address" },
+    //     },
+    //   },
+    // ]);
+
+    const closeContractswithCustomerData = await Agreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          agreementclose_status: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+            customer_id: "$customer_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+    ]);
+
+    response.httpStatus = 200;
+    response.data = {
+      active: activeContractswithCustomerData,
+      close: closeContractswithCustomerData,
+    };
+  } catch (error) {
+    response.httpStatus = 400;
+    response.error = "failed operation";
+  }
+  return response;
+};
+
+exports.closeAgreement = async (req) => {
+  //console.log("Inside closeAgreement");
+  const { id } = req.params; // Agreement Id agreement to Update
+  //console.log("id :- ", id);
+
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  try {
+    // Update ageementClose status to true :-
+    const agreementUpdated = await Agreement.updateOne(
+      { _id: id },
+      { agreementclose_status: true }
+    );
+    console.log("agreementUpdated :- ", agreementUpdated);
+    response.message = "Agreement closed Successful";
+    response.httpStatus = 200;
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 200;
+  }
+
   return response;
 };
 
