@@ -101,10 +101,12 @@ const Card = ({ data }) => {
         </div>
       </Flexbox>
       <Address>{data?.address}</Address>
-      <InnerContainer>
+      <InnerContainer style={{display:"block"}}>
         <Crop>{data?._id.crop}</Crop>
-        <Area>Quantity: {data?.unit_available}</Area>
-        <Area>{data?._id.area}</Area>
+        <Flexbox justify="space-between">
+          <Area style={{marginTop:"0.5rem"}}>Quantity: {data?.unit_available}</Area>
+          <Area>{data?._id.area}</Area>
+        </Flexbox>
       </InnerContainer>
       <Flexbox justify="space-between" margin="1rem 0">
         <Amount>₹ {data?._id.price}</Amount>

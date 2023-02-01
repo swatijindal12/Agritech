@@ -15,7 +15,7 @@ const Container = styled.div`
 `;
 
 const Id = styled.p`
-  font-size: 0.8rem;
+  font-size: 1rem;
   opacity: 60%;
   font-weight: 700;
 `;
@@ -36,7 +36,7 @@ const Address = styled.p`
   opacity: 60%;
   font-weight: 400;
   width: 90%;
-  margin: 0.5rem 0;
+  margin: 0.7rem 0;
 `;
 
 const TypeBox = styled(Flexbox)`
@@ -44,6 +44,13 @@ const TypeBox = styled(Flexbox)`
   padding: 1rem;
   background-color: #dde5b654;
   justify-content: space-between;
+`;
+
+const Number = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  margin-top: 0rem;
 `;
 
 const Area = styled.p`
@@ -75,28 +82,38 @@ const ActiveCard = ({ data }) => {
     <Container>
       <Id>
         Contract NFT ID{" "}
-        {data.agreement_nft_id.map((nftId, index) => (
+        {data?.agreement_nft_id.map((nftId, index) => (
           <React.Fragment key={index}>
-            <a href={data.tx_hash[index]} target="_blank">
+            <a href={data?.tx_hash[index]} target="_blank">
               #{nftId}
             </a>{" "}
           </React.Fragment>
         ))}
       </Id>
       <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data.farmer_name}</Name>
+        <Name>{data?.farmer_name}</Name>
         <div>
-          <Date>{`from ${data.start_date}`}</Date>
-          <Date>{`to ${data.end_date}`}</Date>
+          <Date>{`from ${data?._id.start_date}`}</Date>
+          <Date>{`to ${data?._id.end_date}`}</Date>
         </div>
       </Flexbox>
       <Address>{data.address}</Address>
-      <TypeBox>
-        <Id styele={{ opacity: 1 }}>{data.crop.toUpperCase()}</Id>
-        <Area>{data._id}</Area>
+      <TypeBox style={{display:"block"}}>
+        <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
+        <Flexbox justify="space-between">
+          <Area style={{marginTop:"0.5rem"}}>Quantity: {data?.unit_bought}</Area>
+          <Area>{data?._id.area}</Area>
+        </Flexbox>
       </TypeBox>
+
+      <TypeBox style={{ display: "block" }}>
+        <Name>{data?.customer_name}</Name>
+        <Number>{data?.customer_phone}</Number>
+        <Address>{data?.customer_address || "Buyer Address"}</Address>
+      </TypeBox>
+
       <Flexbox justify="space-between">
-        <Area>₹ {data.price}</Area>
+        <Area>₹ {data?._id.price}</Area>
         {user.data.role === "admin" && (
           <Button text="CLOSE" margin="0 0 0 2rem" onClick={closeContract} />
         )}
