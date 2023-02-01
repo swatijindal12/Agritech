@@ -19,6 +19,10 @@ export const adminNavItems = [
     title: "Contracts",
     url: "/contracts",
   },
+  {
+    title: "About Us",
+    url: "/about-us",
+  },
 ];
 
 export const buyerNavItems = [
@@ -29,5 +33,9 @@ export const buyerNavItems = [
   {
     title: "Contracts",
     url: "/contracts",
+  },
+  {
+    title: "About Us",
+    url: "/about-us",
   },
 ];
