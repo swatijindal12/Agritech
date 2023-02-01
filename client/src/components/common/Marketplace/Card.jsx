@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { addToCart } from "../../../redux/actions/cartActions";
@@ -59,6 +59,7 @@ const Amount = styled.p`
 const Card = ({ data }) => {
   const [quantity, setQuantity] = useState(1);
   const user = useSelector(store => store.auth.user);
+  const cart = useSelector(store => store.cart.cart);
   const dispatch = useDispatch();
 
   const farmProfile = () => {
@@ -81,6 +82,17 @@ const Card = ({ data }) => {
     }
   });
 
+  const ButtonText = () => {
+    let cartContract = cart.filter(
+      item => item.agreements[0] === data.agreements[0]
+    );
+    return cartContract.length > 0
+      ? `${cartContract[0].selected_quantity} Units added`
+      : "Add to cart";
+  };
+
+  ButtonText();
+
   return user ? (
     <Container>
       <Id>
@@ -101,10 +113,12 @@ const Card = ({ data }) => {
         </div>
       </Flexbox>
       <Address>{data?.address}</Address>
-      <InnerContainer style={{display:"block"}}>
+      <InnerContainer style={{ display: "block" }}>
         <Crop>{data?._id.crop}</Crop>
         <Flexbox justify="space-between">
-          <Area style={{marginTop:"0.5rem"}}>Quantity: {data?.unit_available}</Area>
+          <Area style={{ marginTop: "0.5rem" }}>
+            Quantity: {data?.unit_available}
+          </Area>
           <Area>{data?._id.area}</Area>
         </Flexbox>
       </InnerContainer>
@@ -128,9 +142,10 @@ const Card = ({ data }) => {
               />
             </Flexbox>
             <Button
-              text="Add to cart"
+              text={ButtonText()}
               margin="unset"
               onClick={handleAddToCart}
+              disabled={ButtonText() !== "Add to cart"}
             />
           </div>
         )}
