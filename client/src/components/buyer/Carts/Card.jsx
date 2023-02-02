@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import CrossIcon from "../../../assets/green-cross.svg";
@@ -47,9 +47,14 @@ const Area = styled.p`
   font-weight: 600;
 `;
 
+const Id = styled.p`
+  font-size: 1rem;
+  opacity: 60%;
+  font-weight: 700;
+`;
+
 const Card = ({ data, index }) => {
   const dispatch = useDispatch();
-  const cart = useSelector(store => store.cart.cart);
 
   const removeItemFromCart = () => {
     dispatch(removeFromCart(index));
@@ -62,7 +67,19 @@ const Card = ({ data, index }) => {
         <NameConatiner margin-left="20%">
           <Name>{data?.farmer_name}</Name>
         </NameConatiner>
-        <p>#{data?._id.farm_id}</p>
+        <Id>
+          {data?.agreement_nft_id.map((nftId, index) => {
+            if (data?.selected_quantity > index) {
+              return (
+                <React.Fragment key={index}>
+                  <a href={data.tx_hash[index]} target="_blank">
+                    #{nftId}
+                  </a>{" "}
+                </React.Fragment>
+              );
+            }
+          })}
+        </Id>
       </Flexbox>
       <Flexbox justify="space-between">
         <div>
