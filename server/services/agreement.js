@@ -207,9 +207,9 @@ exports.getAgreementsOfCustomer = async (req) => {
   return response;
 };
 
-// Creating Agreement Bulk Import
+// Creating Agreement Bulk Import.. On Upload.
 exports.createAgreement = async (req) => {
-  // General response format
+  // General response formate
   let response = {
     error: null,
     message: null,
@@ -227,6 +227,8 @@ exports.createAgreement = async (req) => {
   // Parse the JSON data
   const data = JSON.parse(fileContent);
   console.log("data :", data);
+
+  // Validating whether Json Data is not empty
 
   // console.log("data :", data);
   // Read the contents of the file
@@ -254,6 +256,7 @@ exports.createAgreement = async (req) => {
   // console.log("updated data :", updatedData);
   // console.log("length", updatedData.length);
 
+  // Blockchain Integration
   const mintPromises = [];
   const Tran = "https://mumbai.polygonscan.com/tx";
   for (let index = 0; index < 11; index++) {
@@ -275,7 +278,7 @@ exports.createAgreement = async (req) => {
       )
       .estimateGas({ from: adminAddr });
 
-    console.log(gasLimit);
+    // console.log(gasLimit);
 
     const bufferedGasLimit = Math.round(
       Number(gasLimit) + Number(gasLimit) * Number(0.2)
@@ -335,11 +338,10 @@ exports.createAgreement = async (req) => {
     mintPromises.push(mintPromise);
   }
   await Promise.all(mintPromises);
-  // Blockchain Integration
-
   // BlockChain end
 
   try {
+    // Validating this Before Inserting..
     const agreements = await Agreement.create(updatedData);
     console.log("agreements :- ", agreements);
     (response.message = "Data Insertion successful"),

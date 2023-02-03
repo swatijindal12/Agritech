@@ -33,16 +33,27 @@ exports.validate = async (req) => {
   if (!req.files || !req.files.file) {
     response.error = "no file selected";
     response.httpStatus = 400;
-  }
-  // Read the contents of the file
-  const fileContent = req.files.file.data.toString();
+  } else {
+    // Read the contents of the file
+    const fileContent = req.files.file.data.toString();
 
-  // Parse the JSON data
-  const data = JSON.parse(fileContent);
+    // Parse the JSON data
+    const data = JSON.parse(fileContent);
 
-  if (data) {
-    response.httpStatus = 200;
-    response.data = data;
+    const validate_data = data.filter((item) => {
+      console.log("item :- ", item);
+      for (const key in item) {
+        console.log("key :- ", key);
+        if (!item[key]) return false;
+      }
+      return true;
+    });
+    console.log("validate_data :- ", validate_data);
+
+    if (validate_data) {
+      response.httpStatus = 200;
+      response.data = validate_data;
+    }
   }
   return response;
 };

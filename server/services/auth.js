@@ -39,21 +39,22 @@ exports.login = async (req) => {
     }
 
     // Twilio send OTP service
-    client.verify.v2
-      .services(serviceId)
-      .verifications.create({
-        to: "+91" + user.phone,
-        channel: "sms",
-      })
-      .then(
-        (verification) => (response.httpStatus = 200),
-        (response.message = `OTP sent to your number`),
-        (response.httpStatus = 200)
-      )
-      .catch((error) => {
-        (response.httpStatus = 400),
-          (response.error = `failed operation ${error}`);
-      });
+    // client.verify.v2
+    //   .services(serviceId)
+    //   .verifications.create({
+    //     to: "+91" + user.phone,
+    //     channel: "sms",
+    //   })
+    //   .then(
+    //     (verification) => (response.httpStatus = 200),
+    //     (response.message = `OTP sent to your number`),
+    //     (response.httpStatus = 200)
+    //   )
+    //   .catch((error) => {
+    //     (response.httpStatus = 400),
+    //       (response.error = `failed operation ${error}`);
+    //   });
+    (response.message = `OTP sent to your number`), (response.httpStatus = 200);
   } catch (error) {
     (response.httpStatus = 404), (response.error = `User not found`);
   }
@@ -96,7 +97,7 @@ exports.verify = async (req) => {
       if (verification_check.status === "approved") {
         // Create JSON Web token
         const token = user.getJwtToken();
-        // console.log("token : ", token);
+        console.log("token : ", token);
         (response.httpStatus = 200), (response.data = token);
       } else {
         response.httpStatus = 404;
