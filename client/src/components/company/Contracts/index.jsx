@@ -36,6 +36,15 @@ const ImageContainer = styled.div`
   opacity: 0.3;
 `;
 
+const CardsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+
+  @media only screen and (max-width: 990px) {
+    display: block;
+  }
+`;
+
 const Contracts = () => {
   const [currentPage, setCurrentpage] = useState("active");
   const [active, setActive] = useState([]);
@@ -85,13 +94,15 @@ const Contracts = () => {
           <EmptyImage src={EmptyIcon} />
         </ImageContainer>
       )}
-      {currentPage === "active"
-        ? active.map(item => {
-            return <ActiveCard data={item} key={item.agreements[0]} />;
-          })
-        : closed.map(item => {
-            return <ClosedCard data={item} key={item.agreements[0]} />;
-          })}
+      <CardsContainer>
+        {currentPage === "active"
+          ? active.map(item => {
+              return <ActiveCard data={item} key={item.agreements[0]} />;
+            })
+          : closed.map(item => {
+              return <ClosedCard data={item} key={item.agreements[0]} />;
+            })}
+      </CardsContainer>
     </Container>
   );
 };

@@ -18,7 +18,7 @@ const WebContainer = styled.div`
   align-items: center;
   padding: 0.8rem 1.5rem;
   width: 100%;
-  background-color: #f0ead299;
+  background-color: #f0ead2;
 
   @media only screen and (max-width: 990px) {
     display: none;
