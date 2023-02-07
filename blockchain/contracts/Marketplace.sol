@@ -15,7 +15,8 @@ contract Marketplace is Ownable {
     event Buy(
         address indexed buyer,
         uint256 indexed farmNFTId,
-        uint256 agreementNFTId
+        uint256 agreementNFTId,
+        string updatedTokenURI
     );
 
     struct AgreementInfo {
@@ -97,10 +98,11 @@ contract Marketplace is Ownable {
 
     function buyContract(
         uint256[] memory agreementNftId_,
-        string[] memory transactionId
+        string memory transactionId,
+        string[] memory updateTokenURI
     ) external {
         require(
-            agreementNftId_.length == transactionId.length,
+            agreementNftId_.length == updateTokenURI.length,
             "Array length not same"
         );
         uint256 arrayLength = agreementNftId_.length;
@@ -118,14 +120,14 @@ contract Marketplace is Ownable {
 
             agreementList[msg.sender].push(agreementNftId_[i]);
             agreementDetails[agreementNftId_[i]].buyer = msg.sender;
-            agreementDetails[agreementNftId_[i]].razorTransId = transactionId[
-                i
-            ];
+            agreementDetails[agreementNftId_[i]].razorTransId = transactionId;
 
+            IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
             emit Buy(
                 msg.sender,
                 agreementDetails[agreementNftId_[i]].farmNFTId,
-                agreementNftId_[i]
+                agreementNftId_[i],
+                updateTokenURI[i]
             );
             unchecked {
                 ++i;

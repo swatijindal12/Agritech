@@ -42,6 +42,10 @@ contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
         return agreementId;
     }
 
+    function updateAgreement(uint256 agreementNFTId, string memory agreementIPFSUrl) external{
+        _setTokenURI(agreementNFTId, agreementIPFSUrl);
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,
