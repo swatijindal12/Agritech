@@ -39,6 +39,7 @@ const ImageContainer = styled.div`
 const CardsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-around;
 
   @media only screen and (max-width: 990px) {
     display: block;
