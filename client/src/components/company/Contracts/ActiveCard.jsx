@@ -7,11 +7,14 @@ import axios from "axios";
 
 const Container = styled.div`
   box-sizing: border-box;
-  width: 100%;
+  width: 48%;
   background-color: #f0ead254;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Id = styled.p`
@@ -98,10 +101,12 @@ const ActiveCard = ({ data }) => {
         </div>
       </Flexbox>
       <Address>{data.address}</Address>
-      <TypeBox style={{display:"block"}}>
+      <TypeBox style={{ display: "block" }}>
         <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
         <Flexbox justify="space-between">
-          <Area style={{marginTop:"0.5rem"}}>Quantity: {data?.unit_bought}</Area>
+          <Area style={{ marginTop: "0.5rem" }}>
+            Quantity: {data?.unit_bought}
+          </Area>
           <Area>{data?._id.area}</Area>
         </Flexbox>
       </TypeBox>

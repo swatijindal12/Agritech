@@ -6,11 +6,39 @@ import Button from "../../common/Button";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { loginUser } from "../../../redux/actions";
+import LoginImage from "../../../assets/login.png";
 
 const Container = styled.div`
-  height: 100vh;
-  width: 100vw;
+  padding: 0;
+  display: flex;
+  @media only screen and (max-width: 990px) {
+    display: block;
+    padding: 1rem;
+    height: 100vh;
+    width: 100vw;
+  }
+`;
+
+const RightContainer = styled.div`
+  width: 50%;
   padding: 1rem;
+  @media only screen and (max-width: 990px) {
+    height: 100vh;
+    width: 100vw;
+  }
+`;
+
+const LeftContainer = styled.div`
+  width: 50%;
+  @media only screen and (max-width: 990px) {
+    display: none;
+  }
+`;
+
+const BackGround = styled.img`
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 `;
 
 const Heading = styled.p`
@@ -110,41 +138,48 @@ const Login = () => {
         />
       )}
       <Container>
-        <Heading>Login</Heading>
-        {!authorised ? (
-          <MiddleContainer>
-            <LogoImage src={Logo} alt="logo" />
-            <Input
-              type="number"
-              placeholder="Enter Moblile Number"
-              value={number}
-              onChange={e => setNumber(e.target.value)}
-            />
-            <Button text="SEND OTP" onClick={getOTP} />
-          </MiddleContainer>
-        ) : (
-          <MiddleContainer>
-            <LogoImage src={Logo} alt="logo" />
-            <Input
-              type="number"
-              placeholder="Enter OTP"
-              style={{ textAlign: "center" }}
-              value={otp}
-              onChange={e => setOtp(e.target.value)}
-            />
-            {timeRemaining === 0 ? (
-              <ResendMessageStyle
-                onClick={getOTP}
-              >{`Resend OTP`}</ResendMessageStyle>
-            ) : (
-              <ResendMessageStyle>
-                {`Resend OTP in ${timeRemaining} seconds`}
-              </ResendMessageStyle>
-            )}
-            <Resend active={timeRemaining === 0} onClick={getOTP}></Resend>
-            <Button text="VERIFY" onClick={verifyOTP} />
-          </MiddleContainer>
-        )}
+        <LeftContainer>
+          <BackGround src={LoginImage} />
+        </LeftContainer>
+        <RightContainer>
+          <Heading>Login</Heading>
+          {!authorised ? (
+            <MiddleContainer>
+              <LogoImage src={Logo} alt="logo" />
+              <br />
+              <Input
+                type="number"
+                placeholder="Enter Moblile Number"
+                value={number}
+                onChange={e => setNumber(e.target.value)}
+              />
+              <Button text="SEND OTP" onClick={getOTP} />
+            </MiddleContainer>
+          ) : (
+            <MiddleContainer>
+              <LogoImage src={Logo} alt="logo" />
+              <br />
+              <Input
+                type="number"
+                placeholder="Enter OTP"
+                style={{ textAlign: "center" }}
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+              />
+              {timeRemaining === 0 ? (
+                <ResendMessageStyle
+                  onClick={getOTP}
+                >{`Resend OTP`}</ResendMessageStyle>
+              ) : (
+                <ResendMessageStyle>
+                  {`Resend OTP in ${timeRemaining} seconds`}
+                </ResendMessageStyle>
+              )}
+              <Resend active={timeRemaining === 0} onClick={getOTP}></Resend>
+              <Button text="VERIFY" onClick={verifyOTP} />
+            </MiddleContainer>
+          )}
+        </RightContainer>
       </Container>
     </>
   );

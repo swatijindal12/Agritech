@@ -16,6 +16,7 @@ const Container = styled.div`
   font-weight: 700;
   width: ${props => (props.width ? props.width : "fit-content")};
   opacity: ${props => (props.disabled ? 0.3 : 1)};
+  cursor: ${props => (props.disabled ? "not-allowed" : "pointer")};
 `;
 
 const Button = ({ color, margin, width, text, disabled, onClick }) => {
