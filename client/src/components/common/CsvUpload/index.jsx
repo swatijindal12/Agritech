@@ -71,46 +71,38 @@ const CsvUpload = () => {
   );
 
   const handleFileChange = e => {
-    const inputFile = e.target.files[0];
-    setFile(inputFile);
-    var reader = new FileReader();
-    reader.onload = onReaderLoad;
-    reader.readAsText(inputFile);
-
-    const formData = new FormData();
-    formData.append("file", inputFile);
-    axios
-      .post(
-        `${process.env.REACT_APP_BASE_URL}/${uploadData.validate_url}`,
-        formData,
-        {
-          headers: {
-            Authorization: "Bearer " + user?.data.token,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
-      .then(res => {
-        console.log("res : ", res);
-        setErrors(res.data.error);
-      })
-      .catch(err => {
-        console.log("error in validating", err);
-      });
-  };
-
-  const onReaderLoad = event => {
-    console.log(event.target.result);
-    var obj = JSON.parse(event.target.result);
-    console.log("Here the object is ", obj);
-    setData(obj);
-    let tempArr = [];
-    tempArr.push("Status");
-    for (const key in obj[0]) {
-      tempArr.push(key);
+    // Check if user has entered the file
+    if (e.target.files.length) {
+      const inputFile = e.target.files[0];
+      setFile(inputFile);
+      const formData = new FormData();
+      formData.append("file", inputFile);
+      axios
+        .post(
+          `${process.env.REACT_APP_BASE_URL}/admin/validate-data`,
+          formData,
+          {
+            headers: {
+              Authorization: "Bearer " + user?.data.token,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then(res => {
+          setErrors(res.data.error);
+          setData(res.data.data);
+          let tempArr = [];
+          tempArr.push("Status");
+          for (const key in res.data.data[0]) {
+            tempArr.push(key);
+          }
+          setTableHeading(tempArr);
+          console.log("res : ", res);
+        })
+        .catch(err => {
+          console.log("error in validating", err);
+        });
     }
-
-    setTableHeading(tempArr);
   };
 
   const handleUpload = () => {
