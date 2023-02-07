@@ -129,7 +129,7 @@ const CsvUpload = () => {
       )
       .then(res => {
         console.log("res in setting new data: ", res);
-        // window.location.href = uploadData.redirection_url;
+        window.location.href = uploadData.redirection_url;
       })
       .catch(err => {
         console.log("error in setting new data", err);
