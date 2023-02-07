@@ -7,7 +7,7 @@ const Agreement = require("../models/agreements");
 const Web3 = require("web3");
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 const farmNFTContractABI = require("../web3/farmContractABI");
-
+const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -209,7 +209,7 @@ exports.getAgreementsOfCustomer = async (req) => {
 
 // Creating Agreement Bulk Import.. On Upload.
 exports.createAgreement = async (req) => {
-  // General response formate
+  // General response format
   let response = {
     error: null,
     message: null,
@@ -221,134 +221,127 @@ exports.createAgreement = async (req) => {
     response.error = "no file selected";
     response.httpStatus = 400;
   }
+  try {
+    // const fileContent = req.files.file.data.toString(); //For JSON.
+    const file = req.files.file;
+    // Convert to the JSON data
+    const data = await csvToJson(file);
 
-  const fileContent = req.files.file.data.toString();
+    // // Parse the JSON data
+    // const data = JSON.parse(fileContent); //For JSON.
 
-  // Parse the JSON data
-  const data = JSON.parse(fileContent);
-  console.log("data :", data);
+    // Read the contents of the file
+    const updatedData = await Promise.all(
+      data.map(async (contract) => {
+        contract.ipfs_url = "";
 
-  // Validating whether Json Data is not empty
+        // -------------- IPFS --------------------
+        const options = {
+          pinataMetadata: {
+            name: contract.farm_nft_id.toString(),
+          },
+          pinataOptions: {
+            cidVersion: 0,
+          },
+        };
 
-  // console.log("data :", data);
-  // Read the contents of the file
-  const updatedData = await Promise.all(
-    data.map(async (contract) => {
-      contract.ipfs_url = "";
+        const ipfsHash = await pinata.pinJSONToIPFS(contract, options);
+        contract.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+        // -------------- IPFS --------------------
+        return { ...contract };
+      })
+    );
 
-      // -------------- IPFS --------------------
-      const options = {
-        pinataMetadata: {
-          name: contract.farm_nft_id.toString(),
-        },
-        pinataOptions: {
-          cidVersion: 0,
-        },
+    // Blockchain Integration
+    const mintPromises = [];
+    const Tran = "https://mumbai.polygonscan.com/tx";
+    for (let index = 0; index < updatedData.length; index++) {
+      const contract = updatedData[index];
+      contract.agreement_nft_id = "";
+      // console.log("Single contract: ", contract);
+      const farmerAddr = process.env.FARMER_ADDR;
+
+      const start_date = epocTimeConv(contract.start_date);
+      const end_date = epocTimeConv(contract.end_date);
+      const gasLimit = await marketplaceContract.methods
+        .putContractOnSell(
+          farmerAddr,
+          contract.farm_nft_id,
+          contract.price,
+          start_date,
+          end_date,
+          contract.ipfs_url
+        )
+        .estimateGas({ from: adminAddr });
+
+      // console.log(gasLimit);
+
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      // console.log("bufferedGasLimit", bufferedGasLimit);
+      const sell = marketplaceContract.methods
+        .putContractOnSell(
+          farmerAddr,
+          contract.farm_nft_id,
+          contract.price,
+          start_date,
+          end_date,
+          contract.ipfs_url
+        )
+        .encodeABI();
+
+      const gasPrice = await web3.eth.getGasPrice();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: marketplaceAddr,
+        value: "0x00",
+        data: sell,
+        from: adminAddr,
       };
 
-      const ipfsHash = await pinata.pinJSONToIPFS(contract, options);
-      contract.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
-      // -------------- IPFS --------------------
-      return { ...contract };
-    })
-  );
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
 
-  // console.log("updated data :", updatedData);
-  // console.log("length", updatedData.length);
-
-  // Blockchain Integration
-  const mintPromises = [];
-  const Tran = "https://mumbai.polygonscan.com/tx";
-  for (let index = 0; index < 11; index++) {
-    const contract = updatedData[index];
-    contract.agreement_nft_id = "";
-    console.log("Single contract: ", contract);
-    const farmerAddr = process.env.FARMER_ADDR;
-
-    const start_date = epocTimeConv(contract.start_date);
-    const end_date = epocTimeConv(contract.end_date);
-    const gasLimit = await marketplaceContract.methods
-      .putContractOnSell(
-        farmerAddr,
-        contract.farm_nft_id,
-        contract.price,
-        start_date,
-        end_date,
-        contract.ipfs_url
-      )
-      .estimateGas({ from: adminAddr });
-
-    // console.log(gasLimit);
-
-    const bufferedGasLimit = Math.round(
-      Number(gasLimit) + Number(gasLimit) * Number(0.2)
-    );
-
-    // console.log("bufferedGasLimit", bufferedGasLimit);
-    const sell = marketplaceContract.methods
-      .putContractOnSell(
-        farmerAddr,
-        contract.farm_nft_id,
-        contract.price,
-        start_date,
-        end_date,
-        contract.ipfs_url
-      )
-      .encodeABI();
-
-    const gasPrice = await web3.eth.getGasPrice();
-
-    const tx = {
-      gas: web3.utils.toHex(bufferedGasLimit),
-      to: marketplaceAddr,
-      value: "0x00",
-      data: sell,
-      from: adminAddr,
-    };
-
-    const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
-
-    const transaction = await web3.eth.sendSignedTransaction(
-      signedTx.rawTransaction
-    );
-
-    // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
-    contract.tx_hash = `${Tran}/${transaction.transactionHash}`;
-
-    // console.log(await web3.eth.getBlockNumber());
-    let agreement_nft_id = null;
-    const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
-      marketplaceContract.getPastEvents(
-        "Sell",
-        {
-          fromBlock: latestBlock,
-          toBlock: latestBlock,
-        },
-        function (error, events) {
-          const result = events[0].returnValues;
-          console.log("result : - ", result);
-          agreement_nft_id = result[2];
-          // console.log("agreement_nft_id :- ", agreement_nft_id);
-          contract.agreement_nft_id = result[2];
-          console.log("contract :", contract);
-          // console.log(events[0]);
-        }
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
       );
-    });
-    mintPromises.push(mintPromise);
-  }
-  await Promise.all(mintPromises);
-  // BlockChain end
 
-  try {
+      // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+      contract.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      // console.log(await web3.eth.getBlockNumber());
+      let agreement_nft_id = null;
+      const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
+        marketplaceContract.getPastEvents(
+          "Sell",
+          {
+            fromBlock: latestBlock,
+            toBlock: latestBlock,
+          },
+          function (error, events) {
+            const result = events[0].returnValues;
+            // console.log("result : - ", result);
+            agreement_nft_id = result[2];
+            // console.log("agreement_nft_id :- ", agreement_nft_id);
+            contract.agreement_nft_id = result[2];
+            // console.log(events[0]);
+          }
+        );
+      });
+      mintPromises.push(mintPromise);
+    }
+    await Promise.all(mintPromises);
+    // BlockChain end
+
     // Validating this Before Inserting..
     const agreements = await Agreement.create(updatedData);
-    console.log("agreements :- ", agreements);
     (response.message = "Data Insertion successful"),
       (response.httpStatus = 200),
       (response.data = agreements);
   } catch (error) {
-    response.message = `operation failed try 1 ${error}`;
+    response.error = `operation failed  ${error}`;
     response.httpStatus = 500;
   }
 

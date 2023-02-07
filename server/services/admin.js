@@ -23,6 +23,7 @@ const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 
 exports.validate = async (req) => {
   // General response format
+
   let response = {
     error: null,
     message: null,
@@ -40,19 +41,36 @@ exports.validate = async (req) => {
     // Parse the JSON data
     const data = JSON.parse(fileContent);
 
-    const validate_data = data.filter((item) => {
-      console.log("item :- ", item);
+    const errorLines = [];
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
       for (const key in item) {
-        console.log("key :- ", key);
-        if (!item[key]) return false;
+        if (item[key] === "farm_nft_id") {
+          if (!isNaN(item[key])) {
+            errorLines.push(i);
+            break;
+          }
+        }
+        if (item[key] === "farm_id") {
+          if (!isNaN(item[key])) {
+            errorLines.push(i);
+            break;
+          }
+        }
+        if (!item[key] || item[key].length < 1) {
+          // console.log("check :- ");
+          errorLines.push(i);
+          break;
+        }
       }
-      return true;
-    });
-    console.log("validate_data :- ", validate_data);
+    }
 
-    if (validate_data) {
-      response.httpStatus = 200;
-      response.data = validate_data;
+    if (errorLines.length >= 1) {
+      // There are error some lines missing data
+      (response.httpStatus = 400), (response.error = errorLines);
+    } else {
+      // No error
+      (response.httpStatus = 200), (response.message = "validation successful");
     }
   }
   return response;

@@ -10,7 +10,7 @@ exports.validateData = async (req, res, next) => {
     })
     .catch((error) => {
       res.status(400).json({
-        error: "failed operation",
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
