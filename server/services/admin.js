@@ -2,7 +2,7 @@ const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 const User = require("../models/users");
 const Agreement = require("../models/agreements");
-
+const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -36,11 +36,11 @@ exports.validate = async (req) => {
     response.httpStatus = 400;
   } else {
     // Read the contents of the file
-    const fileContent = req.files.file.data.toString();
-
+    // const fileContent = req.files.file.data.toString(); //JSON DATA
+    const file = req.files.file;
     // Parse the JSON data
-    const data = JSON.parse(fileContent);
-
+    // const data = JSON.parse(fileContent); //JSON DATA
+    const data = await csvToJson(file);
     const errorLines = [];
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
@@ -72,6 +72,7 @@ exports.validate = async (req) => {
       // No error
       (response.httpStatus = 200), (response.message = "validation successful");
     }
+    response.data = data;
   }
   return response;
 };
