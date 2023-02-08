@@ -12,11 +12,11 @@ export const adminNavItems = [
     url: "/buyers",
   },
   {
-    title: "Marketplace",
+    title: "Buy/Sell",
     url: "/marketplace",
   },
   {
-    title: "Contracts",
+    title: "Purchased Contracts",
     url: "/contracts",
   },
   {
@@ -27,11 +27,11 @@ export const adminNavItems = [
 
 export const buyerNavItems = [
   {
-    title: "Marketplace",
+    title: "Buy/Sell",
     url: "/marketplace",
   },
   {
-    title: "Contracts",
+    title: "My Contracts",
     url: "/contracts",
   },
   {

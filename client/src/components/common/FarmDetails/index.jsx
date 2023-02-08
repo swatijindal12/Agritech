@@ -8,6 +8,7 @@ import Flexbox from "../../common/Flexbox";
 import LocationIcon from "../../../assets/farms/location.svg";
 import Stars from "../../../assets/farms/star.svg";
 import BackButton from "../../../assets/back-button.svg";
+import InfoIcon from "../../../assets/info-icon.svg";
 import axios from "axios";
 // import { farmDetails } from "./tempData";
 
@@ -37,7 +38,30 @@ const Id = styled.p`
   color: #00000099;
 `;
 
-const Star = styled.img``;
+const InfoImg = styled.img`
+  width: 1.5rem;
+  height: 1.2rem;
+  margin-left: 0.5rem;
+  position: relative;
+
+  &::after {
+    content: "TEXT HERE";
+    display: none;
+    visibility: hidden;
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    background-color: #333;
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  &:hover::after {
+    display: block;
+    visibility: visible;
+  }
+`;
 
 const Address = styled.p`
   font-size: 1.25rem;
@@ -76,7 +100,7 @@ const RatingNumber = styled.p`
   font-weight: 400;
   color: "#6C584C";
   padding: 0;
-  margin-right: 8.5rem;
+  margin-right: 5.5rem;
 `;
 
 const FarmDetails = () => {
@@ -93,16 +117,11 @@ const FarmDetails = () => {
 
   useEffect(() => {
     axios
-      .get(
-        `${process.env.REACT_APP_BASE_URL}/marketplace/farm/${atob(
-          slug
-        )}`,
-        {
-          headers: {
-            Authorization: "Bearer " + user?.data.token,
-          },
-        }
-      )
+      .get(`${process.env.REACT_APP_BASE_URL}/marketplace/farm/${atob(slug)}`, {
+        headers: {
+          Authorization: "Bearer " + user?.data.token,
+        },
+      })
       .then(res => {
         console.log("res is", res.data.data.farm);
         console.log("farmer data is", res.data.data.farmer);
@@ -134,10 +153,6 @@ const FarmDetails = () => {
                 </a>
               </Id>
             </NameContainer>
-            <Flexbox justify="space-content">
-              <Star src={Stars} width="80%" />
-              <RatingNumber>{farmDetails?.farm?.rating}</RatingNumber>
-            </Flexbox>
           </Flexbox>
 
           <Name>{farmDetails?.farm?.area}</Name>
@@ -158,16 +173,29 @@ const FarmDetails = () => {
             onClick={() => window.open(farmDetails?.farm?.farm_practice_pdf)}
           >
             Read more about farm practices
-            <Flexbox justify="space-content">
-              <img src={Stars} />
-              <RatingNumber>
-                {farmDetails?.farm?.farm_practice_rating}
-              </RatingNumber>
-            </Flexbox>
           </ViewMore>
           <ViewMore onClick={() => window.open(farmDetails?.farm?.farm_pdf)}>
             View more
           </ViewMore>
+          <Flexbox style={{ display: "block" }}>
+            <p style={{ marginTop: "0.5rem" }}>Rating</p>
+            <Flexbox justify="space-content">
+              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>Farm</p>
+              <InfoImg src={InfoIcon} />
+              <img src={Stars} style={{ marginLeft: "5.8rem" }} />
+              <RatingNumber>{farmDetails?.farm?.rating}</RatingNumber>
+            </Flexbox>
+            <Flexbox justify="space-content">
+              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>
+                Farm practices
+              </p>
+              <InfoImg src={InfoIcon} />
+              <img src={Stars} style={{ marginLeft: "1.3rem" }} />
+              <RatingNumber>
+                {farmDetails?.farm?.farm_practice_rating}
+              </RatingNumber>
+            </Flexbox>
+          </Flexbox>
           <br />
           <p color="#6c584c">Farmer Details</p>
           <FarmerName>{farmDetails?.farmer?.name}</FarmerName>

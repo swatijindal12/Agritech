@@ -121,6 +121,7 @@ const Card = ({ data }) => {
             <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
               Read more about farm practices
               <Flexbox justify="space-content">
+                <p style={{ color: "#6c584c" }}>Farm practices rating</p>
                 <img src={Stars} />
                 <RatingNumber>{data.farm_practice_rating}</RatingNumber>
               </Flexbox>
