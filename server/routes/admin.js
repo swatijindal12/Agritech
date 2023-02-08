@@ -21,11 +21,15 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 // Route => /api/v1/admin
 
 // Validate the file Data
-router.route("/validate-data").post(validateData);
-// isAuthenticatedUser, authorizeRoles("admin"),
+router
+  .route("/validate-data")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), validateData);
+// ,
 
 // Insert farm data into DB.
-router.route("/farm").post(createFarm);
+router
+  .route("/farm")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createFarm);
 
 // Get List of farms
 router
