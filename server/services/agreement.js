@@ -2,6 +2,7 @@ const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 const User = require("../models/users");
 const Cart = require("../models/cart");
+const StageAgreement = require("../models/stageAgreement");
 const epocTimeConv = require("../utils/epocTimeConv");
 const Agreement = require("../models/agreements");
 const Web3 = require("web3");
@@ -217,22 +218,33 @@ exports.createAgreement = async (req) => {
     data: null,
   };
 
-  if (!req.files || !req.files.file) {
-    response.error = "no file selected";
-    response.httpStatus = 400;
-  }
+  // if (!req.files || !req.files.file) {
+  //   response.error = "no file selected";
+  //   response.httpStatus = 400;
+  // }
+
   try {
     // const fileContent = req.files.file.data.toString(); //For JSON.
-    const file = req.files.file;
-    // Convert to the JSON data
-    const data = await csvToJson(file);
+    // const file = req.files.file;
+    // // Convert to the JSON data
+    // const data = await csvToJson(file);
+    const data = req.body;
+    console.log("data :- ", data);
+
+    /* NOTE:- first update in stagetable to  (stage_status:false, aprroval_status:true)
+     stage_status: false & approval_staus: false:- will not show in review list
+     stage_status: true & approval_status: false :- will show in rejected list */
 
     // // Parse the JSON data
     // const data = JSON.parse(fileContent); //For JSON.
 
-    // Read the contents of the file
+    // Read the req.body and add ipfs_url to json data
     const updatedData = await Promise.all(
       data.map(async (contract) => {
+        await StageAgreement.updateOne(
+          { _id: contract._id, stage_status: true, approval_status: false },
+          { stage_status: false, approval_status: true }
+        );
         contract.ipfs_url = "";
 
         // -------------- IPFS --------------------
@@ -336,7 +348,12 @@ exports.createAgreement = async (req) => {
     // BlockChain end
 
     // Validating this Before Inserting..
-    const agreements = await Agreement.create(updatedData);
+
+    // updating in stage table and giving data to agreement collection to insert.
+
+    const agreements = await Agreement.create(updatedData, {
+      select: `-_id -stage_status -approval_status`,
+    });
     (response.message = "Data Insertion successful"),
       (response.httpStatus = 200),
       (response.data = agreements);

@@ -13,6 +13,8 @@ const {
   getdashBoard,
   getAgreementsForAdmin,
   closeAgreement,
+  stagedAgreements,
+  getStagedAgreements,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -24,7 +26,16 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 router
   .route("/validate-data")
   .post(isAuthenticatedUser, authorizeRoles("admin"), validateData);
-// ,
+
+// Stage the data before approval :: POST
+router
+  .route("/stage")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), stagedAgreements);
+
+// Get Staged data before approval :: get
+router
+  .route("/stage")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getStagedAgreements);
 
 // Insert farm data into DB.
 router

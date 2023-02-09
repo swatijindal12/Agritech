@@ -18,6 +18,42 @@ exports.validateData = async (req, res, next) => {
     });
 };
 
+// Route to      => api/v1/admin/state : POST
+// create data in stage table
+exports.stagedAgreements = async (req, res, next) => {
+  adminService
+    .stagedAgreements(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/stage :: GET
+// get staged data
+exports.getStagedAgreements = async (req, res, next) => {
+  adminService
+    .getStagedAgreements(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // Route to     => POST: api/v1/admin/farmer
 // Create farmer
 exports.createFarmer = async (req, res, next) => {

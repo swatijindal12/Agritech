@@ -2,6 +2,7 @@ const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 const User = require("../models/users");
 const Agreement = require("../models/agreements");
+const StageAgreement = require("../models/stageAgreement");
 const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -73,6 +74,66 @@ exports.validate = async (req) => {
       (response.httpStatus = 200), (response.message = "validation successful");
     }
     response.data = data;
+  }
+  return response;
+};
+
+exports.stagedAgreements = async (req) => {
+  // General response format
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  if (!req.files || !req.files.file) {
+    response.error = "no file selected";
+    response.httpStatus = 400;
+  } else {
+    try {
+      const file = req.files.file;
+      const data = await csvToJson(file);
+
+      // Insert record into DB (stageAgreement)
+      const stageAgreement = await StageAgreement.create(data);
+
+      response.httpStatus = 200;
+      response.message = "Insertion succeesful";
+      response.data = stageAgreement;
+    } catch (error) {
+      response.error = `failed operation ${error}`;
+      response.httpStatus = 500;
+    }
+  }
+  return response;
+};
+
+exports.getStagedAgreements = async (req) => {
+  // General response format
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+  try {
+    // read the data {stage_status:true}, all the data in stage state
+    const stageAgreementpending = await StageAgreement.find({
+      stage_status: true,
+      approval_status: false,
+    }).select("-createdAt -updatedAt -__v");
+    // Note :- while inserting update the status to approval_status true
+    // if approval status true ,stage_staus:true means this data should be
+    // inserted into the Agreement table.
+    response.httpStatus = 200;
+    response.data =
+      stageAgreementpending.length > 1 ? stageAgreementpending : null;
+  } catch (error) {
+    response.error = `operation failed ${error}`;
+    response.httpStatus = 500;
   }
   return response;
 };
