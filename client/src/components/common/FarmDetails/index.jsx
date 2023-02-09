@@ -43,24 +43,19 @@ const InfoImg = styled.img`
   height: 1.2rem;
   margin-left: 0.5rem;
   position: relative;
+  margin-top: 0.5rem;
+`;
 
-  &::after {
-    content: "TEXT HERE";
-    display: none;
-    visibility: hidden;
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    background-color: #333;
-    color: #fff;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-  }
-
-  &:hover::after {
-    display: block;
-    visibility: visible;
-  }
+const Tooltip = styled.div`
+  position: absolute;
+  visibility: ${props => (props.show ? "visible" : "hidden")};
+  z-index: 1;
+  left: 50%;
+  transform: translated(-50%, -100%);
+  background-color: #00000099;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 8px;
 `;
 
 const Address = styled.p`
@@ -105,14 +100,18 @@ const RatingNumber = styled.p`
 
 const FarmDetails = () => {
   const [farmDetails, setFarmDetails] = useState(null);
-  // const [farmId, setFarmId] = useState(null);
+  const [showTooltip1, setShowTooltip1] = useState(false);
+  const [showTooltip2, setShowTooltip2] = useState(false);
   const user = useSelector(store => store.auth.user);
 
   const { slug } = useParams();
 
+  const handleInfoIcon1Hover = () => setShowTooltip1(!showTooltip1);
+  const handleInfoIcon2Hover = () => setShowTooltip2(!showTooltip2);
+  
+
   useEffect(() => {
     console.log("here the user id is ", atob(slug));
-    // setFarmId(atob(slug));
   }, [slug]);
 
   useEffect(() => {
@@ -181,7 +180,14 @@ const FarmDetails = () => {
             <p style={{ marginTop: "0.5rem" }}>Rating</p>
             <Flexbox justify="space-content">
               <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>Farm</p>
-              <InfoImg src={InfoIcon} />
+              <InfoImg src={InfoIcon} onClick={handleInfoIcon1Hover} />
+              <Tooltip show={showTooltip1}>
+                Farm Rating parameters:
+                <p>1. Farm details</p>
+                <p>2. Farm land record</p>
+                <p>3. Soil type quality</p>
+                <p>4. Water quality</p>
+              </Tooltip>
               <img src={Stars} style={{ marginLeft: "5.8rem" }} />
               <RatingNumber>{farmDetails?.farm?.rating}</RatingNumber>
             </Flexbox>
@@ -189,7 +195,18 @@ const FarmDetails = () => {
               <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>
                 Farm practices
               </p>
-              <InfoImg src={InfoIcon} />
+              <InfoImg
+                src={InfoIcon}
+                onMouseEnter={handleInfoIcon2Hover}
+                onMouseLeave={handleInfoIcon2Hover}
+              />
+              <Tooltip show={showTooltip2}>
+                Farm practices rating parameters:
+                <p>1. Process identified</p>
+                <p>2. Quality of products utilized</p>
+                <p>3. Process Documented</p>
+                <p>4. Compliance process</p>
+              </Tooltip>
               <img src={Stars} style={{ marginLeft: "1.3rem" }} />
               <RatingNumber>
                 {farmDetails?.farm?.farm_practice_rating}

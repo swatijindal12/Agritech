@@ -4,6 +4,7 @@ import ExpandIcon from "../../../assets/down-arrow.svg";
 import Flexbox from "../../common/Flexbox";
 import LocationIcon from "../../../assets/farms/location.svg";
 import Stars from "../../../assets/farms/star.svg";
+import InfoIcon from "../../../assets/info-icon.svg";
 
 const Container = styled.div`
   background-color: #f0ead2;
@@ -64,8 +65,33 @@ const RatingNumber = styled.p`
   color: "#6C584C";
 `;
 
+const InfoImg = styled.img`
+  width: 1.5rem;
+  height: 1.2rem;
+  margin-left: 0.5rem;
+  position: relative;
+  margin-top: 0.5rem;
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  visibility: ${props => (props.show ? "visible" : "hidden")};
+  z-index: 1;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  background-color: #00000099;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 8px;
+`;
+
 const Card = ({ data }) => {
   const [opened, setOpened] = useState(false);
+  const [showTooltip1, setShowTooltip1] = useState(false);
+  const [showTooltip2, setShowTooltip2] = useState(false);
+
+  const handleInfoIcon1Hover = () => setShowTooltip1(!showTooltip1);
+  const handleInfoIcon2Hover = () => setShowTooltip2(!showTooltip2);
 
   // const createContract = () => {
   //   localStorage.setItem("current-selected-farm", JSON.stringify(data));
@@ -87,10 +113,6 @@ const Card = ({ data }) => {
                 </a>
               </Id>
             </NameContainer>
-            <Flexbox justify="space-between">
-              <Star src={Stars} width="80%" />
-              <RatingNumber>{data.rating}</RatingNumber>
-            </Flexbox>
           </Flexbox>
         ) : (
           <Name>{data.name}</Name>
@@ -120,16 +142,46 @@ const Card = ({ data }) => {
           <Flexbox justify="space-between">
             <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
               Read more about farm practices
-              <Flexbox justify="space-content">
-                <p style={{ color: "#6c584c" }}>Farm practices rating</p>
-                <img src={Stars} />
-                <RatingNumber>{data.farm_practice_rating}</RatingNumber>
-              </Flexbox>
             </ViewMore>
           </Flexbox>
           <ViewMore onClick={() => window.open(data.farm_pdf)}>
             View more
           </ViewMore>
+          <Flexbox style={{ display: "block" }}>
+            <p style={{ marginTop: "0.5rem" }}>Rating</p>
+            <Flexbox justify="space-content">
+              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>Farm</p>
+              <InfoImg src={InfoIcon} onClick={handleInfoIcon1Hover} />
+              <Tooltip show={showTooltip1}>
+                Farm Rating parameters:
+                <p>1. Farm details</p>
+                <p>2. Farm land record</p>
+                <p>3. Soil type quality</p>
+                <p>4. Water quality</p>
+              </Tooltip>
+              <img src={Stars} style={{ marginLeft: "5.8rem" }} />
+              <RatingNumber>{data?.rating}</RatingNumber>
+            </Flexbox>
+            <Flexbox justify="space-content" style ={{alignItems: "baseline"}}>
+              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>
+                Farm practices
+              </p>
+              <InfoImg
+                src={InfoIcon}
+                onMouseEnter={handleInfoIcon2Hover}
+                onMouseLeave={handleInfoIcon2Hover}
+              />
+              <Tooltip show={showTooltip2}>
+                Farm practices rating parameters:
+                <p>1. Process identified</p>
+                <p>2. Quality of products utilized</p>
+                <p>3. Process Documented</p>
+                <p>4. Compliance process</p>
+              </Tooltip>
+              <img src={Stars} style={{ marginLeft: "1.3rem" }} />
+              <RatingNumber>{data?.farm_practice_rating}</RatingNumber>
+            </Flexbox>
+          </Flexbox>
           {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
         </>
       )}
