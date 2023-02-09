@@ -63,7 +63,7 @@ const MarketPlace = () => {
 
   return (
     <Container>
-      <ButtonContainer justify="flex-start">
+      {/* <ButtonContainer justify="flex-start">
         <Title>MarketPlace</Title>
         {user.data.role === "admin" && (
           <Button
@@ -72,7 +72,7 @@ const MarketPlace = () => {
             onClick={handleNewUpload}
           />
         )}
-      </ButtonContainer>
+      </ButtonContainer> */}
       <CardsContainer>
         {contract?.map(item => {
           return <Card data={item} key={item.agreements[0]} />;
