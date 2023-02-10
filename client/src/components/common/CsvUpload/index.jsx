@@ -192,7 +192,7 @@ const CsvUpload = () => {
           </Table>
         </TableContainer>
       ) : (
-        <UploadText>Uload csv file</UploadText>
+        <UploadText>Upload csv file</UploadText>
       )}
     </Container>
   );
