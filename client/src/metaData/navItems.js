@@ -16,7 +16,7 @@ export const adminNavItems = [
     url: "/marketplace",
   },
   {
-    title: "Purchased Contracts",
+    title: "PurchasedContracts",
     url: "/contracts",
   },
   {
