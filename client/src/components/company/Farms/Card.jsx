@@ -7,10 +7,15 @@ import Stars from "../../../assets/farms/star.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
 
 const Container = styled.div`
+  width: 45%;
+  height: fit-content;
   background-color: #f0ead2;
   padding: 0.5rem;
   border-radius: 8px;
   margin: 1rem 0;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Image = styled.img`

@@ -2,12 +2,16 @@ import React from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
+  width: 33%;
   padding: 1rem;
-  width: 100%;
   text-align: center;
   background-color: #f0ead24d;
   border-radius: 8px;
   margin: 1rem 0;
+
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Image = styled.img`
@@ -40,10 +44,9 @@ const Email = styled.p`
 `;
 
 const Card = ({ data }) => {
-
   const openProfile = () => {
-    window.location.href = `/buyers/${data._id}`
-  }
+    window.location.href = `/buyers/${data._id}`;
+  };
 
   return (
     <Container onClick={openProfile}>

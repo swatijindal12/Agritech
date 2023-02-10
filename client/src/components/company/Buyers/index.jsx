@@ -10,6 +10,16 @@ const Container = styled.div`
   padding: 1rem;
 `;
 
+const CardsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  @media only screen and (max-width: 990px) {
+    display: block;
+  }
+`;
+
 const Buyers = () => {
   const [buyers, setBuyers] = useState(null);
   const user = useSelector(store => store.auth.user);
@@ -32,9 +42,11 @@ const Buyers = () => {
     <Container>
       {/* <Button text="ADD NEW" margin="0" /> */}
       <Title>Buyers</Title>
-      {buyers?.map(item => {
-        return <Card data={item} key={item._id}  />;
-      })}
+      <CardsContainer>
+        {buyers?.map(item => {
+          return <Card data={item} key={item._id} />;
+        })}
+      </CardsContainer>
     </Container>
   );
 };

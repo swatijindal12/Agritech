@@ -63,14 +63,16 @@ const MarketPlace = () => {
 
   return (
     <Container>
-      <ButtonContainer justify="flex-start">
+      {/* <ButtonContainer justify="flex-start">
         <Title>MarketPlace</Title>
-        <Button
-          text="UPLOAD NEW CONRACT"
-          margin="0"
-          onClick={handleNewUpload}
-        />
-      </ButtonContainer>
+        {user.data.role === "admin" && (
+          <Button
+            text="UPLOAD NEW CONRACT"
+            margin="0"
+            onClick={handleNewUpload}
+          />
+        )}
+      </ButtonContainer> */}
       <CardsContainer>
         {contract?.map(item => {
           return <Card data={item} key={item.agreements[0]} />;

@@ -16,6 +16,7 @@ import Cart from "./components/buyer/Carts";
 import FarmDetails from "./components/common/FarmDetails";
 import Aboutus from "./components/common/Aboutus";
 import CsvUpload from "./components/common/CsvUpload";
+import Admin from "./components/company/Admin";
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -55,6 +56,7 @@ const Routing = () => {
           <Route path="/farms/:slug" element={<FarmDetails />} />
           <Route path="/about-us" element={<Aboutus />} />
           <Route path="/csv-validator" element={<CsvUpload />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </Router>
     </>

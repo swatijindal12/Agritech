@@ -1,15 +1,17 @@
 import React from "react";
-// import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 
 const Container = styled.div`
   box-sizing: border-box;
-  width: 100%;
-  background-color: #dde5b699;
+  width: 48%;
+  background-color: #f0ead254;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Id = styled.p`
@@ -89,7 +91,7 @@ const ClosedCard = ({ data }) => {
         <Area>Quantity: {data?.unit_bought}</Area>
         <Area>{data?._id.area}</Area>
       </TypeBox>
-      <TypeBox style={{display:"block"}}>
+      <TypeBox style={{ display: "block" }}>
         <Name>{data?.customer_name || "Buyer Name"}</Name>
         <Number>{data?.customer_phone}</Number>
         <Address>{data?.customer_address || "Buyer Address"}</Address>
