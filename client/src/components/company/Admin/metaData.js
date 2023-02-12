@@ -5,6 +5,7 @@ export const navigationData = [
     post_url: "admin/stage",
     redirection_url: "/marketplace",
     validate_url: "admin/validate-data",
+    staged_list_get: "admin/stage",
   },
   {
     name: "Farmers",
