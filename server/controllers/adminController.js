@@ -54,14 +54,102 @@ exports.getStagedAgreements = async (req, res, next) => {
     });
 };
 
+// Route to      => api/v1/admin/validate-data
+// Validate the Json data in table
+exports.validateFarmers = async (req, res, next) => {
+  adminService
+    .validateFarmers(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/state : POST
+// create data in stage table
+exports.stagedFarmers = async (req, res, next) => {
+  adminService
+    .stagedFarmers(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/stage :: GET
+// get staged data
+exports.getStagedFarmers = async (req, res, next) => {
+  adminService
+    .getStagedFarmers(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // Route to     => POST: api/v1/admin/farmer
 // Create farmer
 exports.createFarmer = async (req, res, next) => {
-  console.log("createFarmer Controllers : ");
   adminService
     .createFarmer(req)
     .then((response) => {
-      console.log("res controller :- ", response);
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation 2 ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to     => UPDATE: api/v1/admin/farmer/:id
+// Create farmer
+exports.updateFarmer = async (req, res, next) => {
+  adminService
+    .updateFarmer(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation 2 ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to     => DELETE: api/v1/admin/farmer/:id
+// Create farmer
+exports.deleteFarmer = async (req, res, next) => {
+  adminService
+    .deleteFarmer(req)
+    .then((response) => {
       res.json(response);
     })
     .catch((error) => {
@@ -86,6 +174,42 @@ exports.createFarm = async (req, res, next) => {
     .catch((error) => {
       res.status(400).json({
         error: `failed operation controllers ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to     => UPDATE: api/v1/admin/farm/:id
+// update farm
+exports.updateFarm = async (req, res, next) => {
+  adminService
+    .updateFarm(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to     => DELETE: api/v1/admin/farm/:id
+// delete farm
+exports.deleteFarm = async (req, res, next) => {
+  adminService
+    .deleteFarm(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,

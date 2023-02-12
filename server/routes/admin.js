@@ -9,12 +9,19 @@ const {
   getFarmers,
   createCustomer,
   getFarms,
+  deleteFarm,
+  updateFarm,
   getCustomers,
   getdashBoard,
   getAgreementsForAdmin,
   closeAgreement,
   stagedAgreements,
   getStagedAgreements,
+  validateFarmers,
+  stagedFarmers,
+  getStagedFarmers,
+  updateFarmer,
+  deleteFarmer,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -42,6 +49,16 @@ router
   .route("/farm")
   .post(isAuthenticatedUser, authorizeRoles("admin"), createFarm);
 
+// Delete farm data into DB.
+router
+  .route("/farm/:id")
+  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteFarm);
+
+// Update farm data into DB.
+router
+  .route("/farm/:id")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateFarm);
+
 // Get List of farms
 router
   .route("/farms")
@@ -57,10 +74,35 @@ router
   .route("/agreement/closed/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin"), closeAgreement);
 
+// Validate Farmer.
+router
+  .route("/farmer/validate")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), validateFarmers);
+
+// Insert farmer data into Stage DB.
+router
+  .route("/farmer/stage")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), stagedFarmers);
+
+// Get farmer data into stage Table.
+router
+  .route("/farmer/stage")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getStagedFarmers);
+
 // Insert farmer data into DB.
 router
   .route("/farmer")
   .post(isAuthenticatedUser, authorizeRoles("admin"), createFarmer);
+
+// Insert farmer data into DB.
+router
+  .route("/farmer/:id")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateFarmer);
+
+// Delete farmer data into DB.
+router
+  .route("/farmer/:id")
+  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteFarmer);
 
 // Get List of farmers
 router

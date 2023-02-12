@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 // User Model
 const stageAgreementSchema = new mongoose.Schema(
   {
+    file_name: {
+      type: String,
+    },
     farmer_name: {
       type: String,
     },

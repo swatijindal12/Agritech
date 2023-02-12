@@ -352,7 +352,7 @@ exports.createAgreement = async (req) => {
     // updating in stage table and giving data to agreement collection to insert.
 
     const agreements = await Agreement.create(updatedData, {
-      select: `-_id -stage_status -approval_status`,
+      select: `-_id -stage_status -approval_status -file_name`,
     });
     (response.message = "Data Insertion successful"),
       (response.httpStatus = 200),
