@@ -16,6 +16,17 @@ const FilterContainer = styled.div`
   position: relative;
 `;
 
+const CardsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 2rem 0;
+
+  @media only screen and (max-width: 990px) {
+    display: block;
+  }
+`;
+
 const Farms = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
@@ -69,9 +80,11 @@ const Farms = () => {
         </FilterContainer>
       </Flexbox>
       <br />
-      {farms?.map(item => {
-        return <Card data={item} key={item._id}/>;
-      })}
+      <CardsContainer>
+        {farms?.map(item => {
+          return <Card data={item} key={item._id} />;
+        })}
+      </CardsContainer>
     </Container>
   );
 };

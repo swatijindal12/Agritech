@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -60,11 +60,22 @@ const StatusImage = styled.img`
   object-fit: cover;
 `;
 
+const UploadText = styled.div`
+  width: 100vw;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  opacity: 0.3;
+`;
+
 const CsvUpload = () => {
   const [data, setData] = useState(null);
   const [tableHeading, setTableHeading] = useState([]);
   const [errors, setErrors] = useState([]);
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const user = useSelector(store => store.auth.user);
   const uploadData = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -106,6 +117,7 @@ const CsvUpload = () => {
   };
 
   const handleUpload = () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
     axios
@@ -120,10 +132,12 @@ const CsvUpload = () => {
         }
       )
       .then(res => {
+        setLoading(false);
         console.log("res in setting new data: ", res);
         window.location.href = uploadData.redirection_url;
       })
       .catch(err => {
+        setLoading(false);
         console.log("error in setting new data", err);
         alert("error in setting new data ", err);
       });
@@ -139,41 +153,47 @@ const CsvUpload = () => {
           type="File"
         />
         <Button
-          text="UPLOAD"
+          text={loading ? "...UPLOADING" : "UPLOAD"}
           margin="0 1rem"
-          disabled={errors?.length > 0 || !data}
+          disabled={errors?.length > 0 || !data || loading}
           onClick={handleUpload}
         />
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again
         </ErrorTag>
       </TopContainer>
-      <TableContainer>
-        <Table>
-          <tr>
-            {tableHeading.map(item => {
-              return <th>{item}</th>;
+      {data?.length > 0 ? (
+        <TableContainer>
+          <Table>
+            <tr>
+              {tableHeading.map(item => {
+                return <th>{item}</th>;
+              })}
+            </tr>
+            {data?.map((row, index) => {
+              return (
+                <Tr error={errors?.includes(index)}>
+                  {tableHeading.map((item, tdIndex) => {
+                    if (tdIndex === 0)
+                      return (
+                        <td>
+                          <StatusImage
+                            src={
+                              errors?.includes(index) ? CrossIcon : CheckIcon
+                            }
+                          />
+                        </td>
+                      );
+                    return <td>{row[item]}</td>;
+                  })}
+                </Tr>
+              );
             })}
-          </tr>
-          {data?.map((row, index) => {
-            return (
-              <Tr error={errors?.includes(index)}>
-                {tableHeading.map((item, tdIndex) => {
-                  if (tdIndex === 0)
-                    return (
-                      <td>
-                        <StatusImage
-                          src={errors?.includes(index) ? CrossIcon : CheckIcon}
-                        />
-                      </td>
-                    );
-                  return <td>{row[item]}</td>;
-                })}
-              </Tr>
-            );
-          })}
-        </Table>
-      </TableContainer>
+          </Table>
+        </TableContainer>
+      ) : (
+        <UploadText>Uload csv file</UploadText>
+      )}
     </Container>
   );
 };

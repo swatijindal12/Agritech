@@ -9,8 +9,12 @@ const Container = styled.div`
   padding: 1rem 1.5rem;
   background-color: #f0ead24d;
   border-radius: 8px;
-  width: 100%;
+  width: 32%;
   margin: 1rem 0;
+
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const NameContainer = styled.div`
@@ -39,7 +43,7 @@ const Card = ({ data }) => {
     <Container>
       <Flexbox justify="unset" margin="0 0 1rem">
         <Flexbox justify="space-between">
-          <img src={Star} width="80%"/>
+          <img src={Star} width="80%" />
           <Number>{data.rating}</Number>
         </Flexbox>
         <NameContainer>

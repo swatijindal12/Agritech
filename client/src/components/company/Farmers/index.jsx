@@ -18,7 +18,14 @@ const FilterContainer = styled.div`
 `;
 
 const CardsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   margin: 2rem 0;
+
+  @media only screen and (max-width: 990px) {
+    display: block;
+  }
 `;
 
 const Farmers = () => {
