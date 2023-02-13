@@ -61,10 +61,12 @@ const Admin = () => {
     localStorage.setItem(
       "current-new-upload-data",
       JSON.stringify({
+        name: item.name,
         validate_url: item.validate_url,
         post_url: item.post_url,
         redirection_url: item.redirection_url,
         staged_list_get: item.staged_list_get,
+        final_upload_url: item.final_upload_url,
       })
     );
     window.location.href = "/csv-validator";
@@ -74,10 +76,12 @@ const Admin = () => {
     localStorage.setItem(
       "current-new-upload-data",
       JSON.stringify({
+        name: item.name,
         validate_url: item.validate_url,
         post_url: item.post_url,
         redirection_url: item.redirection_url,
         staged_list_get: item.staged_list_get,
+        final_upload_url: item.final_upload_url,
       })
     );
     window.location.href = "/approve";

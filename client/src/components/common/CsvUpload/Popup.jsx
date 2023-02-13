@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import Lottie from "lottie-react";
-import SuccessLottie from "../../../assets/lottie/success.json";
+import Button from "../Button";
+import Flexbox from "../Flexbox";
 
 const Container = styled.div`
   position: fixed;
@@ -24,25 +24,24 @@ const InnerContianer = styled.div`
 `;
 
 const Message = styled.p`
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 500;
   color: #adc178;
   margin-bottom: 1rem;
 `;
 
-const Modal = () => {
+const Popup = ({ toggle, addToList }) => {
   return (
     <Container>
       <InnerContianer>
-        <Message>Payment Successfull</Message>
-        <Lottie
-          animationData={SuccessLottie}
-          loop={false}
-          style={{ height: "100px" }}
-        />
+        <Message>Add items to the list</Message>
+        <Flexbox justify="space-between">
+          <Button text="Add" onClick={addToList} margin="0 1rem 0 0" />
+          <Button text="Cancel" color="#FCBF49" onClick={toggle} />
+        </Flexbox>
       </InnerContianer>
     </Container>
   );
 };
 
-export default Modal;
+export default Popup;
