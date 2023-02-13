@@ -49,30 +49,8 @@ const MarketPlace = () => {
       .catch(err => console.log("Error in fetching dashboard data ", err));
   }, []);
 
-  const handleNewUpload = () => {
-    localStorage.setItem(
-      "current-new-upload-data",
-      JSON.stringify({
-        validate_url: "admin/validate-data",
-        post_url: "marketplace/agreement",
-        redirection_url: "/marketplace",
-      })
-    );
-    window.location.href = "/csv-validator";
-  };
-
   return (
     <Container>
-      {/* <ButtonContainer justify="flex-start">
-        <Title>MarketPlace</Title>
-        {user.data.role === "admin" && (
-          <Button
-            text="UPLOAD NEW CONRACT"
-            margin="0"
-            onClick={handleNewUpload}
-          />
-        )}
-      </ButtonContainer> */}
       <CardsContainer>
         {contract?.map(item => {
           return <Card data={item} key={item.agreements[0]} />;

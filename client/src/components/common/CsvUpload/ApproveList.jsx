@@ -16,13 +16,18 @@ const ListItem = styled.div`
   cursor: pointer;
 `;
 
-const ApproveList = ({ data, setSelectedItem }) => {
+const ApproveList = ({ data, setSelectedItem, setSelectedItemName }) => {
   return (
     <Container>
-      {data.map(item => {
+      {data?.map(item => {
         return (
-          <ListItem onClick={() => setSelectedItem(item.data)}>
-            {item.name}
+          <ListItem
+            onClick={() => {
+              setSelectedItem(item?.data);
+              setSelectedItemName(item.name);
+            }}
+          >
+            {item?.name}
           </ListItem>
         );
       })}
