@@ -4,6 +4,7 @@ import Flexbox from "../../common/Flexbox";
 import CrossIcon from "../../../assets/green-cross.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart } from "../../../redux/actions/cartActions";
+import NFTPopup from "../../common/NFTPopup";
 
 const Cross = styled.img`
   position: absolute;
@@ -53,11 +54,29 @@ const Id = styled.p`
   font-weight: 700;
 `;
 
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    overflow-x: scroll;
+    scroll-margin-top: 1rem;
+  }
+`;
+
 const Card = ({ data, index }) => {
+  const [selectedNFTId, setSelectedNFTId] = useState("");
+
   const dispatch = useDispatch();
 
   const removeItemFromCart = () => {
     dispatch(removeFromCart(index));
+  };
+
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
   };
 
   return (
@@ -72,9 +91,25 @@ const Card = ({ data, index }) => {
             if (data?.selected_quantity > index) {
               return (
                 <React.Fragment key={index}>
-                  <a href={data.tx_hash[index]} target="_blank">
-                    #{nftId}
-                  </a>{" "}
+                  <a
+                    style={{ color: "blue" }}
+                    onClick={() => togglePopup(nftId)}
+                  >
+                    #{data.farm_nft_id}
+                  </a>
+                  <NFTPopup
+                    isOpen={selectedNFTId === nftId}
+                    togglePopup={togglePopup}
+                    tx_hash={data.tx_hash}
+                  >
+                    <PopupContent>farm_id:{data.farmer_id}</PopupContent>
+                    <PopupContent>
+                      IPFS URL:
+                      <a href={data?.ipfs_url} target="_blank">
+                        {data?.ipfs_url}
+                      </a>
+                    </PopupContent>
+                  </NFTPopup>
                 </React.Fragment>
               );
             }
