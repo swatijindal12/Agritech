@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { navigationData } from "./metaData";
 
@@ -15,7 +16,7 @@ const Card = styled.div`
 
 const CardContainer = styled.div`
   width: 80vw;
-  margin: auto;
+  margin: 2rem auto;
   display: flex;
   flex-wrap: wrap;
   row-gap: 1rem;
@@ -50,6 +51,12 @@ const BottomContainer = styled.div`
 `;
 
 const Admin = () => {
+  const user = useSelector(store => store.auth.user);
+
+  useEffect(() => {
+    if (user.data.role !== "admin") window.location.href = "/marketplace";
+  }, []);
+
   const handleNewUpload = item => {
     localStorage.setItem(
       "current-new-upload-data",
@@ -57,9 +64,23 @@ const Admin = () => {
         validate_url: item.validate_url,
         post_url: item.post_url,
         redirection_url: item.redirection_url,
+        staged_list_get: item.staged_list_get,
       })
     );
     window.location.href = "/csv-validator";
+  };
+
+  const handleApproveClick = item => {
+    localStorage.setItem(
+      "current-new-upload-data",
+      JSON.stringify({
+        validate_url: item.validate_url,
+        post_url: item.post_url,
+        redirection_url: item.redirection_url,
+        staged_list_get: item.staged_list_get,
+      })
+    );
+    window.location.href = "/approve";
   };
 
   return (
@@ -73,7 +94,9 @@ const Admin = () => {
                 <BottomContainer onClick={() => handleNewUpload(item)}>
                   Upload New
                 </BottomContainer>
-                <BottomContainer>Aprrove Existing</BottomContainer>
+                <BottomContainer onClick={() => handleApproveClick(item)}>
+                  Aprrove Existing
+                </BottomContainer>
                 <BottomContainer>Modify</BottomContainer>
               </CardBottomContainer>
             </Card>
