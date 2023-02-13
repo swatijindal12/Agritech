@@ -296,5 +296,4 @@ const farmNFTContractABI = [
     type: "function",
   },
 ];
-
 module.exports = farmNFTContractABI;

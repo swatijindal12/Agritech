@@ -27,6 +27,7 @@ contract Marketplace is Ownable {
         address buyer;
         address farmerAddr;
         string razorTransId;
+        bool isClosedContract;
     }
     // Mapping from agreementNFTId to AgreementInfo struct
     mapping(uint256 => AgreementInfo) public agreementDetails;
@@ -45,7 +46,15 @@ contract Marketplace is Ownable {
         farmNFT = IERC721(farmNFT_);
         agreementNFT = IAgreementNFT(agreementNFT_);
     }
-
+    
+    /**
+    @dev put contract NFT on sell & call createAgreement() to create Contract NFT
+    * Requirements:
+    * - `price_` must be greater than 0
+    - `startDate_` must be greater than current timestamp
+    - `endDate_` must be greater than startDate_
+    Emits a {Sell} event.
+    */
     function putContractOnSell(
         address farmerAddr_,
         uint256 farmNFTId_,
@@ -55,10 +64,10 @@ contract Marketplace is Ownable {
         string memory agreementNftUri_
     ) external onlyOwner {
         require(price_ != 0, "Invalid price");
-        require(
-            block.timestamp <= startDate_,
-            "startDate less than current time"
-        );
+        // require(
+        //     block.timestamp <= startDate_,
+        //     "startDate less than current time"
+        // );
         require(startDate_ < endDate_, "end date should be less");
 
         uint256 agreementNftId_ = IAgreementNFT(agreementNFT).createAgreement(
@@ -72,15 +81,19 @@ contract Marketplace is Ownable {
         agreementDetails[agreementNftId_].startDate = startDate_;
         agreementDetails[agreementNftId_].endDate = endDate_;
 
-        IERC721(farmNFT).transferFrom(
-            msg.sender,
-            address(this),
-            farmNFTId_
-        );
         agreementDetails[agreementNftId_].agreementNftId = agreementNftId_;
 
         emit Sell(farmNFTId_, price_, agreementNftId_);
     }
+
+    /**
+    @dev to buy contract NFT
+    @param agreementNftId_ array of contract NFT id
+    @param transactionId array of razorpay transaction id
+    Requirements:
+    -`agreementNftId_ & transactionId` length of array must be equal
+    -`msg.sender` must not be equal to farmerAddr & owner
+     */
 
     function buyContract(
         uint256[] memory agreementNftId_,
@@ -120,25 +133,35 @@ contract Marketplace is Ownable {
         }
     }
 
+    /**
+    @dev to closed contract NFT
+    @param agreementNftId_ contract NFT id
+    Requirements:
+    -`isClosedContract` to check whether contract NFT is on sale or not.
+    -`buyer` msg.sender must equal to buyer address
+    Emits a {ClosedContractNFT} event.
+     */
+
     function soldContractNFT(uint256 agreementNftId_) external {
         require(
-            agreementDetails[agreementNftId_].agreementNftId != 0,
+            !(agreementDetails[agreementNftId_].isClosedContract),
             "Not on sale"
         );
-        require(
-            msg.sender == agreementDetails[agreementNftId_].buyer,
-            "Only Buyer"
-        );
+        // require(
+        //     msg.sender == agreementDetails[agreementNftId_].buyer,
+        //     "Only Buyer"
+        // );
 
-        IAgreementNFT(agreementNFT).closeAgreement(
-            agreementDetails[agreementNftId_].buyer,
-            agreementNftId_
-        );
-        IERC721(farmNFT).transferFrom(address(this), owner(), agreementDetails[agreementNftId_].farmNFTId);
-        delete agreementDetails[agreementNftId_];
+       agreementDetails[agreementNftId_].isClosedContract = true;
 
         emit ClosedContractNFT(agreementNftId_);
     }
+
+    /**
+    @dev to get sell detail
+    @param agreementNFTId array of contract NFT Id
+    - returns a agreement data.
+     */
 
     function getSellDetailByTokenId(
         uint256[] calldata agreementNFTId
@@ -152,6 +175,11 @@ contract Marketplace is Ownable {
         return agreementData;
     }
 
+    /**
+    @dev to get all active contract list of particular buyer
+    @param _buyerAddr buyer address
+    - returns all array of contract list of buyer
+     */
     function getAcceptedContractList(
         address _buyerAddr
     ) external view returns (uint256[] memory) {

@@ -16,6 +16,9 @@ module.exports = {
 	etherscan: {
 		apiKey: process.env.MATIC_API_KEY, //for polygonscan (mumbai)
 	},
+	gasReporter: {
+		enabled: true
+	  }
 }
 
 //Farm NFT deployed to 0xb2114c3Bf73A88A75a13d02bA3AEFFb8b68F7757
