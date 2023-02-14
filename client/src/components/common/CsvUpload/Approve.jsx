@@ -6,6 +6,7 @@ import Arrow from "../../../assets/down-arrow.svg";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
+import Popup from "./Popup";
 
 const Container = styled.div`
   padding: 1rem;
@@ -50,7 +51,7 @@ const Table = styled.table`
 
 const UploadText = styled.div`
   width: 100vw;
-  height: 80vh;
+  height: 60vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,12 +59,25 @@ const UploadText = styled.div`
   opacity: 0.3;
 `;
 
+const Heading = styled.p`
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6c584c;
+  margin: 0.5rem 0 1.5rem;
+  text-align: center;
+`;
+
 const Approve = () => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItemName, setSelectedItemName] = useState("");
   const [tableHeading, setTableHeading] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
   const user = useSelector(store => store.auth.user);
+  const selectedType = JSON.parse(
+    localStorage.getItem("current-new-upload-data")
+  );
 
   useEffect(() => {
     let tempArr = [];
@@ -79,10 +93,7 @@ const Approve = () => {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/${
-          JSON.parse(localStorage.getItem("current-new-upload-data"))
-            ?.staged_list_get
-        }`,
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.staged_list_get}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -95,49 +106,82 @@ const Approve = () => {
   }, []);
 
   const handleUploadClick = () => {
+    axios
+      .post(
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.final_upload_url}`,
+        selectedItem,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
+      .then(res => {
+        console.log("posted Succssfully ", res.data);
+        window.location.href = selectedType?.redirection_url;
+      });
     setSelectedItem(null);
     setShowList(false);
+    setShowPopup(false);
   };
 
   return (
-    <Container>
-      <Flexbox justify="flex-start">
-        <Selector>
-          Select Contract To Review
-          <ArrowImage
-            src={Arrow}
-            reverse={showList}
-            onClick={() => setShowList(!showList)}
-          />
-          {showList && (
-            <ApproveList data={list} setSelectedItem={setSelectedItem} />
-          )}
-        </Selector>
-        <Button text="UPLOAD" onClick={handleUploadClick} />
-      </Flexbox>
-      {selectedItem ? (
-        <TableContainer>
-          <Table>
-            <tr>
-              {tableHeading.map(item => {
-                return <th>{item}</th>;
-              })}
-            </tr>
-            {selectedItem?.map(row => {
-              return (
-                <tr>
-                  {tableHeading.map(item => {
-                    return <td>{row[item]}</td>;
-                  })}
-                </tr>
-              );
-            })}
-          </Table>
-        </TableContainer>
-      ) : (
-        <UploadText>Select file for preview</UploadText>
+    <>
+      {showPopup && (
+        <Popup
+          toggle={() => setShowPopup(!showPopup)}
+          addToList={handleUploadClick}
+        />
       )}
-    </Container>
+      <Container>
+        <Heading>{`Review ${selectedType.name} Uploaded Lists`}</Heading>
+        <Flexbox>
+          <Selector>
+            {selectedItem ? selectedItemName : `Select Contract To Review`}
+            <ArrowImage
+              src={Arrow}
+              reverse={showList}
+              onClick={() => setShowList(!showList)}
+            />
+            {showList && (
+              <ApproveList
+                data={list}
+                setSelectedItem={setSelectedItem}
+                setSelectedItemName={setSelectedItemName}
+              />
+            )}
+          </Selector>
+          <Button
+            text="ADD TO LIST"
+            onClick={() => setShowPopup(true)}
+            margin="0 1rem"
+            disabled={!selectedItem}
+          />
+        </Flexbox>
+        {selectedItem ? (
+          <TableContainer>
+            <Table>
+              <tr>
+                {tableHeading.map(item => {
+                  return <th>{item}</th>;
+                })}
+              </tr>
+              {selectedItem?.map(row => {
+                return (
+                  <tr>
+                    {tableHeading.map(item => {
+                      return <td>{row[item]}</td>;
+                    })}
+                  </tr>
+                );
+              })}
+            </Table>
+          </TableContainer>
+        ) : (
+          <UploadText>Select file for preview</UploadText>
+        )}
+      </Container>
+    </>
   );
 };
 

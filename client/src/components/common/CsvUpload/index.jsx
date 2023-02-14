@@ -62,12 +62,20 @@ const StatusImage = styled.img`
 
 const UploadText = styled.div`
   width: 100vw;
-  height: 80vh;
+  height: 70vh;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
   opacity: 0.3;
+`;
+
+const Heading = styled.p`
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6c584c;
+  margin: 0.5rem 0 1.5rem;
+  text-align: center;
 `;
 
 const CsvUpload = () => {
@@ -145,7 +153,8 @@ const CsvUpload = () => {
 
   return (
     <Container>
-      <TopContainer justify="flex-start">
+      <Heading>{`Upload ${uploadData.name} For Review`}</Heading>
+      <TopContainer justify="center">
         <input
           onChange={handleFileChange}
           id="csvInput"
@@ -153,7 +162,7 @@ const CsvUpload = () => {
           type="File"
         />
         <Button
-          text={loading ? "...UPLOADING" : "UPLOAD"}
+          text={loading ? "...UPLOADING" : "ADD TO REVIEW"}
           margin="0 1rem"
           disabled={errors?.length > 0 || !data || loading}
           onClick={handleUpload}

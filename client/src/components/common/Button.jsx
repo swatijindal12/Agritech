@@ -26,7 +26,9 @@ const Button = ({ color, margin, width, text, disabled, onClick }) => {
       margin={margin}
       width={width}
       disabled={disabled}
-      onClick={onClick}
+      onClick={() => {
+        if(!disabled) onClick();
+      }}
     >
       {text}
     </Container>
