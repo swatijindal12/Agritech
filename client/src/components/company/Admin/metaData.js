@@ -20,10 +20,10 @@ export const navigationData = [
   {
     name: "Farms",
     color: "#F77F00",
-    post_url: "marketplace/agreement",
-    redirection_url: "/marketplace",
-    validate_url: "admin/validate-data",
-    staged_list_get: "admin/farmer/stage",
-    final_upload_url: "admin/farmer",
+    post_url: "admin/farm/stage",
+    redirection_url: "/farms",
+    validate_url: "admin/farm/validate",
+    staged_list_get: "admin/farm/stage",
+    final_upload_url: "admin/farm",
   },
 ];
