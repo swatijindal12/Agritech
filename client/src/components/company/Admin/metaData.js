@@ -7,6 +7,7 @@ export const navigationData = [
     validate_url: "admin/validate-data",
     staged_list_get: "admin/stage",
     final_upload_url: "marketplace/agreement",
+    get_list: "marketplace/agreements",
   },
   {
     name: "Farmers",
@@ -16,6 +17,7 @@ export const navigationData = [
     validate_url: "admin/farmer/validate",
     staged_list_get: "admin/farmer/stage",
     final_upload_url: "admin/farmer",
+    get_list: "admin/farmers",
   },
   {
     name: "Farms",
@@ -25,5 +27,6 @@ export const navigationData = [
     validate_url: "admin/farm/validate",
     staged_list_get: "admin/farm/stage",
     final_upload_url: "admin/farm",
+    get_list: "admin/farms",
   },
 ];
