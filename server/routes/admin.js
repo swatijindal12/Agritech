@@ -20,6 +20,7 @@ const {
   closeAgreement,
   stagedAgreements,
   getStagedAgreements,
+  deleteAgreements,
   validateFarmers,
   stagedFarmers,
   getStagedFarmers,
@@ -46,6 +47,11 @@ router
 router
   .route("/stage")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getStagedAgreements);
+
+// Delete agreement which are not active
+router
+  .route("/agreement/:id")
+  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteAgreements);
 
 // Insert farm data into DB.
 router

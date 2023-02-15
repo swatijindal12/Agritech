@@ -185,6 +185,40 @@ exports.getStagedAgreements = async (req) => {
   return response;
 };
 
+// Delete Agreement Service /:id
+exports.deleteAgreement = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+  try {
+    // First check agreement is their with id
+    const agreement = await Agreement.findOne({
+      _id: id,
+      agreementclose_status: true,
+    });
+
+    if (agreement) {
+      // delete the farmer data..
+      await Agreement.deleteOne({ _id: id });
+      response.message = `Successfully deleted`;
+      response.httpStatus = 200;
+    } else {
+      response.error = `agreement not found or agreement active`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
 exports.validateFarmers = async (req) => {
   // General response format
 
@@ -505,8 +539,8 @@ exports.getFarmers = async (req) => {
         .limit(limit)
         .sort({ rating: -1 })
         .select("-__v");
-    } else if (sortOrder === undefined) {
-      farmers = await Farmer.find().skip(skip).limit(limit).select("-__v");
+    } else {
+      farmers = await Farmer.find().select("-__v");
     }
     (response.data = farmers), (response.httpStatus = 200);
   } catch (error) {
