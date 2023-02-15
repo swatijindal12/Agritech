@@ -54,7 +54,7 @@ exports.getStagedAgreements = async (req, res, next) => {
     });
 };
 
-// Route to      => api/v1/admin/validate-data
+// Route to      => api/v1/admin/validate/farmer :: POST
 // Validate the Json data in table
 exports.validateFarmers = async (req, res, next) => {
   adminService
@@ -72,7 +72,7 @@ exports.validateFarmers = async (req, res, next) => {
     });
 };
 
-// Route to      => api/v1/admin/state : POST
+// Route to      => api/v1/admin/stage : POST
 // create data in stage table
 exports.stagedFarmers = async (req, res, next) => {
   adminService
@@ -155,6 +155,60 @@ exports.deleteFarmer = async (req, res, next) => {
     .catch((error) => {
       res.status(400).json({
         error: `failed operation 2 ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/validate/farm :: POST
+// Validate the Json data in table
+exports.validateFarms = async (req, res, next) => {
+  adminService
+    .validateFarms(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/farm/stage : POST
+// create data in stage table
+exports.stagedFarms = async (req, res, next) => {
+  adminService
+    .stagedFarms(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to      => api/v1/admin/farm/stage :: GET
+// get staged data
+exports.getStagedFarms = async (req, res, next) => {
+  adminService
+    .getStagedFarms(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,

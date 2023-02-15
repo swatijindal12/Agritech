@@ -5,6 +5,9 @@ const router = express.Router();
 const {
   validateData,
   createFarm,
+  stagedFarms,
+  getStagedFarms,
+  validateFarms,
   createFarmer,
   getFarmers,
   createCustomer,
@@ -48,6 +51,21 @@ router
 router
   .route("/farm")
   .post(isAuthenticatedUser, authorizeRoles("admin"), createFarm);
+
+// Validate farm.
+router
+  .route("/farm/validate")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), validateFarms);
+
+// Insert farm data into Stage DB.
+router
+  .route("/farm/stage")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), stagedFarms);
+
+// Get farm data from stage Table.
+router
+  .route("/farm/stage")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getStagedFarms);
 
 // Delete farm data into DB.
 router
@@ -94,7 +112,7 @@ router
   .route("/farmer")
   .post(isAuthenticatedUser, authorizeRoles("admin"), createFarmer);
 
-// Insert farmer data into DB.
+// Update farmer data into DB.
 router
   .route("/farmer/:id")
   .put(isAuthenticatedUser, authorizeRoles("admin"), updateFarmer);
