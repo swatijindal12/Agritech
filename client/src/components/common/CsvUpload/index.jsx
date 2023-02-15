@@ -182,7 +182,7 @@ const CsvUpload = () => {
 
   return (
     <Container>
-      <Heading>{`Upload ${uploadData.name} For Review`}</Heading>
+      <Heading>{`Upload ${uploadData.name}`}</Heading>
       <TopContainer justify="center">
         <input
           onChange={handleFileChange}
@@ -191,7 +191,7 @@ const CsvUpload = () => {
           type="File"
         />
         <Button
-          text={loading ? "...UPLOADING" : "ADD TO REVIEW"}
+          text={loading ? "...UPLOADING" : "SEND FOR APPROVAL"}
           margin="0 1rem"
           disabled={errors?.length > 0 || !data || loading}
           onClick={handleUpload}
