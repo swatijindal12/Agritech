@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/auth/Login";
+import Login from "./components/auth/Login/index";
 import MarketPlace from "./components/common/Marketplace";
 import Navbar from "./components/common/Navbar";
 import Sidebar from "./components/common/Sidebar";
@@ -18,6 +18,7 @@ import Aboutus from "./components/common/Aboutus";
 import CsvUpload from "./components/common/CsvUpload";
 import Admin from "./components/company/Admin";
 import Approve from "./components/common/CsvUpload/Approve";
+import Register from "./components/auth/Login/register";
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -59,6 +60,7 @@ const Routing = () => {
           <Route path="/csv-validator" element={<CsvUpload />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/approve" element={<Approve />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </Router>
     </>

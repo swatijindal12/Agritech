@@ -5,6 +5,7 @@ import Logo from "../../../assets/logo.jpg";
 import Button from "../../common/Button";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../redux/actions";
 import LoginImage from "../../../assets/login.png";
 
@@ -42,7 +43,7 @@ const BackGround = styled.img`
 `;
 
 const Heading = styled.p`
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 600;
   color: #6c584c;
   margin: 0;
@@ -92,6 +93,7 @@ const Login = () => {
   const [timeRemaining, setTimeRemaining] = useState(30);
   const dispatch = useDispatch();
   const user = useSelector(store => store.auth.user);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let interval;
@@ -115,7 +117,6 @@ const Login = () => {
       })
       .then(res => {
         console.log("res : ", res);
-
         if (res.status === 200) {
           setAuthorised(true);
         }
@@ -127,6 +128,10 @@ const Login = () => {
 
   const verifyOTP = () => {
     dispatch(loginUser({ phone: number, otp }));
+  };
+
+  const handleClick = () => {
+    navigate("/register");
   };
 
   return (
@@ -142,18 +147,24 @@ const Login = () => {
           <BackGround src={LoginImage} />
         </LeftContainer>
         <RightContainer>
-          <Heading>Login</Heading>
           {!authorised ? (
             <MiddleContainer>
+              <Heading>Login</Heading>
               <LogoImage src={Logo} alt="logo" />
               <br />
               <Input
                 type="number"
-                placeholder="Enter Moblile Number"
+                placeholder="Enter Mobile Number"
                 value={number}
                 onChange={e => setNumber(e.target.value)}
               />
               <Button text="SEND OTP" onClick={getOTP} />
+              <ResendMessageStyle
+                style={{ fontSize: "1rem", marginTop: "1rem" }}
+                onClick={handleClick}
+              >
+                {`Register as a customer`}
+              </ResendMessageStyle>
             </MiddleContainer>
           ) : (
             <MiddleContainer>
@@ -171,14 +182,13 @@ const Login = () => {
                   onClick={getOTP}
                 >{`Resend OTP`}</ResendMessageStyle>
               ) : (
-                <ResendMessageStyle>
-                  {`Resend OTP in ${timeRemaining} seconds`}
-                </ResendMessageStyle>
+                <ResendMessageStyle>{`Resend OTP in ${timeRemaining} seconds`}</ResendMessageStyle>
               )}
-              <Resend active={timeRemaining === 0} onClick={getOTP}></Resend>
+              <Resend active={timeRemaining === 0} onClick={getOTP} />
               <Button text="VERIFY" onClick={verifyOTP} />
             </MiddleContainer>
           )}
+          {}
         </RightContainer>
       </Container>
     </>
