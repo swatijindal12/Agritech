@@ -42,7 +42,7 @@ const BackGround = styled.img`
 `;
 
 const Heading = styled.p`
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 600;
   color: #6c584c;
   margin: 0;
@@ -142,9 +142,9 @@ const Login = () => {
           <BackGround src={LoginImage} />
         </LeftContainer>
         <RightContainer>
-          <Heading>Login</Heading>
           {!authorised ? (
             <MiddleContainer>
+              <Heading>Login</Heading>
               <LogoImage src={Logo} alt="logo" />
               <br />
               <Input
