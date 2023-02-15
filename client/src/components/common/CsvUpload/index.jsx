@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -54,6 +54,29 @@ const ErrorTag = styled.p`
   display: ${props => (props.show ? "block" : "none")};
 `;
 
+const StatusImageContainer = styled.td`
+  position: realtive;
+
+  .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+  }
+
+  :hover .tooltiptext {
+    visibility: visible;
+  }
+`;
+
 const StatusImage = styled.img`
   height: 50px;
   width: 50px;
@@ -85,12 +108,13 @@ const CsvUpload = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const user = useSelector(store => store.auth.user);
-  const uploadData = JSON.parse(
-    localStorage.getItem("current-new-upload-data")
-  );
+  const [uploadData, setUploadData] = useState({});
+
+  useEffect(() => {
+    setUploadData(JSON.parse(localStorage.getItem("current-new-upload-data")));
+  }, [file]);
 
   const handleFileChange = e => {
-    // Check if user has entered the file
     if (e.target.files.length) {
       const inputFile = e.target.files[0];
       setFile(inputFile);
@@ -98,7 +122,7 @@ const CsvUpload = () => {
       formData.append("file", inputFile);
       axios
         .post(
-          `${process.env.REACT_APP_BASE_URL}/admin/validate-data`,
+          `${process.env.REACT_APP_BASE_URL}/${uploadData.validate_url}`,
           formData,
           {
             headers: {
@@ -151,6 +175,11 @@ const CsvUpload = () => {
       });
   };
 
+  const getErrorIndex = index => {
+    let item = errors?.filter(error => error.line === index);
+    return item?.length > 0 ? item[0] : false;
+  };
+
   return (
     <Container>
       <Heading>{`Upload ${uploadData.name} For Review`}</Heading>
@@ -185,13 +214,16 @@ const CsvUpload = () => {
                   {tableHeading.map((item, tdIndex) => {
                     if (tdIndex === 0)
                       return (
-                        <td>
+                        <StatusImageContainer>
                           <StatusImage
-                            src={
-                              errors?.includes(index) ? CrossIcon : CheckIcon
-                            }
+                            src={getErrorIndex(index) ? CrossIcon : CheckIcon}
                           />
-                        </td>
+                          {getErrorIndex(index) && (
+                            <span class="tooltiptext">
+                              {getErrorIndex(index)?.message}
+                            </span>
+                          )}
+                        </StatusImageContainer>
                       );
                     return <td>{row[item]}</td>;
                   })}

@@ -71,6 +71,7 @@ const Hamburger = styled.img`
 
 const Cart = styled.img`
   margin-left: 12.5rem;
+  cursor: pointer;
 `;
 
 const CartContainer = styled.div`
@@ -147,6 +148,15 @@ const Navbar = ({ toggleSidebar }) => {
           })}
         </NavItemsContainer>
         <NavRightContainer>
+          {user?.data?.role === "customer" && (
+            <CartContainer>
+              <CartNumber ref={cartNumberRef}>{cartItem.length}</CartNumber>
+              <Cart
+                src={CartImg}
+                onClick={() => (window.location.href = "/cart")}
+              />
+            </CartContainer>
+          )}
           <Logout onClick={handleLogout}>LOGOUT</Logout>
           {user?.data?.role === "admin" && (
             <Button

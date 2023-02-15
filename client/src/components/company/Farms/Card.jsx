@@ -22,6 +22,7 @@ const Container = styled.div`
 const Image = styled.img`
   height: 100%;
   width: 100%;
+  max-height: 19rem;
   object-fit: cover;
   border-radius: 8px;
 `;
@@ -206,7 +207,7 @@ const Card = ({ data }) => {
               <RatingNumber>{data?.rating}</RatingNumber>
             </Flexbox>
             <Flexbox justify="space-content" style={{ alignItems: "baseline" }}>
-              <p style={{ color: "#6c584c", marginTop: "0.2rem" }}>
+              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>
                 Farm practices
               </p>
               <InfoImg
