@@ -33,6 +33,11 @@ const Table = styled.table`
   border-collapse: collapse;
   margin: 2rem 0 0 0;
 
+  tr {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   td {
     border: 1px solid black;
     padding: 1rem;
@@ -183,7 +188,7 @@ const CsvUpload = () => {
       .then(res => {
         setLoading(false);
         console.log("res in setting new data: ", res);
-        window.location.href = uploadData.redirection_url;
+        window.location.href = "/approve";
       })
       .catch(err => {
         setLoading(false);

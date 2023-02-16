@@ -39,6 +39,11 @@ const Table = styled.table`
   border-collapse: collapse;
   margin: 2rem 0 0 0;
 
+  tr {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   td {
     border: 1px solid black;
     padding: 1rem;

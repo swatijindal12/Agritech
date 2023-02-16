@@ -30,14 +30,23 @@ const Message = styled.p`
   margin-bottom: 1rem;
 `;
 
+const Description = styled.p`
+  font-size: 1rem;
+  margin: 0.8rem 0 1rem;
+  max-width: 22rem;
+`;
+
 const Popup = ({ toggle, addToList }) => {
   return (
     <Container>
       <InnerContianer>
-        <Message>Add items to the list</Message>
+        <Message>Approve</Message>
+        <Description>
+          Are you sure you want to Add this data to the existing list?
+        </Description>
         <Flexbox justify="space-between">
-          <Button text="Add" onClick={addToList} margin="0 1rem 0 0" />
-          <Button text="Cancel" color="#FCBF49" onClick={toggle} />
+          <Button text="ADD" onClick={addToList} margin="0 1rem 0 0" />
+          <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
         </Flexbox>
       </InnerContianer>
     </Container>

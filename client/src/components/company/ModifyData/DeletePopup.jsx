@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import Button from "../../common/Button";
+import Flexbox from "../../common/Flexbox";
 
 const Container = styled.div`
   position: fixed;
@@ -27,23 +29,27 @@ const Heading = styled.p`
   color: #a98467;
 `;
 
-const Form = styled.form`
-  input {
-    border-radius: 8px;
-    border: none;
-    background-color: #d9d9d954;
-  }
+const Description = styled.p`
+  font-size: 1rem;
+  margin: 0.8rem 0 1rem;
+  max-width: 22rem;
 `;
 
-const EditForm = () => {
+const DeletePopup = ({ deleteItem, toggle }) => {
   return (
     <Container>
       <InnerContianer>
-        <Heading>Edit Form</Heading>
-        <Form></Form>
+        <Heading>Delete Item</Heading>
+        <Description>
+          Are you sure you want to delete this data from the list?
+        </Description>
+        <Flexbox justify="space-around">
+          <Button onClick={deleteItem} text="DELETE" color="#D62828" />
+          <Button onClick={toggle} text="CANCEL" color="#FCBF49" />
+        </Flexbox>
       </InnerContianer>
     </Container>
   );
 };
 
-export default EditForm;
+export default DeletePopup;

@@ -4,6 +4,8 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import EditIcon from "../../../assets/edit.svg";
 import DeleteIcon from "../../../assets/delete.svg";
+import DeletePopup from "./DeletePopup";
+import EditForm from "./EditForm";
 
 const Container = styled.div`
   padding: 1rem;
@@ -26,6 +28,11 @@ const Table = styled.table`
   border: 1px solid black;
   border-collapse: collapse;
 
+  tr {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   td {
     border: 1px solid black;
     padding: 1rem;
@@ -37,15 +44,23 @@ const Table = styled.table`
   }
 
   img {
-    height: 48px;
-    width: 48px;
+    width: 28px;
     cursor: pointer;
   }
+`;
+
+const UrlTd = styled.td`
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 
 const ModifyData = () => {
   const [list, setList] = useState(null);
   const [tableHeading, setTableHeading] = useState(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showUpdatePopup, setShowUpdatePopup] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -65,57 +80,99 @@ const ModifyData = () => {
         tempArr.push("Edit");
         tempArr.push("Delete");
         for (const key in res.data.data[0]) {
-          if (!key.includes("_id")) tempArr.push(key);
+          tempArr.push(key);
         }
         setTableHeading(tempArr);
       });
   }, []);
 
-  const handleEdit = id => {};
+  const handleEdit = () => {};
 
-  const handleDelete = id => {};
+  const handleDelete = () => {
+    axios
+      .delete(
+        `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedId}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
+      .then(res => {
+        setShowDeletePopup(false);
+        window.location.reload();
+        console.log("delete response is ", res);
+      })
+      .catch(err => console.log("error in deleting data ", err));
+  };
 
   return (
-    <Container>
-      <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
-      <TableContainer>
-        <Table>
-          <tr>
-            {tableHeading?.map(item => {
-              return <th>{item}</th>;
+    <>
+      {showDeletePopup && (
+        <DeletePopup
+          deleteItem={handleDelete}
+          toggle={() => setShowDeletePopup(!showDeletePopup)}
+        />
+      )}
+      {showUpdatePopup && (
+        <EditForm
+          updateItem={handleEdit}
+          toggle={() => setShowUpdatePopup(!showUpdatePopup)}
+        />
+      )}
+      <Container>
+        <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
+        <TableContainer>
+          <Table>
+            <tr>
+              {tableHeading?.map(item => {
+                return <th>{item}</th>;
+              })}
+            </tr>
+            {list?.map(row => {
+              return (
+                <tr>
+                  {tableHeading?.map((item, tdIndex) => {
+                    if (tdIndex === 0)
+                      return (
+                        <td>
+                          <img
+                            src={EditIcon}
+                            onClick={() => {
+                              setSelectedId(row._id);
+                              // setShowUpdatePopup(true);
+                            }}
+                          />
+                        </td>
+                      );
+                    if (tdIndex === 1)
+                      return (
+                        <td>
+                          <img
+                            src={DeleteIcon}
+                            onClick={() => {
+                              setSelectedId(row._id);
+                              setShowDeletePopup(true);
+                            }}
+                          />
+                        </td>
+                      );
+                    if (row[item] === true) return <td>1</td>;
+                    if (row[item]?.toString()?.includes("http"))
+                      return (
+                        <UrlTd onClick={() => window.open(row[item])}>
+                          {item}
+                        </UrlTd>
+                      );
+                    else return <td>{row[item] || 0}</td>;
+                  })}
+                </tr>
+              );
             })}
-          </tr>
-          {list?.map(row => {
-            return (
-              <tr>
-                {tableHeading?.map((item, tdIndex) => {
-                  if (tdIndex === 0)
-                    return (
-                      <td>
-                        <img
-                          src={EditIcon}
-                          onClick={() => handleEdit(row._id)}
-                        />
-                      </td>
-                    );
-                  if (tdIndex === 1)
-                    return (
-                      <td>
-                        <img
-                          src={DeleteIcon}
-                          onClick={() => handleDelete(row._id)}
-                        />
-                      </td>
-                    );
-                  if (row[item] === true) return <td>1</td>;
-                  else return <td>{row[item] || 0}</td>;
-                })}
-              </tr>
-            );
-          })}
-        </Table>
-      </TableContainer>
-    </Container>
+          </Table>
+        </TableContainer>
+      </Container>
+    </>
   );
 };
 

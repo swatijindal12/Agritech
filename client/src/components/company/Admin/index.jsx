@@ -12,6 +12,9 @@ const Card = styled.div`
   background-color: ${props => props.color};
   width: 48%;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const CardContainer = styled.div`
@@ -20,6 +23,7 @@ const CardContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   row-gap: 1rem;
+  justify-content: center;
   column-gap: 1rem;
 `;
 
@@ -72,7 +76,7 @@ const Admin = () => {
         {navigationData?.map(item => {
           return (
             <Card color={item.color}>
-              <CardTopContainer>{item.name}</CardTopContainer>
+              <CardTopContainer>Manage {item.name}</CardTopContainer>
               <CardBottomContainer>
                 <BottomContainer
                   onClick={() => handleClick(item, "/csv-validator")}
