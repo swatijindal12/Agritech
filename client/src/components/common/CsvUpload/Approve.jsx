@@ -7,6 +7,7 @@ import Button from "../Button";
 import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
 import Popup from "./Popup";
+import CheckIcon from "../../../assets/green-check.svg";
 
 const Container = styled.div`
   padding: 1rem;
@@ -67,6 +68,12 @@ const Heading = styled.p`
   text-align: center;
 `;
 
+const StatusImage = styled.img`
+  height: 50px;
+  width: 50px;
+  object-fit: cover;
+`;
+
 const Approve = () => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
@@ -81,9 +88,10 @@ const Approve = () => {
 
   useEffect(() => {
     let tempArr = [];
+    tempArr.push("status");
     if (selectedItem) {
       for (const key in selectedItem[0]) {
-        tempArr.push(key);
+        if (!key.includes("_id")) tempArr.push(key);
       }
       setTableHeading(tempArr);
     }
@@ -134,7 +142,7 @@ const Approve = () => {
         />
       )}
       <Container>
-        <Heading>{`Review ${selectedType.name} Uploaded Lists`}</Heading>
+        <Heading>{`Approve ${selectedType.name}`}</Heading>
         <Flexbox>
           <Selector>
             {selectedItem ? selectedItemName : `Select Contract To Review`}
@@ -152,7 +160,7 @@ const Approve = () => {
             )}
           </Selector>
           <Button
-            text="ADD TO LIST"
+            text="APPROVE LIST"
             onClick={() => setShowPopup(true)}
             margin="0 1rem"
             disabled={!selectedItem}
@@ -169,7 +177,13 @@ const Approve = () => {
               {selectedItem?.map(row => {
                 return (
                   <tr>
-                    {tableHeading.map(item => {
+                    {tableHeading.map((item, tdIndex) => {
+                      if (tdIndex === 0)
+                        return (
+                          <td>
+                            <StatusImage src={CheckIcon} />
+                          </td>
+                        );
                       return <td>{row[item]}</td>;
                     })}
                   </tr>

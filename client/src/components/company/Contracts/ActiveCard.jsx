@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
+import NFTPopup from "../../common/NFTPopup";
 import axios from "axios";
 
 const Container = styled.div`
@@ -61,8 +62,25 @@ const Area = styled.p`
   font-weight: 600;
 `;
 
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    overflow-x: scroll;
+    scroll-margin-top: 1rem;
+  }
+`;
+
 const ActiveCard = ({ data }) => {
+  const [selectedNFTId, setSelectedNFTId] = useState("");
   const user = useSelector(store => store.auth.user);
+
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
+  };
 
   const closeContract = () => {
     axios
@@ -87,9 +105,23 @@ const ActiveCard = ({ data }) => {
         Contract NFT ID{" "}
         {data?.agreement_nft_id.map((nftId, index) => (
           <React.Fragment key={index}>
-            <a href={data?.tx_hash[index]} target="_blank">
-              #{nftId}
-            </a>{" "}
+            <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
+              #{nftId}{" "}
+            </a>
+            <NFTPopup
+              isOpen={selectedNFTId === nftId}
+              togglePopup={togglePopup}
+              tx_hash={data.tx_hash[index]}
+              width={100}
+            >
+              <PopupContent>farm_id:{data?._id?.farm_id}</PopupContent>
+              <PopupContent>
+                IPFS URL:
+                <a href={data?.ipfs_url[index]} target="_blank">
+                  {data?.ipfs_url[index]}
+                </a>
+              </PopupContent>
+            </NFTPopup>
           </React.Fragment>
         ))}
       </Id>

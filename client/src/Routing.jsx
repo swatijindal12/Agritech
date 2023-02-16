@@ -19,6 +19,7 @@ import CsvUpload from "./components/common/CsvUpload";
 import Admin from "./components/company/Admin";
 import Approve from "./components/common/CsvUpload/Approve";
 import Register from "./components/auth/Login/register";
+import ModifyData from "./components/company/ModifyData";
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -61,6 +62,7 @@ const Routing = () => {
           <Route path="/admin" element={<Admin />} />
           <Route path="/approve" element={<Approve />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/modify" element={<ModifyData />} />
         </Routes>
       </Router>
     </>

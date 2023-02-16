@@ -9,6 +9,7 @@ import LocationIcon from "../../../assets/farms/location.svg";
 import Stars from "../../../assets/farms/star.svg";
 import BackButton from "../../../assets/back-button.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
+import NFTPopup from "../../common/NFTPopup";
 import axios from "axios";
 // import { farmDetails } from "./tempData";
 
@@ -23,6 +24,14 @@ const Image = styled.img`
   width: 100%;
   object-fit: cover;
   border-radius: 8px;
+`;
+
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    overflow-x: scroll;
+    scroll-margin-top: 1rem;
+  }
 `;
 
 const NameContainer = styled.div``;
@@ -102,13 +111,14 @@ const FarmDetails = () => {
   const [farmDetails, setFarmDetails] = useState(null);
   const [showTooltip1, setShowTooltip1] = useState(false);
   const [showTooltip2, setShowTooltip2] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const user = useSelector(store => store.auth.user);
 
   const { slug } = useParams();
 
+  const togglePopup = value => setIsPopupOpen(value);
   const handleInfoIcon1Hover = () => setShowTooltip1(!showTooltip1);
   const handleInfoIcon2Hover = () => setShowTooltip2(!showTooltip2);
-  
 
   useEffect(() => {
     console.log("here the user id is ", atob(slug));
@@ -147,9 +157,27 @@ const FarmDetails = () => {
             <NameContainer>
               <Id>
                 NFT TOKEN ID{" "}
-                <a href={farmDetails?.farm?.tx_hash} target="_blank">
+                {/* <a href={farmDetails?.farm?.tx_hash} target="_blank">
+                  #{farmDetails?.farm?.farm_nft_id}
+                </a> */}
+                <a style={{ color: "blue" }} onClick={() => togglePopup(true)}>
                   #{farmDetails?.farm?.farm_nft_id}
                 </a>
+                <NFTPopup
+                  isOpen={isPopupOpen}
+                  togglePopup={togglePopup}
+                  tx_hash={farmDetails?.farm?.tx_hash}
+                >
+                  <PopupContent>
+                    farm_id:{farmDetails?.farm?.farmer_id}
+                  </PopupContent>
+                  <PopupContent>
+                    IPFS URL:
+                    <a href={farmDetails?.farm?.ipfs_url} target="_blank">
+                      {farmDetails?.farm?.ipfs_url}
+                    </a>
+                  </PopupContent>
+                </NFTPopup>
               </Id>
             </NameContainer>
           </Flexbox>

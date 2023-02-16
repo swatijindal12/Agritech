@@ -11,7 +11,9 @@ contract FarmNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
 
     Counters.Counter private _tokenIdCounter;
 
+    //Mapping from farmer address to list of NFT Id
     mapping(address => uint256[]) private farmList;
+
     event Mint(address indexed minterAddr, uint256 farmId, string tokenURI);
 
     constructor(
@@ -19,6 +21,12 @@ contract FarmNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
         string memory symbol_
     ) ERC721(name_, symbol_) {}
 
+    /**
+    @dev mint farm NFT
+    @param farmerAddr address of farmer
+    @param _tokenURI Ipfs URL of farm
+    * emits a {Mint} event.
+     */
     function mint(
         address farmerAddr,
         string memory _tokenURI
@@ -32,7 +40,11 @@ contract FarmNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
         farmList[farmerAddr].push(farmId);
         _setTokenURI(farmId, _tokenURI);
     }
-
+    
+    /**
+    @dev To get farm list of articular farmer
+    * return array of NFT Id.
+    */
     function getFarmList(
         address farmerAddr
     ) external view returns (uint256[] memory) {

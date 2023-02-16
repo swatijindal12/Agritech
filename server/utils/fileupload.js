@@ -1,5 +1,5 @@
 // Importing aws-config
-const s3 = require('../config/awsconfig')
+const s3 = require('../config/awsConfig')
 
 // Actual function for uploading file to S3
 async function uploadImage(file) {

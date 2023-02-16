@@ -148,6 +148,23 @@ const CsvUpload = () => {
     }
   };
 
+  const handleSampleData = () => {
+    console.log(uploadData.name);
+    if (uploadData.name == "Farmers") {
+      window.open(
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv"
+      );
+    } else if (uploadData.name == "Farms") {
+      window.open(
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv"
+      );
+    } else if (uploadData.name == "Contracts") {
+      window.open(
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementTemplate.csv"
+      );
+    }
+  };
+
   const handleUpload = () => {
     setLoading(true);
     const formData = new FormData();
@@ -182,7 +199,7 @@ const CsvUpload = () => {
 
   return (
     <Container>
-      <Heading>{`Upload ${uploadData.name} For Review`}</Heading>
+      <Heading>{`Upload ${uploadData.name}`}</Heading>
       <TopContainer justify="center">
         <input
           onChange={handleFileChange}
@@ -191,10 +208,16 @@ const CsvUpload = () => {
           type="File"
         />
         <Button
-          text={loading ? "...UPLOADING" : "ADD TO REVIEW"}
+          text={loading ? "...UPLOADING" : "SEND FOR APPROVAL"}
           margin="0 1rem"
           disabled={errors?.length > 0 || !data || loading}
           onClick={handleUpload}
+        />
+        <Button
+          text={"Download Sample data"}
+          margin="0 1rem"
+          color={"#d62828cc"}
+          onClick={handleSampleData}
         />
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again

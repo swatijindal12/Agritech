@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { addToCart } from "../../../redux/actions/cartActions";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
+import NFTPopup from "../../common/NFTPopup";
 
 const Container = styled.div`
   padding: 1rem;
@@ -56,8 +57,18 @@ const Amount = styled.p`
   font-weight: 700;
 `;
 
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    overflow-x: scroll;
+    scroll-margin-top: 1rem;
+  }
+`;
+
 const Card = ({ data }) => {
   const [quantity, setQuantity] = useState(1);
+  const [selectedNFTId, setSelectedNFTId] = useState("");
+
   const user = useSelector(store => store.auth.user);
   const cart = useSelector(store => store.cart.cart);
   const dispatch = useDispatch();
@@ -82,6 +93,14 @@ const Card = ({ data }) => {
     }
   });
 
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
+  };
+
   const ButtonText = () => {
     let cartContract = cart.filter(
       item => item.agreements[0] === data.agreements[0]
@@ -99,9 +118,23 @@ const Card = ({ data }) => {
         Contract NFT ID{" "}
         {data?.agreement_nft_id.map((nftId, index) => (
           <React.Fragment key={index}>
-            <a href={data?.tx_hash[index]} target="_blank">
-              #{nftId}
-            </a>{" "}
+            <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
+              #{nftId}{" "}
+            </a>
+            <NFTPopup
+              isOpen={selectedNFTId === nftId}
+              togglePopup={togglePopup}
+              tx_hash={data.tx_hash[index]}
+              width={100}
+            >
+              <PopupContent>farm_id:{data?._id?.farm_id}</PopupContent>
+              <PopupContent>
+                IPFS URL:
+                <a href={data?.ipfs_url[index]} target="_blank">
+                  {data?.ipfs_url}
+                </a>
+              </PopupContent>
+            </NFTPopup>
           </React.Fragment>
         ))}
       </Id>

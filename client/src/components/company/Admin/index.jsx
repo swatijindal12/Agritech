@@ -57,34 +57,13 @@ const Admin = () => {
     if (user.data.role !== "admin") window.location.href = "/marketplace";
   }, []);
 
-  const handleNewUpload = item => {
-    localStorage.setItem(
-      "current-new-upload-data",
-      JSON.stringify({
-        name: item.name,
-        validate_url: item.validate_url,
-        post_url: item.post_url,
-        redirection_url: item.redirection_url,
-        staged_list_get: item.staged_list_get,
-        final_upload_url: item.final_upload_url,
-      })
-    );
-    window.location.href = "/csv-validator";
+  const setToLocalStorage = item => {
+    localStorage.setItem("current-new-upload-data", JSON.stringify(item));
   };
 
-  const handleApproveClick = item => {
-    localStorage.setItem(
-      "current-new-upload-data",
-      JSON.stringify({
-        name: item.name,
-        validate_url: item.validate_url,
-        post_url: item.post_url,
-        redirection_url: item.redirection_url,
-        staged_list_get: item.staged_list_get,
-        final_upload_url: item.final_upload_url,
-      })
-    );
-    window.location.href = "/approve";
+  const handleClick = (item, url) => {
+    setToLocalStorage(item);
+    window.location.href = url;
   };
 
   return (
@@ -95,13 +74,17 @@ const Admin = () => {
             <Card color={item.color}>
               <CardTopContainer>{item.name}</CardTopContainer>
               <CardBottomContainer>
-                <BottomContainer onClick={() => handleNewUpload(item)}>
+                <BottomContainer
+                  onClick={() => handleClick(item, "/csv-validator")}
+                >
                   Upload New
                 </BottomContainer>
-                <BottomContainer onClick={() => handleApproveClick(item)}>
-                  Aprrove Existing
+                <BottomContainer onClick={() => handleClick(item, "/approve")}>
+                  Approve Existing
                 </BottomContainer>
-                <BottomContainer>Modify</BottomContainer>
+                <BottomContainer onClick={() => handleClick(item, "/modify")}>
+                  Modify
+                </BottomContainer>
               </CardBottomContainer>
             </Card>
           );
