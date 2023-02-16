@@ -71,6 +71,7 @@ const Register = () => {
   const [number, setNumber] = useState("");
   const [name, setName] = useState("");
   const [mail, setMail] = useState("");
+  const [address, setAddress] = useState("");
 
   return (
     <Container>
@@ -101,11 +102,18 @@ const Register = () => {
           <Input
             type="number"
             placeholder="Enter Mobile Number"
-            value={number}
+            value={address}
             required
-            onChange={e => setNumber(e.target.value)}
+            onChange={e => setAddress(e.target.value)}
           />
           <br />
+          <Input 
+          type="address"
+          placeholder="Enter Address"
+          value={number}
+          required
+          onChange={e => setNumber(e.target.value)}
+        />
           <Button text={"SEND OTP"} />
         </MiddleContainer>
       </RightContainer>
