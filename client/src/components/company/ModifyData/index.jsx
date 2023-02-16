@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import EditIcon from "../../../assets/edit.svg";
+import DeleteIcon from "../../../assets/delete.svg";
 
 const Container = styled.div`
   padding: 1rem;
@@ -33,6 +35,12 @@ const Table = styled.table`
     border: 1px solid black;
     padding: 1rem;
   }
+
+  img {
+    height: 48px;
+    width: 48px;
+    cursor: pointer;
+  }
 `;
 
 const ModifyData = () => {
@@ -54,12 +62,18 @@ const ModifyData = () => {
         console.log("here the response is ", res.data.data);
         setList(res.data.data);
         let tempArr = [];
+        tempArr.push("Edit");
+        tempArr.push("Delete");
         for (const key in res.data.data[0]) {
           if (!key.includes("_id")) tempArr.push(key);
         }
         setTableHeading(tempArr);
       });
   }, []);
+
+  const handleEdit = id => {};
+
+  const handleDelete = id => {};
 
   return (
     <Container>
@@ -74,7 +88,25 @@ const ModifyData = () => {
           {list?.map(row => {
             return (
               <tr>
-                {tableHeading?.map(item => {
+                {tableHeading?.map((item, tdIndex) => {
+                  if (tdIndex === 0)
+                    return (
+                      <td>
+                        <img
+                          src={EditIcon}
+                          onClick={() => handleEdit(row._id)}
+                        />
+                      </td>
+                    );
+                  if (tdIndex === 1)
+                    return (
+                      <td>
+                        <img
+                          src={DeleteIcon}
+                          onClick={() => handleDelete(row._id)}
+                        />
+                      </td>
+                    );
                   if (row[item] === true) return <td>1</td>;
                   else return <td>{row[item] || 0}</td>;
                 })}
