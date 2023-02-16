@@ -8,6 +8,7 @@ import InfoIcon from "../../../assets/info-icon.svg";
 import NFTPopup from "../../common/NFTPopup";
 
 const Container = styled.div`
+  position: relative;
   width: 45%;
   height: fit-content;
   background-color: #f0ead2;
@@ -43,7 +44,7 @@ const Id = styled.p`
 const Down = styled.img`
   transform: ${props => props.opened && "rotate(180deg)"};
   position: absolute;
-  margin-left: 47.5rem;
+  right: 10px;
   @media screen and (max-width: 990px) {
     margin-left: 18.5rem;
   }
@@ -53,6 +54,7 @@ const Star = styled.img`
   margin-left: 9.5rem;
   @media only screen and (max-width: 990px) {
     margin-left: 5.5rem;
+    margin-top: 0.3rem;
   }
 `;
 
@@ -70,7 +72,7 @@ const Video = styled.video`
 const ViewMore = styled.p`
   font-size: 1.25rem;
   color: #0000ff;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
 `;
 
 const RatingNumber = styled.p`
@@ -78,6 +80,10 @@ const RatingNumber = styled.p`
   opacity: 60%;
   font-weight: 400;
   color: "#6C584C";
+  margin-top: 0.2rem;
+  @media screen and (max-width: 990px) {
+    margin-top: 0.3rem;
+  }
 `;
 
 const InfoImg = styled.img`
@@ -85,7 +91,10 @@ const InfoImg = styled.img`
   height: 1.2rem;
   margin-left: 0.5rem;
   position: relative;
-  margin-top: 0.5rem;
+  margin-top: 0rem;
+  @media screen and (max-width: 990px) {
+    margin-top: 0.2rem;
+  }
 `;
 
 const Tooltip = styled.div`
@@ -109,6 +118,14 @@ const PopupContent = styled.p`
   @media screen and (max-width: 990px) {
     overflow-x: scroll;
     scroll-margin-top: 1rem;
+  }
+`;
+
+const RatingName = styled.p`
+  color: #6c584c;
+  margin-top: 0rem;
+  @media screen and (max-width: 990px) {
+    margin-top: 0.2rem;
   }
 `;
 
@@ -192,10 +209,14 @@ const Card = ({ data }) => {
             View more
           </ViewMore>
           <Flexbox style={{ display: "block" }}>
-            <p style={{ marginTop: "0.5rem" }}>Rating</p>
-            <Flexbox justify="space-content">
-              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>Farm</p>
-              <InfoImg src={InfoIcon} onClick={handleInfoIcon1Hover} />
+            <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
+            <Flexbox justify="space-content" style={{ maxHeight: "2.5rem" }}>
+              <RatingName>Farm</RatingName>
+              <InfoImg
+                src={InfoIcon}
+                onMouseEnter={handleInfoIcon1Hover}
+                onMouseLeave={handleInfoIcon1Hover}
+              />
               <Tooltip show={showTooltip1}>
                 Farm Rating parameters:
                 <p>1. Farm details</p>
@@ -206,10 +227,11 @@ const Card = ({ data }) => {
               <Star src={Stars} />
               <RatingNumber>{data?.rating}</RatingNumber>
             </Flexbox>
-            <Flexbox justify="space-content" style={{ alignItems: "baseline" }}>
-              <p style={{ color: "#6c584c", marginTop: "0.7rem" }}>
-                Farm practices
-              </p>
+            <Flexbox
+              justify="space-content"
+              style={{ alignItems: "baseline", maxHeight: "2.5rem" }}
+            >
+              <RatingName>Farm practices</RatingName>
               <InfoImg
                 src={InfoIcon}
                 onMouseEnter={handleInfoIcon2Hover}
@@ -222,7 +244,10 @@ const Card = ({ data }) => {
                 <p>3. Process Documented</p>
                 <p>4. Compliance process</p>
               </Tooltip>
-              <img src={Stars} style={{ marginLeft: "1.3rem" }} />
+              <img
+                src={Stars}
+                style={{ marginLeft: "1.3rem", marginTop: "0.5rem" }}
+              />
               <RatingNumber>{data?.farm_practice_rating}</RatingNumber>
             </Flexbox>
           </Flexbox>
