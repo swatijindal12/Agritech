@@ -51,10 +51,18 @@ const Down = styled.img`
 `;
 
 const Star = styled.img`
-  margin-left: 9.5rem;
+  margin-left: -2rem;
   @media only screen and (max-width: 990px) {
     margin-left: 5.5rem;
     margin-top: 0.3rem;
+  }
+`;
+
+const Star2 = styled.img`
+  margin-left: -10.5rem;
+  @media only screen and (max-width: 990px) {
+    margin-left: 1.3rem;
+    margin-top: 0.5rem;
   }
 `;
 
@@ -91,7 +99,7 @@ const InfoImg = styled.img`
   height: 1.2rem;
   margin-left: 0.5rem;
   position: relative;
-  margin-top: 0rem;
+  margin-top: 1.5rem;
   @media screen and (max-width: 990px) {
     margin-top: 0.2rem;
   }
@@ -123,9 +131,9 @@ const PopupContent = styled.p`
 
 const RatingName = styled.p`
   color: #6c584c;
-  margin-top: 0rem;
+  margin-top: 1.5rem;
   @media screen and (max-width: 990px) {
-    margin-top: 0.2rem;
+    margin-top: 0.5rem;
   }
 `;
 
@@ -210,7 +218,7 @@ const Card = ({ data }) => {
           </ViewMore>
           <Flexbox style={{ display: "block" }}>
             <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
-            <Flexbox justify="space-content" style={{ maxHeight: "2.5rem" }}>
+            <Flexbox justify="space-content" style={{ maxHeight: "1rem" }}>
               <RatingName>Farm</RatingName>
               <InfoImg
                 src={InfoIcon}
@@ -229,7 +237,7 @@ const Card = ({ data }) => {
             </Flexbox>
             <Flexbox
               justify="space-content"
-              style={{ alignItems: "baseline", maxHeight: "2.5rem" }}
+              style={{ alignItems: "baseline", maxHeight: "3rem" }}
             >
               <RatingName>Farm practices</RatingName>
               <InfoImg
@@ -244,9 +252,9 @@ const Card = ({ data }) => {
                 <p>3. Process Documented</p>
                 <p>4. Compliance process</p>
               </Tooltip>
-              <img
+              <Star2
                 src={Stars}
-                style={{ marginLeft: "1.3rem", marginTop: "0.5rem" }}
+                // style={{ marginLeft: "1.3rem", marginTop: "0.5rem" }}
               />
               <RatingNumber>{data?.farm_practice_rating}</RatingNumber>
             </Flexbox>
