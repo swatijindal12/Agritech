@@ -60,7 +60,7 @@ const ModifyData = () => {
   const [tableHeading, setTableHeading] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -86,12 +86,31 @@ const ModifyData = () => {
       });
   }, []);
 
-  const handleEdit = () => {};
+  const handleEdit = data => {
+    axios
+      .put(
+        `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
+        data,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
+      .then(res => {
+        console.log("res : ", res);
+        setShowUpdatePopup(false);
+        window.location.reload();
+      })
+      .catch(err => {
+        console.log("error in updating data", err);
+      });
+  };
 
   const handleDelete = () => {
     axios
       .delete(
-        `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedId}`,
+        `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -118,6 +137,7 @@ const ModifyData = () => {
         <EditForm
           updateItem={handleEdit}
           toggle={() => setShowUpdatePopup(!showUpdatePopup)}
+          data={selectedData}
         />
       )}
       <Container>
@@ -139,8 +159,8 @@ const ModifyData = () => {
                           <img
                             src={EditIcon}
                             onClick={() => {
-                              setSelectedId(row._id);
-                              // setShowUpdatePopup(true);
+                              setSelectedData(row);
+                              setShowUpdatePopup(true);
                             }}
                           />
                         </td>
@@ -151,7 +171,7 @@ const ModifyData = () => {
                           <img
                             src={DeleteIcon}
                             onClick={() => {
-                              setSelectedId(row._id);
+                              setSelectedData(row);
                               setShowDeletePopup(true);
                             }}
                           />
