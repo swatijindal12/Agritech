@@ -5,6 +5,7 @@ import Flexbox from "../../common/Flexbox";
 import LocationIcon from "../../../assets/farms/location.svg";
 import Stars from "../../../assets/farms/star.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
+import NFTPopup from "../../common/NFTPopup";
 
 const Container = styled.div`
   width: 45%;
@@ -41,10 +42,18 @@ const Id = styled.p`
 
 const Down = styled.img`
   transform: ${props => props.opened && "rotate(180deg)"};
+  position: absolute;
+  margin-left: 47.5rem;
+  @media screen and (max-width: 990px) {
+    margin-left: 18.5rem;
+  }
 `;
 
 const Star = styled.img`
-  margin-left: 1rem;
+  margin-left: 9.5rem;
+  @media only screen and (max-width: 990px) {
+    margin-left: 5.5rem;
+  }
 `;
 
 const Address = styled.p`
@@ -80,22 +89,36 @@ const InfoImg = styled.img`
 `;
 
 const Tooltip = styled.div`
-  position: absolute;
   visibility: ${props => (props.show ? "visible" : "hidden")};
   z-index: 1;
-  left: 50%;
+  left: 25%;
   transform: translate(-50%, -100%);
   background-color: #00000099;
   color: #fff;
-  padding: 0.5rem;
+  padding: 0rem;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    left: 50%;
+    position: absolute;
+    padding: 0.5rem;
+  }
+`;
+
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    overflow-x: scroll;
+    scroll-margin-top: 1rem;
+  }
 `;
 
 const Card = ({ data }) => {
   const [opened, setOpened] = useState(false);
   const [showTooltip1, setShowTooltip1] = useState(false);
   const [showTooltip2, setShowTooltip2] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  const togglePopup = value => setIsPopupOpen(value);
   const handleInfoIcon1Hover = () => setShowTooltip1(!showTooltip1);
   const handleInfoIcon2Hover = () => setShowTooltip2(!showTooltip2);
 
@@ -114,20 +137,35 @@ const Card = ({ data }) => {
               <Name>{data.name}</Name>
               <Id>
                 NFT TOKEN ID{" "}
-                <a href={data.tx_hash} target="_blank">
+                <a style={{ color: "blue" }} onClick={() => togglePopup(true)}>
                   #{data.farm_nft_id}
                 </a>
+                <NFTPopup
+                  isOpen={isPopupOpen}
+                  togglePopup={togglePopup}
+                  tx_hash={data.tx_hash}
+                >
+                  <PopupContent>farm_id:{data.farmer_id}</PopupContent>
+                  <PopupContent>
+                    IPFS URL:
+                    <a href={data?.ipfs_url} target="_blank">
+                      {data?.ipfs_url}
+                    </a>
+                  </PopupContent>
+                </NFTPopup>
               </Id>
             </NameContainer>
           </Flexbox>
         ) : (
           <Name>{data.name}</Name>
         )}
-        <Down
-          src={ExpandIcon}
-          opened={opened}
-          onClick={() => setOpened(!opened)}
-        />
+        {!isPopupOpen && (
+          <Down
+            src={ExpandIcon}
+            opened={opened}
+            onClick={() => setOpened(!opened)}
+          />
+        )}
       </Flexbox>
       {opened && (
         <>
@@ -165,7 +203,7 @@ const Card = ({ data }) => {
                 <p>3. Soil type quality</p>
                 <p>4. Water quality</p>
               </Tooltip>
-              <img src={Stars} style={{ marginLeft: "5.8rem" }} />
+              <Star src={Stars} />
               <RatingNumber>{data?.rating}</RatingNumber>
             </Flexbox>
             <Flexbox justify="space-content" style={{ alignItems: "baseline" }}>

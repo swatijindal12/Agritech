@@ -80,7 +80,7 @@ const Admin = () => {
                   Upload New
                 </BottomContainer>
                 <BottomContainer onClick={() => handleClick(item, "/approve")}>
-                  Aprrove Existing
+                  Approve Existing
                 </BottomContainer>
                 <BottomContainer onClick={() => handleClick(item, "/modify")}>
                   Modify

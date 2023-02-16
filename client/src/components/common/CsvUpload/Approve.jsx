@@ -142,7 +142,7 @@ const Approve = () => {
         />
       )}
       <Container>
-        <Heading>{`Review ${selectedType.name} Uploaded Lists`}</Heading>
+        <Heading>{`Approve ${selectedType.name}`}</Heading>
         <Flexbox>
           <Selector>
             {selectedItem ? selectedItemName : `Select Contract To Review`}
@@ -160,7 +160,7 @@ const Approve = () => {
             )}
           </Selector>
           <Button
-            text="ADD TO LIST"
+            text="APPROVE LIST"
             onClick={() => setShowPopup(true)}
             margin="0 1rem"
             disabled={!selectedItem}

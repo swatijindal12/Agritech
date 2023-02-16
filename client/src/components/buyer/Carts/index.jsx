@@ -180,7 +180,7 @@ const Cart = () => {
 
           <Button
             text="CHECKOUT"
-            width="100%"
+            width="30%"
             onClick={handleCheckout}
             disabled={data.length === 0}
           />
