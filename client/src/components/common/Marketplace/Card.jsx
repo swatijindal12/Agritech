@@ -131,7 +131,7 @@ const Card = ({ data }) => {
               <PopupContent>
                 IPFS URL:
                 <a href={data?.ipfs_url[index]} target="_blank">
-                  {data?.ipfs_url}
+                  {data?.ipfs_url[index]}
                 </a>
               </PopupContent>
             </NFTPopup>
