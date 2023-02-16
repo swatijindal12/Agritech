@@ -44,7 +44,7 @@ const Table = styled.table`
   }
 
   img {
-    width: 28px;
+    width: 20px;
     cursor: pointer;
   }
 `;
@@ -126,7 +126,7 @@ const ModifyData = () => {
           <Table>
             <tr>
               {tableHeading?.map(item => {
-                return <th>{item}</th>;
+                return <th>{item.toUpperCase()}</th>;
               })}
             </tr>
             {list?.map(row => {

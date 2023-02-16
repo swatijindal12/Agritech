@@ -176,7 +176,7 @@ const Approve = () => {
             <Table>
               <tr>
                 {tableHeading.map(item => {
-                  return <th>{item}</th>;
+                  return <th>{item.toUpperCase()}</th>;
                 })}
               </tr>
               {selectedItem?.map(row => {
