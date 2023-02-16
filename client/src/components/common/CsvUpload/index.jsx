@@ -219,7 +219,7 @@ const CsvUpload = () => {
           onClick={handleUpload}
         />
         <Button
-          text={"Download Sample data"}
+          text={"Download Template"}
           margin="0 1rem"
           color={"#d62828cc"}
           onClick={handleSampleData}
