@@ -966,6 +966,10 @@ exports.updateFarm = async (req) => {
 
 exports.getFarms = async (req) => {
   const sortOrder = req.query.sortOrder;
+  const cropTypes = req.query.cropTypes;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
   // General response format
   let response = {
     error: null,
@@ -974,40 +978,42 @@ exports.getFarms = async (req) => {
     data: null,
   };
 
-  let farms;
   try {
-    farms = await Farm.find().select("-__v");
+    let farmQuery = Farm.find().select("-__v");
+    let totalDocuments = await farmQuery.countDocuments();
 
-    // sort based on rating.
+    // redefine the query before executing it again
+    farmQuery = Farm.find();
     if (sortOrder === "low") {
-      farms = await Farm.find().sort({ rating: 1 }).select("-__v");
+      farmQuery = farmQuery.sort({ rating: 1 });
     } else if (sortOrder === "high") {
-      farms = await Farm.find().sort({ rating: -1 }).select("-__v");
-    } else if (sortOrder === undefined) {
-      farms = await Farm.find().select("-__v");
+      farmQuery = farmQuery.sort({ rating: -1 });
     }
 
-    // filter based on crop types
-    if (req.query.cropTypes) {
-      let cropTypes = req.query.cropTypes.split(",");
-      farms = farms.filter((farm) => {
-        for (let i = 0; i < cropTypes.length; i++) {
-          if (farm[cropTypes[i]] === true) {
-            return true;
-          }
-        }
-        return false;
-      });
+    // Apply filtering based on crop types
+    if (cropTypes) {
+      let cropTypesArray = cropTypes.split(",");
+      farmQuery = farmQuery.where("cropTypes").in(cropTypesArray);
+    }
 
-      response.data = farms;
-      response.httpStatus = 200;
+    // Apply pagination
+    if (page && limit) {
+      const skip = (page - 1) * limit;
+      const totalPages = Math.ceil(totalDocuments / limit);
+      const farms = await farmQuery.skip(skip).limit(limit);
+      response.data = { totalPages, farms };
     } else {
+      const farms = await farmQuery;
       response.data = farms;
-      response.httpStatus = 200;
     }
+
+    response.httpStatus = 200;
   } catch (error) {
-    (response.error = "failed operation"), (response.httpStatus = 400);
+    console.log(error);
+    response.error = "failed operation";
+    response.httpStatus = 400;
   }
+
   return response;
 };
 
