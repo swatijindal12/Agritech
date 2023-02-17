@@ -93,11 +93,6 @@ const farmSchema = new mongoose.Schema(
     farm_practice_rating: {
       type: Number,
     },
-    user_id: {
-      type: String,
-      ref: "Farmer",
-      required: true,
-    },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
 );

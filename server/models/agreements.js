@@ -6,11 +6,14 @@ const agreementSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    farmer_id: {
+      type: String,
+    },
     farmer_name: {
       type: String,
     },
     farm_id: {
-      type: Number,
+      type: String,
     },
     address: {
       type: String,

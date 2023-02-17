@@ -11,6 +11,7 @@ const farmNFTContractABI = require("../web3/farmContractABI");
 const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
+const stageAgreement = require("../models/stageAgreement");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 
 // Importing for Blockchain
@@ -68,35 +69,6 @@ exports.getAgreementsOfCustomer = async (req) => {
 
   // // Grouping farm... for customer to show in their active/close Tab
   try {
-    // const activeContractsOfCustomer = await Agreement.aggregate([
-    //   {
-    //     $match: {
-    //       sold_status: true,
-    //       customer_id: userId,
-    //       agreementclose_status: false,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: {
-    //         crop: "$crop",
-    //         start_date: "$start_date",
-    //         end_date: "$end_date",
-    //         price: "$price",
-    //         area: "$area",
-    //         farm_id: "$farm_id",
-    //       },
-    //       address: { $first: "$address" },
-    //       farmer_name: { $first: "$farmer_name" },
-    //       agreements: { $push: "$_id" },
-    //       ipfs_url: { $push: "$ipfs_url" },
-    //       tx_hash: { $push: "$tx_hash" },
-    //       agreement_nft_id: { $push: "$agreement_nft_id" },
-    //       unit_bought: { $sum: 1 },
-    //     },
-    //   },
-    // ]);
-
     const activeContractsWithCustomerData = await Agreement.aggregate([
       {
         $match: {
@@ -218,31 +190,18 @@ exports.createAgreement = async (req) => {
     data: null,
   };
 
-  // if (!req.files || !req.files.file) {
-  //   response.error = "no file selected";
-  //   response.httpStatus = 400;
-  // }
-
   try {
-    // const fileContent = req.files.file.data.toString(); //For JSON.
-    // const file = req.files.file;
-    // // Convert to the JSON data
-    // const data = await csvToJson(file);
     const data = req.body;
-    console.log("data :- ", data);
 
     /* NOTE:- first update in stagetable to  (stage_status:false, aprroval_status:true)
      stage_status: false & approval_staus: false:- will not show in review list
      stage_status: true & approval_status: false :- will show in rejected list */
 
-    // // Parse the JSON data
-    // const data = JSON.parse(fileContent); //For JSON.
-
     // Read the req.body and add ipfs_url to json data
     const updatedData = await Promise.all(
       data.map(async (contract) => {
         await StageAgreement.updateOne(
-          { _id: contract._id, stage_status: true, approval_status: false },
+          { _id: contract._id },
           { stage_status: false, approval_status: true }
         );
         contract.ipfs_url = "";
@@ -354,6 +313,15 @@ exports.createAgreement = async (req) => {
     const agreements = await Agreement.create(updatedData, {
       select: `-_id -stage_status -approval_status -file_name`,
     });
+
+    // Removing from staging stable
+    updatedData.map(async (contract) => {
+      await stageAgreement.deleteOne({
+        _id: contract._id,
+        stage_status: false,
+      });
+    });
+
     (response.message = "Data Insertion successful"),
       (response.httpStatus = 200),
       (response.data = agreements);

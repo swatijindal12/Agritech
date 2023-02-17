@@ -81,6 +81,7 @@ const userSchema = new mongoose.Schema(
         values: ["admin", "customer"],
         message: "Please select correct options for role.",
       },
+      default: "customer",
     },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
