@@ -204,7 +204,6 @@ exports.deleteAgreement = async (req) => {
     // First check agreement is their with id
     const agreement = await Agreement.findOne({
       _id: id,
-      agreementclose_status: true,
     });
 
     if (agreement) {
@@ -533,13 +532,6 @@ exports.deleteFarmer = async (req) => {
 
 // Get all farmer with page no.
 exports.getFarmers = async (req) => {
-  const sortOrder = req.query.sortOrder;
-
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 2;
-  const skip = (page - 1) * limit;
-
-  // General response format
   let response = {
     error: null,
     message: null,
@@ -547,24 +539,43 @@ exports.getFarmers = async (req) => {
     data: null,
   };
 
-  let farmers;
+  const sortOrder = req.query.sortOrder;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  const skip = (page - 1) * limit;
+
   try {
+    let farmerQuery = Farmer.find();
+    let totalDocuments = await Farmer.countDocuments();
+
     if (sortOrder === "low") {
-      farmers = await Farmer.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ rating: 1 })
-        .select("-__v");
+      farmerQuery = farmerQuery.sort({ rating: 1 });
     } else if (sortOrder === "high") {
-      farmers = await Farmer.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ rating: -1 })
-        .select("-__v");
-    } else {
-      farmers = await Farmer.find().select("-__v");
+      farmerQuery = farmerQuery.sort({ rating: -1 });
     }
-    (response.data = farmers), (response.httpStatus = 200);
+
+    if (isNaN(page) && isNaN(limit) && !sortOrder) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+
+      response.data = farmers;
+      response.httpStatus = 200;
+    } else if (isNaN(page) && isNaN(limit)) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+
+      response.data = farmers;
+      response.httpStatus = 200;
+    } else {
+      console.log("inside else");
+      // Apply pagination
+      const farmers = await farmerQuery.skip(skip).limit(limit).select("-__v");
+      response.httpStatus = 200;
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: farmers,
+      };
+    }
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
   }
