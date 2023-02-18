@@ -8,6 +8,7 @@ const StageFarm = require("../models/stageFarm");
 const csvToJson = require("../utils/csvToJson");
 const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
+const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -29,7 +30,6 @@ const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 // const mingFarm = () => {};
 
 exports.validate = async (req) => {
-  console.log("validate service");
   // General response format
   let response = {
     error: null,
@@ -52,6 +52,10 @@ exports.validate = async (req) => {
     // Check file type
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!agreementSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
       response.httpStatus = 400;
     } else {
       const errorLines = [];

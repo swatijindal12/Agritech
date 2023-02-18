@@ -5,15 +5,15 @@ const agreementSchemaCheck = async (data) => {
   const schema = {
     type: "object",
     properties: {
-      name: {},
+      farmer_name: {},
+      crop: {},
+      start_date: {},
+      end_date: {},
+      area: {},
+      price: {},
+      farm_id: {},
+      farm_nft_id: {},
       address: {},
-      pin: {},
-      phone: {},
-      email: {},
-      image_url: {},
-      rating: {},
-      education: {},
-      farmer_pdf: {},
     },
   };
 
