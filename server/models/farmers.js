@@ -69,17 +69,6 @@ const farmerSchema = new mongoose.Schema(
 );
 
 // Pre hook to convert the date to a localized string before saving
-farmerSchema.pre("save", function (next) {
-  if (this.createdAt) {
-    const date = new Date(this.createdAt);
-    this.createdAt = date.toLocaleDateString();
-  }
-  if (this.updatedAt) {
-    const date = new Date(this.updatedAt);
-    this.updatedAt = date.toLocaleDateString();
-  }
-  next();
-});
 
 // Exporting farmerSchema as Farmer
 module.exports = mongoose.model("Farmer", farmerSchema);
