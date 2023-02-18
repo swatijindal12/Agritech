@@ -12,12 +12,21 @@ const client = require("twilio")(accountSid, authToken);
 // Importing all the services
 const authService = require("../services/auth");
 
+// Route to     => api/v1/auth/register
+exports.createUser = async (req, res, next) => {
+  authService
+    .createUser(req)
+    .then((response) => {
+      res.status(response.httpStatus).json(response);
+    })
+    .catch((err) => res.json(err));
+};
+
 // Route to      => api/v1/auth/login
 exports.loginUser = async (req, res, next) => {
   authService
     .login(req)
     .then((response) => {
-      console.log("response : ", response);
       res.status(response.httpStatus).json(response);
     })
     .catch((err) => res.json(err));

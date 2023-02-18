@@ -9,6 +9,48 @@ const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 
+// Create customer
+exports.createUser = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // Reading
+  const { name, address, phone, email } = req.body;
+
+  //Checking user with phone & email
+  const userWithPhone = await User.findOne({ phone });
+  const userWithEmail = await User.findOne({ email });
+
+  try {
+    ////Checking user with phone & email
+    if (userWithPhone && userWithEmail) {
+      response.httpStatus = 400;
+      response.error = "phone or email already exist";
+    } else if (name && address && phone && email) {
+      // if all field are entered then create user/customer
+      const user = await User.create({ name, address, phone, email });
+      response.httpStatus = 201;
+      response.message = "customer created successful";
+      response.data = user;
+    } else {
+      // if some fields are empty
+      response.httpStatus = 400;
+      response.error = "some fields are empty";
+    }
+  } catch (error) {
+    response.httpStatus = 500;
+    // console.log(error);
+    response.error = `${error}`;
+  }
+
+  return response;
+};
+
 // Login service
 exports.login = async (req) => {
   // General response format
