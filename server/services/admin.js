@@ -193,6 +193,96 @@ exports.getStagedAgreements = async (req) => {
   return response;
 };
 
+// Get Agreement List for admin with Pagination
+exports.listAgreements = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  const skip = (page - 1) * limit;
+
+  try {
+    let agreementQuery = Agreement.find();
+    let totalDocuments = await Agreement.countDocuments();
+
+    if (isNaN(page) && isNaN(limit)) {
+      // Return all documents
+      const agreements = await agreementQuery.select("-__v");
+
+      response.data = agreements;
+      response.httpStatus = 200;
+    } else {
+      // Apply pagination
+      const agreements = await agreementQuery
+        .skip(skip)
+        .limit(limit)
+        .select("-__v");
+      response.httpStatus = 200;
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: agreements,
+      };
+    }
+  } catch (error) {
+    (response.error = "failed operation"), (response.httpStatus = 400);
+  }
+  return response;
+};
+
+// Update Agreement Service :: toBe Confirmed
+exports.updateAgreement = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  const startDate = req.body.start_date;
+  const endDate = req.body.end_date;
+  const price = req.body.price;
+  const crop = req.body.crop;
+  const area = req.body.area;
+
+  const updatedData = {
+    start_date: startDate,
+    end_date: endDate,
+    price: price,
+    crop: crop,
+    area: area,
+  };
+
+  console.log("updatedData :", updatedData);
+
+  try {
+    // First check agreement is their with id
+    const agreement = await Agreement.findOne({ _id: id });
+    console.log("agreement :- ", agreement);
+
+    if (agreement) {
+      // Update the Agreement data..
+      const result = await Agreement.updateOne({ _id: id }, updatedData);
+      response.message = `Successfully updated ${result} document`;
+      response.httpStatus = 200;
+    } else {
+      response.error = `agreement not found`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
 // Delete Agreement Service /:id
 exports.deleteAgreement = async (req) => {
   // General response format
@@ -211,10 +301,19 @@ exports.deleteAgreement = async (req) => {
     });
 
     if (agreement) {
-      // delete the farmer data..
-      await Agreement.deleteOne({ _id: id });
-      response.message = `Successfully deleted`;
-      response.httpStatus = 200;
+      // delete the agreement not active one
+      const checkAgreement = await Agreement.deleteOne({
+        _id: id,
+        agreementclose_status: true,
+      });
+
+      if (checkAgreement.deletedCount) {
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+      } else {
+        response.error = `agreement is active`;
+        response.httpStatus = 400;
+      }
     } else {
       response.error = `agreement not found or agreement active`;
       response.httpStatus = 404;
