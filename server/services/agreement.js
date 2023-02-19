@@ -315,7 +315,8 @@ exports.createAgreement = async (req) => {
     });
 
     // Removing from staging stable
-    updatedData.map(async (contract) => {
+    data.map(async (contract) => {
+      console.log("contract._id : ", contract._id);
       await stageAgreement.deleteOne({
         _id: contract._id,
         stage_status: false,
