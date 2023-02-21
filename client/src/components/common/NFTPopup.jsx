@@ -27,6 +27,10 @@ const NFTPopup = ({ children, tx_hash, togglePopup, isOpen, width }) => {
     togglePopup(false);
   };
 
+  const handleTxhash = () => {
+    window.open(tx_hash);
+  };
+
   return (
     <PopupBox style={{ display: isVisible ? "block" : "none" }} width={width}>
       <h3 style={{ textAlign: "center" }}>Blockchain details</h3>
@@ -34,18 +38,8 @@ const NFTPopup = ({ children, tx_hash, togglePopup, isOpen, width }) => {
       <Flexbox justify="space-content">
         <Button
           margin={"0.5rem"}
-          text={
-            <a
-              href={tx_hash}
-              style={{
-                color: "inherit",
-                textDecoration: "none",
-              }}
-              target="_blank"
-            >
-              Tx hash
-            </a>
-          }
+          onClick={handleTxhash}
+          text={"Tx hash"}
         ></Button>
         <Button margin={"0.5rem"} onClick={handleClose} text={"Close"}></Button>
       </Flexbox>

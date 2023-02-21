@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
+import VerificationPopup from "../../common/VerificationPopup";
 
 const Container = styled.div`
   position: fixed;
@@ -59,10 +60,11 @@ const Input = styled.input`
   margin: 0.5rem 0;
   width: 100%;
 `;
-
 const EditForm = ({ data, updateItem, toggle }) => {
   const [inputs, setInputs] = useState([]);
   const [inputValues, setInputValues] = useState(data);
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+  const [isVisibleEditForm, setIsVisibleEditForm] = useState(true);
 
   useEffect(() => {
     let tempData = [];
@@ -72,43 +74,58 @@ const EditForm = ({ data, updateItem, toggle }) => {
     setInputs(tempData);
   }, []);
 
-  const handleSubmit = () => {
-    updateItem(inputValues);
-    console.log("Inside submit ", inputValues);
+  const handleSubmit = password => {
+    // setPassword(password);
+    updateItem(inputValues, password);
+    console.log("Inside submit ", inputValues, password);
   };
 
   const handleChange = (e, type) => {
     setInputValues({ ...inputValues, [type]: e.target.value });
   };
 
+  const handleVerification = () => {
+    setShowVerificationPopup(true);
+    setIsVisibleEditForm(false);
+  };
+
   return (
     <Container>
-      <InnerContianer>
-        <Heading>Edit Form</Heading>
-        <Form>
-          {inputs?.map(item => {
-            return (
-              <InputContainer>
-                <Title>{item.toUpperCase()}</Title>
-                <Input
-                  type="text"
-                  value={inputValues[item]}
-                  onChange={e => handleChange(e, item)}
-                />
-              </InputContainer>
-            );
-          })}
-          <Flexbox justify="space-around">
-            <Button
-              text="UPDATE"
-              color="#ADC178"
-              type="submit"
-              onClick={handleSubmit}
-            />
-            <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
-          </Flexbox>
-        </Form>
-      </InnerContianer>
+      {isVisibleEditForm && (
+        <InnerContianer>
+          <Heading>Edit Form</Heading>
+          <Form>
+            {inputs?.map(item => {
+              return (
+                <InputContainer>
+                  <Title>{item.toUpperCase()}</Title>
+                  <Input
+                    type="text"
+                    value={inputValues[item]}
+                    onChange={e => handleChange(e, item)}
+                  />
+                </InputContainer>
+              );
+            })}
+            <Flexbox justify="space-around">
+              <Button
+                text="UPDATE"
+                color="#ADC178"
+                type="button"
+                onClick={handleVerification}
+              />
+              <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
+            </Flexbox>
+          </Form>
+        </InnerContianer>
+      )}
+      {showVerificationPopup && (
+        <VerificationPopup
+          togglePopup={toggle}
+          isOpen={showVerificationPopup}
+          onSubmit={handleSubmit}
+        />
+      )}
     </Container>
   );
 };

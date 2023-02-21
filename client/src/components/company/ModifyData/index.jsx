@@ -100,7 +100,8 @@ const ModifyData = () => {
       });
   }, [currentPage]);
 
-  const handleEdit = data => {
+  const handleEdit = (data, password) => {
+    // console.log("Admin password is:", password);
     axios
       .put(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
@@ -108,33 +109,47 @@ const ModifyData = () => {
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: password,
           },
         }
       )
       .then(res => {
         console.log("res : ", res);
         setShowUpdatePopup(false);
-        window.location.reload();
+        // window.location.reload();
+        if (res.data.error) {
+          console.log("Error while deleting farmer:", res.data.error);
+          window.alert("Incorrect password, please try again.");
+        } else {
+          window.location.reload();
+          console.log("edit response is ", res.data);
+        }
       })
       .catch(err => {
         console.log("error in updating data", err);
       });
   };
 
-  const handleDelete = () => {
+  const handleDelete = adminPassword => {
     axios
       .delete(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: adminPassword,
           },
         }
       )
       .then(res => {
         setShowDeletePopup(false);
-        window.location.reload();
-        console.log("delete response is ", res);
+        if (res.data.error) {
+          // console.log("Error while deleting farmer:", res.data.error);
+          window.alert("Incorrect password, please try again.");
+        } else {
+          window.location.reload();
+          // console.log("delete response is ", res);
+        }
       })
       .catch(err => console.log("error in deleting data ", err));
   };

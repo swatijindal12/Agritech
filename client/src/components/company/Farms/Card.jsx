@@ -170,8 +170,7 @@ const Card = ({ data }) => {
                   togglePopup={togglePopup}
                   tx_hash={data.tx_hash}
                 >
-                  <PopupContent>farm_id:{data.farmer_id}</PopupContent>
-                  <PopupContent>
+                 <PopupContent>
                     IPFS URL:
                     <a href={data?.ipfs_url} target="_blank">
                       {data?.ipfs_url}
