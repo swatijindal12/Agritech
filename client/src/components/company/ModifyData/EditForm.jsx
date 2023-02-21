@@ -60,7 +60,7 @@ const Input = styled.input`
   margin: 0.5rem 0;
   width: 100%;
 `;
-const EditForm = ({ data, updateItem, toggle, setPassword }) => {
+const EditForm = ({ data, updateItem, toggle }) => {
   const [inputs, setInputs] = useState([]);
   const [inputValues, setInputValues] = useState(data);
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
@@ -75,9 +75,9 @@ const EditForm = ({ data, updateItem, toggle, setPassword }) => {
   }, []);
 
   const handleSubmit = password => {
-    setPassword(password);
-    updateItem(inputValues);
-    console.log("Inside submit ", inputValues);
+    // setPassword(password);
+    updateItem(inputValues, password);
+    console.log("Inside submit ", inputValues, password);
   };
 
   const handleChange = (e, type) => {

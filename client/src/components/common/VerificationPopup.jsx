@@ -13,7 +13,7 @@ const PopupBox = styled.div`
   height: 23%;
   @media screen and (max-width: 1280px) {
     width: 40%;
-    height: 30%;
+    height: 27%;
   }
 `;
 
@@ -51,6 +51,7 @@ const VerificationPopup = ({ togglePopup, isOpen, width, onSubmit }) => {
   };
 
   const handleSubmit = () => {
+    // console.log("In verification popup the password is:", password);
     const expectedPassword = "password";
     if (password === expectedPassword) {
       onSubmit(password);
@@ -70,16 +71,16 @@ const VerificationPopup = ({ togglePopup, isOpen, width, onSubmit }) => {
         onChange={e => setPassword(e.target.value)}
         required
       />
-      <Flexbox justify="space-content">
+      <Flexbox justify="center">
         <Button
           onClick={handleSubmit}
           text={"Submit"}
-          margin="0.5rem 2rem"
+          margin="0.3rem 1rem"
         ></Button>
         <Button
           onClick={handleClose}
           text={"Close"}
-          margin="0.5rem 0rem"
+          margin="0rem 0rem"
         ></Button>
       </Flexbox>
     </PopupBox>
