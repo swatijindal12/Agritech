@@ -61,6 +61,8 @@ const ModifyData = () => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [password, setPassword] = useState("");
+
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -87,6 +89,7 @@ const ModifyData = () => {
   }, []);
 
   const handleEdit = data => {
+    console.log("Admin password is:", password);
     axios
       .put(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
@@ -94,6 +97,7 @@ const ModifyData = () => {
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: password,
           },
         }
       )
@@ -107,20 +111,25 @@ const ModifyData = () => {
       });
   };
 
-  const handleDelete = () => {
+  const handleDelete = adminPassword => {
     axios
       .delete(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: adminPassword,
           },
         }
       )
       .then(res => {
         setShowDeletePopup(false);
-        window.location.reload();
-        console.log("delete response is ", res);
+        if (res.data.error) {
+          console.log("Error while deleting farmer:", res.data.error);
+        } else {
+          window.location.reload();
+          console.log("delete response is ", res);
+        }
       })
       .catch(err => console.log("error in deleting data ", err));
   };
@@ -138,6 +147,7 @@ const ModifyData = () => {
           updateItem={handleEdit}
           toggle={() => setShowUpdatePopup(!showUpdatePopup)}
           data={selectedData}
+          setPassword={setPassword}
         />
       )}
       <Container>
