@@ -51,13 +51,7 @@ const VerificationPopup = ({ togglePopup, isOpen, width, onSubmit }) => {
   };
 
   const handleSubmit = () => {
-    // console.log("In verification popup the password is:", password);
-    const expectedPassword = "password";
-    if (password === expectedPassword) {
-      onSubmit(password);
-    } else {
-      window.alert("Incorrect password, please try again.");
-    }
+    onSubmit(password);
   };
 
   return (

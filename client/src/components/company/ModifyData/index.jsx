@@ -71,7 +71,6 @@ const ModifyData = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
 
- 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -120,6 +119,7 @@ const ModifyData = () => {
         // window.location.reload();
         if (res.data.error) {
           console.log("Error while deleting farmer:", res.data.error);
+          window.alert("Incorrect password, please try again.");
         } else {
           window.location.reload();
           console.log("edit response is ", res.data);
@@ -144,10 +144,11 @@ const ModifyData = () => {
       .then(res => {
         setShowDeletePopup(false);
         if (res.data.error) {
-          console.log("Error while deleting farmer:", res.data.error);
+          // console.log("Error while deleting farmer:", res.data.error);
+          window.alert("Incorrect password, please try again.");
         } else {
           window.location.reload();
-          console.log("delete response is ", res);
+          // console.log("delete response is ", res);
         }
       })
       .catch(err => console.log("error in deleting data ", err));
