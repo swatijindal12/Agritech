@@ -89,7 +89,6 @@ const ModifyData = () => {
   }, []);
 
   const handleEdit = data => {
-    console.log("Admin password is:", password);
     axios
       .put(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,

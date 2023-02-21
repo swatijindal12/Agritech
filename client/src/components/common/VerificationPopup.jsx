@@ -61,7 +61,7 @@ const VerificationPopup = ({ togglePopup, isOpen, width, onSubmit }) => {
 
   return (
     <PopupBox style={{ display: isVisible ? "block" : "none" }} width={width}>
-      <Heading style={{ textAlign: "center" }}>Password protection</Heading>
+      <Heading style={{ textAlign: "center" }}>Master Admin</Heading>
       <Title>Password</Title>
       <Input
         type="password"
