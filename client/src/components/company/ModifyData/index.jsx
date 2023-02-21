@@ -6,6 +6,7 @@ import EditIcon from "../../../assets/edit.svg";
 import DeleteIcon from "../../../assets/delete.svg";
 import DeletePopup from "./DeletePopup";
 import EditForm from "./EditForm";
+import Pagination from "../../common/Pagination";
 
 const Container = styled.div`
   padding: 1rem;
@@ -55,12 +56,21 @@ const UrlTd = styled.td`
   cursor: pointer;
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const ModifyData = () => {
   const [list, setList] = useState(null);
   const [tableHeading, setTableHeading] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(2);
+
  
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -69,23 +79,27 @@ const ModifyData = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}`, {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
-      })
+      .get(
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=2`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
       .then(res => {
-        console.log("here the response is ", res.data.data);
-        setList(res.data.data);
+        console.log("here the response is ", res.data);
+        setList(res.data.data.data);
+        setTotalPage(res.data.data.totalPages);
         let tempArr = [];
         tempArr.push("Edit");
         tempArr.push("Delete");
-        for (const key in res.data.data[0]) {
+        for (const key in res.data.data.data[0]) {
           tempArr.push(key);
         }
         setTableHeading(tempArr);
       });
-  }, []);
+  }, [currentPage]);
 
   const handleEdit = (data, password) => {
     // console.log("Admin password is:", password);
@@ -205,6 +219,14 @@ const ModifyData = () => {
             })}
           </Table>
         </TableContainer>
+        <PaginationContainer>
+          <Pagination
+            currentPage={currentPage}
+            totalCount={totalPage}
+            pageSize={1}
+            onPageChange={page => setCurrentPage(page)}
+          />
+        </PaginationContainer>
       </Container>
     </>
   );

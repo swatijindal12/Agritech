@@ -44,7 +44,6 @@ const Farmers = () => {
     let queryString = "";
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
-      // console.log("QUERY IS ", queryString);
     }
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
