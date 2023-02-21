@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Button from "../../common/Button";
 import Flexbox from "../../common/Flexbox";
 import VerificationPopup from "../../common/VerificationPopup";
+import crossIcon from "../../../assets/cross.svg";
 
 const Container = styled.div`
   position: fixed;
@@ -19,23 +20,41 @@ const Container = styled.div`
 `;
 
 const InnerContianer = styled.div`
+  position: relative;
   background-color: white;
   border-radius: 12px;
-  padding: 1rem;
-  width: 26rem;
-  max-width: 26.5rem;
+  padding: 3rem 6rem;
+  width: 40rem;
+  max-width: 40rem;
   max-height: 70vh;
   overflow-y: auto;
 
   ::-webkit-scrollbar {
     display: none;
   }
+
+  @media screen and (max-width: 990px) {
+    max-width: 96vw;
+    padding: 1rem;
+  }
+`;
+
+const Cross = styled.img`
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  cursor: pointer;
 `;
 
 const Heading = styled.p`
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #a98467;
+  text-align: center;
+
+  @media screen and (max-width: 990px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const Form = styled.form`
@@ -59,73 +78,69 @@ const Input = styled.input`
   padding: 1rem;
   margin: 0.5rem 0;
   width: 100%;
+
+  @media screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
-const EditForm = ({ data, updateItem, toggle }) => {
+
+const EditForm = ({ data, toggle, setEditData }) => {
   const [inputs, setInputs] = useState([]);
   const [inputValues, setInputValues] = useState(data);
-  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
-  const [isVisibleEditForm, setIsVisibleEditForm] = useState(true);
+  const selectedType = JSON.parse(
+    localStorage.getItem("current-new-upload-data")
+  );
 
   useEffect(() => {
     let tempData = [];
     for (const key in data) {
-      if (!key.includes("id")) tempData.push(key);
+      if (
+        !key.includes("id") &&
+        !key.includes("updatedAt") &&
+        !key.includes("createdAt")
+      )
+        tempData.push(key);
     }
     setInputs(tempData);
   }, []);
-
-  const handleSubmit = password => {
-    // setPassword(password);
-    updateItem(inputValues, password);
-    console.log("Inside submit ", inputValues, password);
-  };
 
   const handleChange = (e, type) => {
     setInputValues({ ...inputValues, [type]: e.target.value });
   };
 
-  const handleVerification = () => {
-    setShowVerificationPopup(true);
-    setIsVisibleEditForm(false);
-  };
-
   return (
     <Container>
-      {isVisibleEditForm && (
-        <InnerContianer>
-          <Heading>Edit Form</Heading>
-          <Form>
-            {inputs?.map(item => {
-              return (
-                <InputContainer>
-                  <Title>{item.toUpperCase()}</Title>
-                  <Input
-                    type="text"
-                    value={inputValues[item]}
-                    onChange={e => handleChange(e, item)}
-                  />
-                </InputContainer>
-              );
-            })}
-            <Flexbox justify="space-around">
-              <Button
-                text="UPDATE"
-                color="#ADC178"
-                type="button"
-                onClick={handleVerification}
-              />
-              <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
-            </Flexbox>
-          </Form>
-        </InnerContianer>
-      )}
-      {showVerificationPopup && (
-        <VerificationPopup
-          togglePopup={toggle}
-          isOpen={showVerificationPopup}
-          onSubmit={handleSubmit}
-        />
-      )}
+      <InnerContianer>
+        <Cross src={crossIcon} alt="cross-icon" onClick={toggle} />
+        <Heading>
+          {`Edit ${selectedType.type
+            .charAt(0)
+            .toUpperCase()}${selectedType.type.slice(1)}  Details`}
+        </Heading>
+        <Form>
+          {inputs?.map(item => {
+            return (
+              <InputContainer>
+                <Title>{item.toUpperCase()}</Title>
+                <Input
+                  type="text"
+                  value={inputValues[item]}
+                  onChange={e => handleChange(e, item)}
+                />
+              </InputContainer>
+            );
+          })}
+          <Flexbox justify="space-around">
+            <Button
+              text="UPDATE"
+              color="#ADC178"
+              type="button"
+              onClick={() => setEditData(inputValues)}
+            />
+            <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
+          </Flexbox>
+        </Form>
+      </InnerContianer>
     </Container>
   );
 };

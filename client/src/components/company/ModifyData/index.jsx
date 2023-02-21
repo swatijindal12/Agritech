@@ -7,6 +7,7 @@ import DeleteIcon from "../../../assets/delete.svg";
 import DeletePopup from "./DeletePopup";
 import EditForm from "./EditForm";
 import Pagination from "../../common/Pagination";
+import VerificationPopup from "../../common/VerificationPopup";
 
 const Container = styled.div`
   padding: 1rem;
@@ -67,6 +68,9 @@ const ModifyData = () => {
   const [tableHeading, setTableHeading] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
+  const [editData, setEditData] = useState([]);
+  const [showVerificationFor, setShowVerificationFor] = useState(false);
+  const [verificationError, setVerificationError] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
@@ -100,12 +104,11 @@ const ModifyData = () => {
       });
   }, [currentPage]);
 
-  const handleEdit = (data, password) => {
-    // console.log("Admin password is:", password);
+  const handleEdit = password => {
     axios
       .put(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
-        data,
+        editData,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -116,10 +119,9 @@ const ModifyData = () => {
       .then(res => {
         console.log("res : ", res);
         setShowUpdatePopup(false);
-        // window.location.reload();
         if (res.data.error) {
           console.log("Error while deleting farmer:", res.data.error);
-          window.alert("Incorrect password, please try again.");
+          setVerificationError(res.data.error);
         } else {
           window.location.reload();
           console.log("edit response is ", res.data);
@@ -144,11 +146,9 @@ const ModifyData = () => {
       .then(res => {
         setShowDeletePopup(false);
         if (res.data.error) {
-          // console.log("Error while deleting farmer:", res.data.error);
-          window.alert("Incorrect password, please try again.");
+          setVerificationError(res.data.error);
         } else {
           window.location.reload();
-          // console.log("delete response is ", res);
         }
       })
       .catch(err => console.log("error in deleting data ", err));
@@ -158,15 +158,29 @@ const ModifyData = () => {
     <>
       {showDeletePopup && (
         <DeletePopup
-          deleteItem={handleDelete}
+          deleteItem={() => setShowVerificationFor("delete")}
           toggle={() => setShowDeletePopup(!showDeletePopup)}
         />
       )}
       {showUpdatePopup && (
         <EditForm
-          updateItem={handleEdit}
+          setEditData={data => {
+            setEditData(data);
+            setShowVerificationFor("update");
+            setShowUpdatePopup(false);
+          }}
           toggle={() => setShowUpdatePopup(!showUpdatePopup)}
           data={selectedData}
+        />
+      )}
+      {showVerificationFor && (
+        <VerificationPopup
+          onSubmit={password => {
+            if (showVerificationFor === "delete") handleDelete(password);
+            else if (showVerificationFor === "update") handleEdit(password);
+          }}
+          togglePopup={() => setShowVerificationFor(false)}
+          error={verificationError}
         />
       )}
       <Container>

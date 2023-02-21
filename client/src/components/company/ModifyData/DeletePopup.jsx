@@ -37,39 +37,18 @@ const Description = styled.p`
 `;
 
 const DeletePopup = ({ deleteItem, toggle }) => {
-  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
-  const [isVisibleEditForm, setIsVisibleEditForm] = useState(true);
-
-  const handleVerification = () => {
-    setShowVerificationPopup(true);
-    setIsVisibleEditForm(false);
-  };
-
   return (
     <Container>
-      {isVisibleEditForm && (
-        <InnerContianer>
-          <Heading>Delete Item</Heading>
-          <Description>
-            Are you sure you want to delete this data from the list?
-          </Description>
-          <Flexbox justify="space-around">
-            <Button
-              onClick={handleVerification}
-              text="DELETE"
-              color="#D62828"
-            />
-            <Button onClick={toggle} text="CANCEL" color="#FCBF49" />
-          </Flexbox>
-        </InnerContianer>
-      )}
-      {showVerificationPopup && (
-        <VerificationPopup
-          togglePopup={toggle}
-          isOpen={showVerificationPopup}
-          onSubmit={deleteItem}
-        />
-      )}
+      <InnerContianer>
+        <Heading>Delete Item</Heading>
+        <Description>
+          Are you sure you want to delete this data from the list?
+        </Description>
+        <Flexbox justify="space-around">
+          <Button onClick={deleteItem} text="DELETE" color="#D62828" />
+          <Button onClick={toggle} text="CANCEL" color="#FCBF49" />
+        </Flexbox>
+      </InnerContianer>
     </Container>
   );
 };
