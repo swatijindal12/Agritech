@@ -8,6 +8,7 @@ import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
+import VerificationPopup from "../VerificationPopup";
 
 const Container = styled.div`
   padding: 1rem;
@@ -86,6 +87,9 @@ const Approve = () => {
   const [selectedItemName, setSelectedItemName] = useState("");
   const [tableHeading, setTableHeading] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+  const [showVerificationError, setShowVerificationError] = useState(false);
+
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -118,7 +122,7 @@ const Approve = () => {
       });
   }, []);
 
-  const handleUploadClick = () => {
+  const handleUploadClick = adminPassword => {
     axios
       .post(
         `${process.env.REACT_APP_BASE_URL}/${selectedType?.final_upload_url}`,
@@ -126,12 +130,17 @@ const Approve = () => {
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: adminPassword,
           },
         }
       )
       .then(res => {
-        console.log("posted Succssfully ", res.data);
-        window.location.href = selectedType?.redirection_url;
+        if (res.data.error) {
+          setShowVerificationError(res.data.error);
+        } else {
+          window.location.href = selectedType?.redirection_url;
+          console.log("posted Succssfully ", res.data);
+        }
       });
     setSelectedItem(null);
     setShowList(false);
@@ -143,7 +152,14 @@ const Approve = () => {
       {showPopup && (
         <Popup
           toggle={() => setShowPopup(!showPopup)}
-          addToList={handleUploadClick}
+          addToList={() => setShowVerificationPopup(true)}
+        />
+      )}
+      {showVerificationPopup && (
+        <VerificationPopup
+          togglePopup={() => setShowVerificationPopup(false)}
+          onSubmit={password => handleUploadClick(password)}
+          error={showVerificationError}
         />
       )}
       <Container>
