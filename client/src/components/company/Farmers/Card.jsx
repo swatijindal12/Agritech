@@ -1,8 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
-import stars from "../../common/stars";
-import Star from "../../../assets/farms/star.svg";
+import Star from "../../../assets/farms/starBlue.svg";
 
 const Container = styled.div`
   box-sizing: border-box;
