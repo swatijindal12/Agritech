@@ -83,7 +83,7 @@ const ModifyData = () => {
   useEffect(() => {
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=2`,
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=5`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
