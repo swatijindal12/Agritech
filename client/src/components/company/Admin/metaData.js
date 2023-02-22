@@ -6,8 +6,8 @@ export const navigationData = [
     redirection_url: "/marketplace",
     validate_url: "admin/validate-data",
     staged_list_get: "admin/stage",
-    final_upload_url: "marketplace/agreement",
-    get_list: "marketplace/agreements",
+    final_upload_url: "admin/listagreements",
+    get_list: "admin/listagreements",
     type: "contract",
   },
   {
