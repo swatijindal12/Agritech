@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import Button from "../Button";
-import Flexbox from "../Flexbox";
+import Button from "../../common/Button";
+import Flexbox from "../../common/Flexbox";
+import VerificationPopup from "../../common/VerificationPopup";
 
 const Container = styled.div`
   position: fixed;
@@ -23,11 +24,10 @@ const InnerContianer = styled.div`
   padding: 1rem;
 `;
 
-const Message = styled.p`
+const Heading = styled.p`
   font-size: 1.5rem;
-  font-weight: 500;
-  color: #adc178;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #a98467;
 `;
 
 const Description = styled.p`
@@ -36,21 +36,21 @@ const Description = styled.p`
   max-width: 22rem;
 `;
 
-const Popup = ({ toggle, addToList }) => {
+const DeletePopup = ({ deleteItem, toggle }) => {
   return (
     <Container>
       <InnerContianer>
-        <Message>Approve</Message>
+        <Heading>Delete Item</Heading>
         <Description>
-          Are you sure you want to Add this data to the existing list?
+          Are you sure you want to delete this data from the list?
         </Description>
-        <Flexbox justify="space-between">
-          <Button text="ADD" onClick={addToList} margin="0 1rem 0 0" />
-          <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
+        <Flexbox justify="space-around">
+          <Button onClick={deleteItem} text="DELETE" color="#D62828" />
+          <Button onClick={toggle} text="CANCEL" color="#FCBF49" />
         </Flexbox>
       </InnerContianer>
     </Container>
   );
 };
 
-export default Popup;
+export default DeletePopup;

@@ -68,6 +68,11 @@ const Input = styled.input`
   background-color: #d9d9d933;
   border-radius: 12px;
   margin: 2rem 0;
+  -moz-appearance: textfield; /* remove up/down counter in Firefox */
+  ::-webkit-outer-spin-button,
+  ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
 `;
 
 const ResendMessageStyle = styled.p`

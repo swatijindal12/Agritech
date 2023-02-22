@@ -168,10 +168,7 @@ const FarmDetails = () => {
                   togglePopup={togglePopup}
                   tx_hash={farmDetails?.farm?.tx_hash}
                 >
-                  <PopupContent>
-                    farm_id:{farmDetails?.farm?.farmer_id}
-                  </PopupContent>
-                  <PopupContent>
+                 <PopupContent>
                     IPFS URL:
                     <a href={farmDetails?.farm?.ipfs_url} target="_blank">
                       {farmDetails?.farm?.ipfs_url}
