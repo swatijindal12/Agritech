@@ -3,7 +3,9 @@ import styled from "styled-components";
 import ExpandIcon from "../../../assets/down-arrow.svg";
 import Flexbox from "../../common/Flexbox";
 import LocationIcon from "../../../assets/farms/location.svg";
-import Stars from "../../../assets/farms/star.svg";
+import Stars from "../../../assets/farms/starYellow.svg";
+import StarRed from "../../../assets/farms/starRed.svg";
+import StarBlue from "../../../assets/farms/starBlue.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
 import NFTPopup from "../../common/NFTPopup";
 
@@ -50,18 +52,27 @@ const Down = styled.img`
   }
 `;
 
-const Star = styled.img`
-  margin-left: -2rem;
-  @media only screen and (max-width: 990px) {
-    margin-left: 5.5rem;
-    margin-top: 0.3rem;
-  }
-`;
+// const Star = styled.img`
+//   width: 1.5rem;
+//   height: 1.5rem;
+//   margin-left: -2rem;
+//   @media only screen and (max-width: 990px) {
+//     margin-left: 5.5rem;
+//     margin-top: 0.3rem;
+//   }
+// `;
 
-const Star2 = styled.img`
+const Star = styled.img`
+  width: 1.5rem;
+  height: 1.5rem;
   margin-left: -10.5rem;
+  margin-left: ${props => (props.marginLeft ? props.marginLeft : "-10.5rem")};
+  margin-top: 0.6rem;
+  top: 2rem;
   @media only screen and (max-width: 990px) {
-    margin-left: 1.3rem;
+    margin-left: ${props =>
+      props.marginLeftMobile ? props.marginLeftMobile : "1rem"};
+    //1.3rem;
     margin-top: 0.5rem;
   }
 `;
@@ -88,9 +99,20 @@ const RatingNumber = styled.p`
   opacity: 60%;
   font-weight: 400;
   color: "#6C584C";
-  margin-top: 0.2rem;
+  margin-top: 0.3rem;
   @media screen and (max-width: 990px) {
-    margin-top: 0.3rem;
+    margin-top: 0.5rem;
+  }
+`;
+
+const RatingNumber2 = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  color: "#6C584C";
+  margin-top: 0.7rem;
+  @media screen and (max-width: 990px) {
+    margin-top: 0.7rem;
   }
 `;
 
@@ -101,23 +123,26 @@ const InfoImg = styled.img`
   position: relative;
   margin-top: 1.5rem;
   @media screen and (max-width: 990px) {
-    margin-top: 0.2rem;
+    margin-top: 0.7rem;
   }
 `;
 
 const Tooltip = styled.div`
   visibility: ${props => (props.show ? "visible" : "hidden")};
   z-index: 1;
-  left: 25%;
   transform: translate(-50%, -100%);
-  background-color: #00000099;
+  background-color: #0000099f;
   color: #fff;
-  padding: 0rem;
+  padding: 1.5rem;
   border-radius: 8px;
+  margin-bottom: -8.5rem;
+  margin-left: 3rem;
   @media only screen and (max-width: 990px) {
-    left: 50%;
+    left: 30%;
     position: absolute;
     padding: 0.5rem;
+    margin-bottom: -5.5rem;
+    width: 80%;
   }
 `;
 
@@ -137,15 +162,22 @@ const RatingName = styled.p`
   }
 `;
 
+const RatingContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const Card = ({ data }) => {
   const [opened, setOpened] = useState(false);
   const [showTooltip1, setShowTooltip1] = useState(false);
   const [showTooltip2, setShowTooltip2] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [showTooltip3, setShowTooltip3] = useState(false);
 
   const togglePopup = value => setIsPopupOpen(value);
   const handleInfoIcon1Hover = () => setShowTooltip1(!showTooltip1);
   const handleInfoIcon2Hover = () => setShowTooltip2(!showTooltip2);
+  const handleInfoIcon3Hover = () => setShowTooltip3(!showTooltip3);
 
   // const createContract = () => {
   //   localStorage.setItem("current-selected-farm", JSON.stringify(data));
@@ -170,7 +202,7 @@ const Card = ({ data }) => {
                   togglePopup={togglePopup}
                   tx_hash={data.tx_hash}
                 >
-                 <PopupContent>
+                  <PopupContent>
                     IPFS URL:
                     <a href={data?.ipfs_url} target="_blank">
                       {data?.ipfs_url}
@@ -213,11 +245,11 @@ const Card = ({ data }) => {
             </ViewMore>
           </Flexbox>
           <ViewMore onClick={() => window.open(data.farm_pdf)}>
-            View more
+            View more about farm
           </ViewMore>
           <Flexbox style={{ display: "block" }}>
             <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
-            <Flexbox justify="space-content" style={{ maxHeight: "1rem" }}>
+            <Flexbox justify="space-content" style={{ maxHeight: "0.8rem" }}>
               <RatingName>Farm</RatingName>
               <InfoImg
                 src={InfoIcon}
@@ -226,17 +258,21 @@ const Card = ({ data }) => {
               />
               <Tooltip show={showTooltip1}>
                 Farm Rating parameters:
+                <p>
+                  <br />{" "}
+                </p>
                 <p>1. Farm details</p>
                 <p>2. Farm land record</p>
                 <p>3. Soil type quality</p>
                 <p>4. Water quality</p>
               </Tooltip>
-              <Star src={Stars} />
+              <Star src={Stars}  marginLeft={"-3.8rem"}
+                  marginLeftMobile={"6.5rem"}/>
               <RatingNumber>{data?.rating}</RatingNumber>
             </Flexbox>
             <Flexbox
               justify="space-content"
-              style={{ alignItems: "baseline", maxHeight: "3rem" }}
+              style={{ alignItems: "baseline", maxHeight: "2rem" }}
             >
               <RatingName>Farm practices</RatingName>
               <InfoImg
@@ -246,16 +282,50 @@ const Card = ({ data }) => {
               />
               <Tooltip show={showTooltip2}>
                 Farm practices rating parameters:
+                <p>
+                  <br />{" "}
+                </p>
                 <p>1. Process identified</p>
                 <p>2. Quality of products utilized</p>
                 <p>3. Process Documented</p>
                 <p>4. Compliance process</p>
               </Tooltip>
-              <Star2
-                src={Stars}
-                // style={{ marginLeft: "1.3rem", marginTop: "0.5rem" }}
+              <RatingContainer>
+                {" "}
+                <Star src={StarRed}  marginLeft={"-12.2rem"}
+                  marginLeftMobile={"2.2rem"}/>
+                <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
+              </RatingContainer>
+            </Flexbox>
+            <Flexbox
+              justify="space-content"
+              style={{ alignItems: "baseline", maxHeight: "3rem" }}
+            >
+              <RatingName>Farmer</RatingName>
+              <InfoImg
+                src={InfoIcon}
+                onMouseEnter={handleInfoIcon3Hover}
+                onMouseLeave={handleInfoIcon3Hover}
               />
-              <RatingNumber>{data?.farm_practice_rating}</RatingNumber>
+              <Tooltip show={showTooltip3}>
+                Farmer rating parameters:
+                <p>
+                  <br />{" "}
+                </p>
+                <p>1. Process identified</p>
+                <p>2. Quality of products utilized</p>
+                <p>3. Process Documented</p>
+                <p>4. Compliance process</p>
+              </Tooltip>
+              <RatingContainer>
+                {" "}
+                <Star
+                  src={StarBlue}
+                  marginLeft={"-7.2rem"}
+                  marginLeftMobile={"5.5rem"}
+                />
+                <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
+              </RatingContainer>
             </Flexbox>
           </Flexbox>
           {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
