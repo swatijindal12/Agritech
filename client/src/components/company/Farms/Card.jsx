@@ -52,16 +52,6 @@ const Down = styled.img`
   }
 `;
 
-// const Star = styled.img`
-//   width: 1.5rem;
-//   height: 1.5rem;
-//   margin-left: -2rem;
-//   @media only screen and (max-width: 990px) {
-//     margin-left: 5.5rem;
-//     margin-top: 0.3rem;
-//   }
-// `;
-
 const Star = styled.img`
   width: 1.5rem;
   height: 1.5rem;
@@ -266,8 +256,11 @@ const Card = ({ data }) => {
                 <p>3. Soil type quality</p>
                 <p>4. Water quality</p>
               </Tooltip>
-              <Star src={Stars}  marginLeft={"-3.8rem"}
-                  marginLeftMobile={"6.5rem"}/>
+              <Star
+                src={Stars}
+                marginLeft={"-3.8rem"}
+                marginLeftMobile={"6.5rem"}
+              />
               <RatingNumber>{data?.rating}</RatingNumber>
             </Flexbox>
             <Flexbox
@@ -292,8 +285,11 @@ const Card = ({ data }) => {
               </Tooltip>
               <RatingContainer>
                 {" "}
-                <Star src={StarRed}  marginLeft={"-12.2rem"}
-                  marginLeftMobile={"2.2rem"}/>
+                <Star
+                  src={StarRed}
+                  marginLeft={"-12.2rem"}
+                  marginLeftMobile={"2.2rem"}
+                />
                 <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
               </RatingContainer>
             </Flexbox>
@@ -321,7 +317,7 @@ const Card = ({ data }) => {
                 {" "}
                 <Star
                   src={StarBlue}
-                  marginLeft={"-7.2rem"}
+                  marginLeft={"-7rem"}
                   marginLeftMobile={"5.5rem"}
                 />
                 <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
