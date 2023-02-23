@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Logo from "../../../assets/logo.jpg";
 import Button from "../../common/Button";
 import LoginImage from "../../../assets/login.png";
+import Flexbox from "../../common/Flexbox";
 import axios from "axios";
 
 const Container = styled.div`
@@ -52,21 +53,18 @@ const MiddleContainer = styled.div`
 `;
 
 const Input = styled.input`
-  width: 45rem;
+  width: 100%;
   height: 3rem;
   padding: 0.75rem;
   border: none;
   background-color: #d9d9d933;
   border-radius: 12px;
-  margin: 1rem 1rem;
+  margin: 1rem 0rem;
   text-align: left;
   -moz-appearance: textfield; /* remove up/down counter in Firefox */
   ::-webkit-outer-spin-button,
   ::-webkit-inner-spin-button {
     -webkit-appearance: none;
-  }
-  @media screen and (max-width: 990px) {
-    width: 20rem;
   }
 `;
 
@@ -81,9 +79,9 @@ const Title = styled.p`
   font-weight: 600;
   color: #6c584c;
   text-align: left;
-  margin-left: 5.3rem;
+  margin-left: 0.5rem;
   @media screen and (max-width: 990px) {
-    margin-left: 1.5rem;
+    margin-left: 0.5rem;
   }
 `;
 
@@ -101,6 +99,17 @@ const Resend = styled.p`
   color: blue;
   font-weight: 700;
   opacity: ${props => (props.active ? 1 : 0.3)};
+`;
+
+const TitleContainer = styled.div`
+  text-align: left;
+  max-width: 90%;
+  margin-left: 10rem;
+  margin-right: 7rem;
+  @media screen and (max-width: 990px) {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
 `;
 
 const Register = () => {
@@ -153,7 +162,7 @@ const Register = () => {
         otp: otp,
       })
       .then(res => {
-        console.log("res data",res);
+        console.log("res data", res);
         if (res.status === 200) {
           window.location.href = "/login";
         }
@@ -161,6 +170,10 @@ const Register = () => {
       .catch(err => {
         console.log("error in otp", err);
       });
+  };
+
+  const handleLogin = () => {
+    window.location.href = "/login";
   };
 
   return (
@@ -174,54 +187,64 @@ const Register = () => {
             <Heading>Register</Heading>
             <LogoImage src={Logo} alt="Logo" />
             <br />
-            <Title>NAME</Title>
-            <Input
-              type="string"
-              placeholder="Enter Name"
-              value={name}
-              required
-              onChange={e => setName(e.target.value)}
-            />
-            <br />
-            <Title>EMAIL</Title>
-            <Input
-              type="email"
-              placeholder="Enter Email Address"
-              value={mail}
-              required
-              onChange={e => setMail(e.target.value)}
-            />
-            <br />
-            <Title>PHONE</Title>
-            <Input
-              type="number"
-              placeholder="Enter Mobile Number"
-              value={number}
-              required
-              onChange={e => setNumber(e.target.value)}
-            />
-            <br />
-            <Title>ADDRESS</Title>
-            <Input
-              type="address"
-              placeholder="Enter Address"
-              value={address}
-              required
-              onChange={e => setAddress(e.target.value)}
-            />
+            <TitleContainer>
+              <Title>NAME</Title>
+              <Input
+                type="string"
+                placeholder="Enter Name"
+                value={name}
+                required
+                onChange={e => setName(e.target.value)}
+              />
+              <br />
+              <Title>EMAIL</Title>
+              <Input
+                type="email"
+                placeholder="Enter Email Address"
+                value={mail}
+                required
+                onChange={e => setMail(e.target.value)}
+              />
+              <br />
+              <Title>PHONE</Title>
+              <Input
+                type="number"
+                placeholder="Enter Mobile Number"
+                value={number}
+                required
+                onChange={e => setNumber(e.target.value)}
+              />
+              <br />
+              <Title>ADDRESS</Title>
+              <Input
+                type="address"
+                placeholder="Enter Address"
+                value={address}
+                required
+                onChange={e => setAddress(e.target.value)}
+              />
+            </TitleContainer>
             <Button text={"SEND OTP"} onClick={getRegisterOTP} />
+            <ResendMessageStyle
+              style={{ fontSize: "1rem", marginTop: "1rem" }}
+              onClick={handleLogin}
+            >
+              {`Go to login page`}
+            </ResendMessageStyle>
           </MiddleContainer>
         ) : (
           <MiddleContainer>
             <LogoImage src={Logo} alt="logo" />
             <br />
-            <Input
-              type="number"
-              placeholder="Enter OTP"
-              style={{ textAlign: "center" }}
-              value={otp}
-              onChange={e => setOtp(e.target.value)}
-            />
+            <TitleContainer>
+              <Input
+                type="number"
+                placeholder="Enter OTP"
+                style={{ textAlign: "center" }}
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+              />
+            </TitleContainer>
             {timeRemaining === 0 ? (
               <ResendMessageStyle
                 onClick={verifyOTP}
