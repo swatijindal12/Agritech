@@ -128,7 +128,6 @@ const Register = () => {
   }, [authorised, timeRemaining]);
 
   const getRegisterOTP = () => {
-    console.log("register", name, number, mail, address);
     axios
       .post(`${process.env.REACT_APP_BASE_URL}/auth/register`, {
         name: name,
