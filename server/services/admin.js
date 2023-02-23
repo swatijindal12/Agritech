@@ -9,7 +9,7 @@ const csvToJson = require("../utils/csvToJson");
 const { farmerSchemaCheck } = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
-
+const mongoose = require("mongoose");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -30,6 +30,7 @@ const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 
 // const mingFarm = () => {};
 
+// Validate the agreement
 exports.validate = async (req) => {
   // General response format
   let response = {
@@ -100,6 +101,7 @@ exports.validate = async (req) => {
   return response;
 };
 
+// Stage the agreement
 exports.stagedAgreements = async (req) => {
   // General response format
   let response = {
@@ -152,6 +154,7 @@ exports.stagedAgreements = async (req) => {
   return response;
 };
 
+// Get staged agreement
 exports.getStagedAgreements = async (req) => {
   // General response format
   let response = {
@@ -222,11 +225,15 @@ exports.listAgreements = async (req) => {
       const agreements = await agreementQuery
         .skip(skip)
         .limit(limit)
-        .select("-__v");
+        .select("-__v ");
       response.httpStatus = 200;
       response.data = {
         totalPages: Math.ceil(totalDocuments / limit),
-        data: agreements,
+        data: agreements.map((agreement) => ({
+          ...agreement._doc,
+          createdAt: agreement.createdAt.toLocaleString(),
+          updatedAt: agreement.updatedAt.toLocaleString(),
+        })),
       };
     }
   } catch (error) {
@@ -401,6 +408,7 @@ exports.validateFarmers = async (req) => {
         const requiredFields = [
           "name",
           "email",
+          "address",
           "phone",
           "pin",
           "image_url",
@@ -764,8 +772,8 @@ exports.getFarmers = async (req) => {
   return response;
 };
 
-// Validate Farm
-exports.validateFarms = async (req) => {
+//Remove it Validate Farm
+exports.validateFarmsOld = async (req) => {
   // General response format
 
   let response = {
@@ -797,7 +805,6 @@ exports.validateFarms = async (req) => {
       const errorLines = [];
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        // console.log(`item ${i}:- `, item);
 
         // Check if location,farmer_id already exist in DB
         let farmLocationExist = await Farm.find({
@@ -836,6 +843,161 @@ exports.validateFarms = async (req) => {
               break;
             }
           }
+        }
+      }
+
+      if (errorLines.length >= 1) {
+        // There are error some lines missing data
+        (response.httpStatus = 400), (response.error = errorLines);
+      } else {
+        // No error
+        (response.httpStatus = 200),
+          (response.message = "validation successful");
+      }
+      response.data = data;
+    }
+  }
+  return response;
+};
+
+// Validate Farm
+exports.validateFarms = async (req) => {
+  // General response format
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  if (!req.files || !req.files.file) {
+    response.error = "no file selected";
+    response.httpStatus = 400;
+  } else {
+    // Read the contents of the file
+    // const fileContent = req.files.file.data.toString(); //JSON DATA
+    const file = req.files.file;
+    // Parse the JSON data
+    // const data = JSON.parse(fileContent); //JSON DATA
+    const data = await csvToJson(file);
+    // Check file type
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!farmSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+    } else {
+      const errorLines = [];
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+
+        let errors = {
+          line: i,
+          farmer_id: "",
+          name: "",
+          address: "",
+          pin: "",
+          location: "",
+          farm_size: "",
+          farm_pdf: "",
+          farm_practice_rating: "",
+          farm_practice_pdf: "",
+          rating: "",
+          image_url: "",
+          video_url: "",
+        };
+
+        if (!item.pin || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 characters long";
+        }
+
+        if (!item.image_url || !item.image_url.startsWith("https://")) {
+          errors.image_url =
+            "Invalid image URL format. Must start with 'https://'";
+        }
+
+        if (!item.farm_pdf || !item.farm_pdf.startsWith("https://")) {
+          errors.farm_pdf = "Farm PDF should start with 'https://'";
+        }
+        if (!item.video_url || !item.video_url.startsWith("https://")) {
+          errors.video_url = "Video_url should start with 'https://'";
+        }
+
+        if (
+          !item.farm_practice_pdf ||
+          !item.farm_practice_pdf.startsWith("https://")
+        ) {
+          errors.video_url = "Farm_practice_pdf should start with 'https://'";
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "name",
+          "farmer_id",
+          "name",
+          "address",
+          "pin",
+          "location",
+          "farm_size",
+          "farm_pdf",
+          "farm_practice_rating",
+          "farm_practice_pdf",
+          "rating",
+          "image_url",
+          "video_url",
+        ];
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
+          }
+        }
+
+        // Check if location,farmer_id is not found or already exist in DB
+        const farmLocationExist = await Farm.find({
+          location: item["location"],
+        });
+        let farmer;
+        try {
+          farmer = await Farmer.findById(item.farmer_id);
+          if (!farmer) {
+            errors.farmer_id = "Farmer not found";
+          }
+        } catch (err) {
+          if (err instanceof mongoose.CastError) {
+            errors.farmer_id = "Invalid farmer ID";
+          }
+        }
+
+        if (
+          farmLocationExist.length != 0 &&
+          (farmer == undefined || farmer.length == 0)
+        ) {
+          errors.farmer_id = "Farmer id is not found";
+          errors.location = "Duplicate farm location";
+        } else if (farmLocationExist.length != 0) {
+          errors.location = "Duplicate farm location";
+        } else if (farmer?.length == 0 || farmer == undefined) {
+          errors.farmer_id = "Farmer id is not found ";
+        }
+
+        if (
+          errors.farmer_id ||
+          errors.name ||
+          errors.address ||
+          errors.pin ||
+          errors.location ||
+          errors.farm_size ||
+          errors.farm_pdf ||
+          errors.farm_practice_rating ||
+          errors.farm_practice_pdf ||
+          errors.rating ||
+          errors.image_url ||
+          errors.video_url
+        ) {
+          errorLines.push(errors);
         }
       }
 
@@ -966,6 +1128,7 @@ exports.createFarm = async (req) => {
 
   const updatedData = await Promise.all(
     data.map(async (farm, index) => {
+      const { _id, farmer_id, file_name, ...rest } = farm;
       farm.ipfs_url = "";
 
       // -------------- IPFS --------------------
@@ -978,7 +1141,7 @@ exports.createFarm = async (req) => {
         },
       };
 
-      const ipfsHash = await pinata.pinJSONToIPFS(farm, options);
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
       farm.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
       // -------------- IPFS --------------------
       return { ...farm, user_id: farm.farmer_id };
