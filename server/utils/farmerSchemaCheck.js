@@ -2,6 +2,7 @@ const Ajv = require("ajv");
 const ajv = new Ajv();
 
 const farmerSchemaCheck = (data) => {
+  console.log("inside farmerSchemaCheck 1.");
   const schema = {
     type: "array",
     items: {
@@ -26,4 +27,5 @@ const farmerSchemaCheck = (data) => {
   const isValid = validate(data);
   return isValid;
 };
-module.exports = farmerSchemaCheck;
+
+module.exports = { farmerSchemaCheck };

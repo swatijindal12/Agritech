@@ -22,6 +22,16 @@ exports.createUser = async (req, res, next) => {
     .catch((err) => res.json(err));
 };
 
+// Route to     => api/v1/auth/verify-register
+exports.verifyCreateUser = async (req, res, next) => {
+  authService
+    .verifyCreateUser(req)
+    .then((response) => {
+      res.status(response.httpStatus).json(response);
+    })
+    .catch((err) => res.json(err));
+};
+
 // Route to      => api/v1/auth/login
 exports.loginUser = async (req, res, next) => {
   authService
@@ -47,7 +57,7 @@ exports.verifyUser = async (req, res, next) => {
   }
 
   // Finding user in database
-  const user = await User.findOne({ phone });
+  const user = await User.findOne({ phone, is_verified: true });
 
   // checking
   if (!user) {

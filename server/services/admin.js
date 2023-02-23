@@ -6,9 +6,10 @@ const StageAgreement = require("../models/stageAgreement");
 const StageFarmer = require("../models/stageFarmer");
 const StageFarm = require("../models/stageFarm");
 const csvToJson = require("../utils/csvToJson");
-const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
+const { farmerSchemaCheck } = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
+
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -339,7 +340,6 @@ exports.validateFarmers = async (req) => {
     response.httpStatus = 400;
   } else {
     // Read the contents of the file
-    // const fileContent = req.files.file.data.toString(); //JSON DATA
     const file = req.files.file;
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
@@ -355,40 +355,85 @@ exports.validateFarmers = async (req) => {
       response.httpStatus = 400;
     } else {
       const errorLines = [];
+      // Creating List of errors.
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
+        let errors = {
+          line: i,
+          name: "",
+          email: "",
+          phone: "",
+          pin: "",
+          image_url: "",
+          farmer_pdf: "",
+        };
 
-        // Check if phone,email already exist in DB
-        let farmerInDbPhone = await Farmer.find({
-          phone: item["phone"],
-        });
-
-        let farmerInDbEmail = await Farmer.find({
-          email: item["email"],
-        });
-
-        if (farmerInDbPhone.length != 0 && farmerInDbEmail.length != 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate Phone && Email data found",
-          });
-        } else if (farmerInDbEmail.length != 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate Email data found",
-          });
-        } else if (farmerInDbPhone.length != 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate Phone && Email data found",
-          });
+        if (!item.name && item.name.length >= 3) {
+          errors.name = "Name should be 3 characters long";
         }
-        for (const key in item) {
-          // check empty fields
-          if (!item[key] || item[key].length < 1) {
-            errorLines.push({ line: i, message: "Missing required data" });
-            break;
+
+        if (
+          !item.email ||
+          !item.email.includes("@") ||
+          !item.email.endsWith(".com")
+        ) {
+          errors.email = "Email should contain '@' and end with '.com'";
+        }
+
+        if (!item.phone || item.phone.length !== 10) {
+          errors.phone = "Phone should be 10 characters long";
+        }
+
+        if (!item.pin || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 characters long";
+        }
+
+        if (!item.image_url || !item.image_url.startsWith("https://")) {
+          errors.image_url =
+            "Invalid image URL format. Must start with 'https://'";
+        }
+
+        if (!item.farmer_pdf || !item.farmer_pdf.startsWith("https://")) {
+          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "name",
+          "email",
+          "phone",
+          "pin",
+          "image_url",
+          "farmer_pdf",
+        ];
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
           }
+        }
+
+        // Check for duplicate phone and email in DB
+        const farmerInDbPhone = await Farmer.find({ phone: item.phone });
+        const farmerInDbEmail = await Farmer.find({ email: item.email });
+
+        if (farmerInDbPhone.length !== 0 && farmerInDbEmail.length !== 0) {
+          errors.phone = "Phone already exists";
+          errors.email = "Email already exists";
+        } else if (farmerInDbEmail.length !== 0) {
+          errors.email = "Email already exists";
+        } else if (farmerInDbPhone.length !== 0) {
+          errors.phone = "Phone already exists";
+        }
+
+        if (
+          errors.name ||
+          errors.email ||
+          errors.phone ||
+          errors.pin ||
+          errors.image_url ||
+          errors.farmer_pdf
+        ) {
+          errorLines.push(errors);
         }
       }
 
@@ -514,8 +559,17 @@ exports.createFarmer = async (req) => {
     data: null,
   };
 
-  // Save Farm data in mongoDB , skip id,s.no key in json
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  // Save Farm data in mongoDB , skip id,s.no key in json
   try {
     const data = req.body;
 
@@ -561,18 +615,27 @@ exports.updateFarmer = async (req) => {
   };
 
   const { id } = req.params;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
 
   const updatedData = req.body;
-  console.log("updatedData - ", updatedData);
+  // console.log("updatedData - ", updatedData);
   try {
     // First check farmer is their with id
     const farmer = await Farmer.findOne({ _id: id });
-    console.log("farmer :- ", farmer);
+    // console.log("farmer :- ", farmer);
 
     if (farmer) {
       // delete the farmer data..
-      const result = await Farmer.updateOne({ _id: id }, updatedData);
-      response.message = `Successfully updated ${result} document`;
+      await Farmer.updateOne({ _id: id }, updatedData);
+      response.message = `Successfully updated`;
       response.httpStatus = 200;
     } else {
       response.error = `farmer not found`;
@@ -596,6 +659,17 @@ exports.deleteFarmer = async (req) => {
   };
 
   const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     // First check farmer is their with id
     const farmer = await Farmer.findOne({ _id: id });
@@ -617,7 +691,6 @@ exports.deleteFarmer = async (req) => {
           });
         }
       }
-
       // Delete farmer
       await Farmer.deleteOne({ _id: id });
       response.message = `Successfully deleted`;
@@ -660,8 +733,11 @@ exports.getFarmers = async (req) => {
     if (isNaN(page) && isNaN(limit) && !sortOrder) {
       // Return all documents
       const farmers = await farmerQuery.select("-__v");
-
-      response.data = farmers;
+      response.data = farmers.map((farmer) => ({
+        ...farmer._doc,
+        createdAt: farmer.createdAt.toLocaleString(),
+        updatedAt: farmer.updatedAt.toLocaleString(),
+      }));
       response.httpStatus = 200;
     } else if (isNaN(page) && isNaN(limit)) {
       // Return all documents
@@ -670,13 +746,16 @@ exports.getFarmers = async (req) => {
       response.data = farmers;
       response.httpStatus = 200;
     } else {
-      console.log("inside else");
       // Apply pagination
       const farmers = await farmerQuery.skip(skip).limit(limit).select("-__v");
       response.httpStatus = 200;
       response.data = {
         totalPages: Math.ceil(totalDocuments / limit),
-        data: farmers,
+        data: farmers.map((farmer) => ({
+          ...farmer._doc,
+          createdAt: farmer.createdAt.toLocaleString(),
+          updatedAt: farmer.updatedAt.toLocaleString(),
+        })),
       };
     }
   } catch (error) {
@@ -912,7 +991,7 @@ exports.createFarm = async (req) => {
   for (let index = 0; index < updatedData.length; index++) {
     const farm = updatedData[index];
     farm.farm_nft_id = "";
-    console.log(`ipfs ${index}:`, farm.ipfs_url);
+    // console.log(`ipfs ${index}:`, farm.ipfs_url);
     // BlockChain Start
     const farmerAddr = process.env.FARMER_ADDR; //wallet adres
 
@@ -951,20 +1030,23 @@ exports.createFarm = async (req) => {
     farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
 
     let farm_nft_id = null;
-    const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
+    const mintPromise = new Promise((resolve, reject) => {
+      // create new promise
       farmNFTContract.getPastEvents(
         "Mint",
         {
-          fromBlock: latestBlock,
-          toBlock: latestBlock,
+          fromBlock: "latest",
         },
         function (error, events) {
-          // console.log(events[0]);
-          const result = events[0].returnValues;
-          farm_nft_id = result[1];
-          // console.log("Farm Id", result[1]);
-          farm.farm_nft_id = result[1];
-          // console.log("error :", error);
+          if (error) {
+            reject(error);
+          } else {
+            const result = events[0].returnValues;
+            farm_nft_id = result[1];
+            // console.log("Farm Id", result[1]);
+            farm.farm_nft_id = result[1]; // assign farm_nft_id to farm object
+            resolve();
+          }
         }
       );
     });
@@ -1013,13 +1095,34 @@ exports.deleteFarm = async (req) => {
   };
 
   const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     // First check farmer is their with id
     const farm = await Farm.findOne({ _id: id });
 
     if (farm) {
-      // delete the farmer data..
-      const result = await Farm.deleteOne({ _id: id });
+      // delete the farm data..
+
+      // delete the farm data..Also delete all farms, and close agreements for that farms.
+      // Check if this farm Has some agreement then Delete it
+      const agreements = await Agreement.find({ farm_id: farm._id });
+
+      if (agreements.length > 0) {
+        const farmId = agreements[0].farm_id;
+        await Agreement.deleteMany({ farm_id: farmId });
+      }
+
+      await Farm.deleteOne({ _id: id });
       response.message = `Successfully deleted`;
       response.httpStatus = 200;
     } else {
@@ -1104,10 +1207,22 @@ exports.getFarms = async (req) => {
       const skip = (page - 1) * limit;
       const totalPages = Math.ceil(totalDocuments / limit);
       const farms = await farmQuery.skip(skip).limit(limit);
-      response.data = { totalPages, farms };
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: farms.map((farm) => ({
+          ...farm._doc,
+          createdAt: farm.createdAt.toLocaleString(),
+          updatedAt: farm.updatedAt.toLocaleString(),
+        })),
+      };
     } else {
       const farms = await farmQuery;
-      response.data = farms;
+
+      response.data = farms.map((farm) => ({
+        ...farm._doc,
+        createdAt: farm.createdAt.toLocaleString(),
+        updatedAt: farm.updatedAt.toLocaleString(),
+      }));
     }
 
     response.httpStatus = 200;
@@ -1172,7 +1287,7 @@ exports.getCustomers = async (req) => {
 
   let customers;
   try {
-    customers = await User.find().select("-__v");
+    customers = await User.find({ is_verified: true }).select("-__v");
     (response.data = customers), (response.httpStatus = 200);
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);

@@ -83,6 +83,10 @@ const userSchema = new mongoose.Schema(
       },
       default: "customer",
     },
+    is_verified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
 );

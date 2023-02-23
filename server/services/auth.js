@@ -34,9 +34,25 @@ exports.createUser = async (req) => {
     } else if (name && address && phone && email) {
       // if all field are entered then create user/customer
       const user = await User.create({ name, address, phone, email });
-      response.httpStatus = 201;
-      response.message = "customer created successful";
-      response.data = user;
+
+      // Twilio send OTP service
+      // client.verify.v2
+      //   .services(serviceId)
+      //   .verifications.create({
+      //     to: "+91" + phone,
+      //     channel: "sms",
+      //   })
+      //   .then(
+      //     (verification) => (response.httpStatus = 200),
+      //     (response.message = `OTP sent to your number ${verification}`),
+      //     (response.httpStatus = 200)
+      //   )
+      //   .catch((error) => {
+      //     (response.httpStatus = 400),
+      //       (response.error = `failed operation ${error}`);
+      //   });
+      (response.message = `OTP sent to your number`),
+        (response.httpStatus = 200);
     } else {
       // if some fields are empty
       response.httpStatus = 400;
@@ -48,6 +64,63 @@ exports.createUser = async (req) => {
     response.error = `${error}`;
   }
 
+  return response;
+};
+
+exports.verifyCreateUser = async (req) => {
+  // General response format
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { phone, otp } = req.body;
+
+  // Checks if phone or otp is entered by user
+  if (!phone || !otp) {
+    response.httpStatus = 400;
+    response.error = "Enter phone number and otp";
+
+    return response;
+  }
+
+  // Finding user in database which is not verified with this Phone.
+  const user = await User.findOne({ phone, is_verified: false });
+
+  // checking
+  if (!user) {
+    response.httpStatus = 404;
+    response.error = "User not found";
+    return response;
+  }
+
+  // verifying otp with twilio service .
+  // client.verify
+  //   .services(serviceId)
+  //   .verificationChecks.create({ to: "+91" + phone, code: otp })
+  //   .then(async (verification_check) => {
+  //     if (verification_check.status === "approved") {
+  //       console.log("verification_check :", verification_check);
+  //       //update is_verified
+  //       await User.updateOne({ phone: phone }, { is_verified: true });
+  //       (response.httpStatus = 200), (response.data = token);
+  //     } else {
+  //       response.httpStatus = 500;
+  //       response.error = `failed operation`;
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     response.httpStatus = 500;
+  //     response.error = "failed operation";
+  //   });
+  //update is_verified
+  await User.updateOne({ phone: phone }, { is_verified: true });
+  response.httpStatus = 200;
+  response.message = "user created successful";
+  response.data = user;
   return response;
 };
 
@@ -72,7 +145,7 @@ exports.login = async (req) => {
     }
 
     // Finding user in database
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ phone, is_verified: true });
 
     // Checking user
     if (!user) {
@@ -105,50 +178,50 @@ exports.login = async (req) => {
 };
 
 // verify service working...
-exports.verify = async (req) => {
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
+// exports.verify = async (req) => {
+//   // General response format
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
 
-  const { phone, otp } = req.body;
+//   const { phone, otp } = req.body;
 
-  // Checks if phone or otp is entered by user
-  if (!phone || !otp) {
-    response.httpStatus = 400;
-    response.error = "Enter phone number and otp";
-  }
+//   // Checks if phone or otp is entered by user
+//   if (!phone || !otp) {
+//     response.httpStatus = 400;
+//     response.error = "Enter phone number and otp";
+//   }
 
-  // Finding user in database
-  const user = await User.findOne({ phone });
+//   // Finding user in database
+//   const user = await User.findOne({ phone, is_verified: true });
 
-  // checking
-  if (!user) {
-    response.httpStatus = 404;
-    response.error = "User not found";
-  }
+//   // checking
+//   if (!user) {
+//     response.httpStatus = 404;
+//     response.error = "User not found";
+//   }
 
-  // verifying otp with twilio service .
-  client.verify
-    .services(serviceId)
-    .verificationChecks.create({ to: "+91" + phone, code: otp })
-    .then((verification_check) => {
-      if (verification_check.status === "approved") {
-        // Create JSON Web token
-        const token = user.getJwtToken();
-        console.log("token : ", token);
-        (response.httpStatus = 200), (response.data = token);
-      } else {
-        response.httpStatus = 404;
-        response.error = `failed operation`;
-      }
-    })
-    .catch((error) => {
-      response.httpStatus = 500;
-      response.error = "failed operation";
-    });
-  return response;
-};
+//   // verifying otp with twilio service .
+//   client.verify
+//     .services(serviceId)
+//     .verificationChecks.create({ to: "+91" + phone, code: otp })
+//     .then((verification_check) => {
+//       if (verification_check.status === "approved") {
+//         // Create JSON Web token
+//         const token = user.getJwtToken();
+//         console.log("token : ", token);
+//         (response.httpStatus = 200), (response.data = token);
+//       } else {
+//         response.httpStatus = 404;
+//         response.error = `failed operation`;
+//       }
+//     })
+//     .catch((error) => {
+//       response.httpStatus = 500;
+//       response.error = "failed operation";
+//     });
+//   return response;
+// };
