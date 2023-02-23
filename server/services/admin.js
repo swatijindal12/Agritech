@@ -6,6 +6,10 @@ const StageAgreement = require("../models/stageAgreement");
 const StageFarmer = require("../models/stageFarmer");
 const StageFarm = require("../models/stageFarm");
 const csvToJson = require("../utils/csvToJson");
+const { farmerSchemaCheck } = require("../utils/farmerSchemaCheck");
+const farmSchemaCheck = require("../utils/farmSchemaCheck");
+const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
+
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -24,9 +28,10 @@ const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 const web3 = new Web3(provider);
 const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 
+// const mingFarm = () => {};
+
 exports.validate = async (req) => {
   // General response format
-
   let response = {
     error: null,
     message: null,
@@ -44,28 +49,35 @@ exports.validate = async (req) => {
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
     const data = await csvToJson(file);
+    //console.log("data :- ", data);
     // Check file type
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!agreementSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
       response.httpStatus = 400;
     } else {
       const errorLines = [];
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
 
+        // Check if farm_id
+
+        let farmId = item["farm_id"];
+
+        // Check farm table the farmer Id
+        let farm = await Farm.findOne({
+          _id: farmId,
+        });
+
+        if (farm == null) {
+          errorLines.push({ line: i, message: "Farm id not found" });
+          break;
+        }
+
         for (const key in item) {
-          if (item[key] === "farm_nft_id") {
-            if (!isNaN(item[key])) {
-              errorLines.push({ line: i, message: "Missing required data" });
-              break;
-            }
-          }
-          if (item[key] === "farm_id") {
-            if (!isNaN(item[key])) {
-              errorLines.push({ line: i, message: "Missing required data" });
-              break;
-            }
-          }
           if (!item[key] || item[key].length < 1) {
             //console.log("check :- ");
             errorLines.push({ line: i, message: "Missing required data" });
@@ -90,7 +102,6 @@ exports.validate = async (req) => {
 
 exports.stagedAgreements = async (req) => {
   // General response format
-  console.log("stagedAgreements service");
   let response = {
     error: null,
     message: null,
@@ -115,12 +126,10 @@ exports.stagedAgreements = async (req) => {
         // Add the file name to each data object
 
         // if Same file name do not exist
-
         const fileExist = await StageAgreement.find({ file_name: file.name });
 
         let updatedData;
         if (fileExist.length <= 0) {
-          console.log("inside check fileExist");
           updatedData = data.map((eachdata) => {
             return { ...eachdata, file_name: file.name };
           });
@@ -156,7 +165,7 @@ exports.getStagedAgreements = async (req) => {
     const stageAgreementpending = await StageAgreement.find({
       stage_status: true,
       approval_status: false,
-    }).select("-createdAt -updatedAt -__v");
+    }).select("-createdAt -updatedAt -__v -stage_status -approval_status");
     // Note :- while inserting update the status to approval_status true
     // if approval status true ,stage_staus:true means this data should be
     // inserted into the Agreement table.
@@ -177,9 +186,99 @@ exports.getStagedAgreements = async (req) => {
     );
 
     response.httpStatus = 200;
-    response.data = dataArray.length > 0 ? dataArray : null;
+    response.data = dataArray.length > 0 ? dataArray : [];
   } catch (error) {
     response.error = `operation failed ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
+// Get Agreement List for admin with Pagination
+exports.listAgreements = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  const skip = (page - 1) * limit;
+
+  try {
+    let agreementQuery = Agreement.find();
+    let totalDocuments = await Agreement.countDocuments();
+
+    if (isNaN(page) && isNaN(limit)) {
+      // Return all documents
+      const agreements = await agreementQuery.select("-__v");
+
+      response.data = agreements;
+      response.httpStatus = 200;
+    } else {
+      // Apply pagination
+      const agreements = await agreementQuery
+        .skip(skip)
+        .limit(limit)
+        .select("-__v");
+      response.httpStatus = 200;
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: agreements,
+      };
+    }
+  } catch (error) {
+    (response.error = "failed operation"), (response.httpStatus = 400);
+  }
+  return response;
+};
+
+// Update Agreement Service :: toBe Confirmed
+exports.updateAgreement = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  const startDate = req.body.start_date;
+  const endDate = req.body.end_date;
+  const price = req.body.price;
+  const crop = req.body.crop;
+  const area = req.body.area;
+
+  const updatedData = {
+    start_date: startDate,
+    end_date: endDate,
+    price: price,
+    crop: crop,
+    area: area,
+  };
+
+  console.log("updatedData :", updatedData);
+
+  try {
+    // First check agreement is their with id
+    const agreement = await Agreement.findOne({ _id: id });
+    console.log("agreement :- ", agreement);
+
+    if (agreement) {
+      // Update the Agreement data..
+      const result = await Agreement.updateOne({ _id: id }, updatedData);
+      response.message = `Successfully updated ${result} document`;
+      response.httpStatus = 200;
+    } else {
+      response.error = `agreement not found`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
     response.httpStatus = 500;
   }
   return response;
@@ -200,14 +299,22 @@ exports.deleteAgreement = async (req) => {
     // First check agreement is their with id
     const agreement = await Agreement.findOne({
       _id: id,
-      agreementclose_status: true,
     });
 
     if (agreement) {
-      // delete the farmer data..
-      await Agreement.deleteOne({ _id: id });
-      response.message = `Successfully deleted`;
-      response.httpStatus = 200;
+      // delete the agreement not active one
+      const checkAgreement = await Agreement.deleteOne({
+        _id: id,
+        agreementclose_status: true,
+      });
+
+      if (checkAgreement.deletedCount) {
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+      } else {
+        response.error = `agreement is active`;
+        response.httpStatus = 400;
+      }
     } else {
       response.error = `agreement not found or agreement active`;
       response.httpStatus = 404;
@@ -221,7 +328,6 @@ exports.deleteAgreement = async (req) => {
 
 exports.validateFarmers = async (req) => {
   // General response format
-
   let response = {
     error: null,
     message: null,
@@ -234,7 +340,6 @@ exports.validateFarmers = async (req) => {
     response.httpStatus = 400;
   } else {
     // Read the contents of the file
-    // const fileContent = req.files.file.data.toString(); //JSON DATA
     const file = req.files.file;
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
@@ -244,38 +349,91 @@ exports.validateFarmers = async (req) => {
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
       response.httpStatus = 400;
+    } else if (!farmerSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
     } else {
       const errorLines = [];
+      // Creating List of errors.
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        // Check if phone,pin,farmer_id already exist in DB
-        let farmerInDbPhone = await Farmer.find({
-          phone: item["phone"],
-        });
-        let farmerInDbFarmerId = await Farmer.find({
-          farmer_id: item["farmer_id"],
-        });
-        let farmerInDbPin = await Farmer.find({
-          pin: item["pin"],
-        });
+        let errors = {
+          line: i,
+          name: "",
+          email: "",
+          phone: "",
+          pin: "",
+          image_url: "",
+          farmer_pdf: "",
+        };
 
-        if (
-          farmerInDbPhone.length != 0 &&
-          farmerInDbFarmerId.length != 0 &&
-          farmerInDbPin.length != 0
-        ) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate data found",
-          });
+        if (!item.name && item.name.length >= 3) {
+          errors.name = "Name should be 3 characters long";
         }
 
-        for (const key in item) {
-          // check pin,farmer_id,phone these things should be unique
-          if (!item[key] || item[key].length < 1) {
-            errorLines.push({ line: i, message: "Missing required data" });
-            break;
+        if (
+          !item.email ||
+          !item.email.includes("@") ||
+          !item.email.endsWith(".com")
+        ) {
+          errors.email = "Email should contain '@' and end with '.com'";
+        }
+
+        if (!item.phone || item.phone.length !== 10) {
+          errors.phone = "Phone should be 10 characters long";
+        }
+
+        if (!item.pin || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 characters long";
+        }
+
+        if (!item.image_url || !item.image_url.startsWith("https://")) {
+          errors.image_url =
+            "Invalid image URL format. Must start with 'https://'";
+        }
+
+        if (!item.farmer_pdf || !item.farmer_pdf.startsWith("https://")) {
+          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "name",
+          "email",
+          "phone",
+          "pin",
+          "image_url",
+          "farmer_pdf",
+        ];
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
           }
+        }
+
+        // Check for duplicate phone and email in DB
+        const farmerInDbPhone = await Farmer.find({ phone: item.phone });
+        const farmerInDbEmail = await Farmer.find({ email: item.email });
+
+        if (farmerInDbPhone.length !== 0 && farmerInDbEmail.length !== 0) {
+          errors.phone = "Phone already exists";
+          errors.email = "Email already exists";
+        } else if (farmerInDbEmail.length !== 0) {
+          errors.email = "Email already exists";
+        } else if (farmerInDbPhone.length !== 0) {
+          errors.phone = "Phone already exists";
+        }
+
+        if (
+          errors.name ||
+          errors.email ||
+          errors.phone ||
+          errors.pin ||
+          errors.image_url ||
+          errors.farmer_pdf
+        ) {
+          errorLines.push(errors);
         }
       }
 
@@ -325,13 +483,13 @@ exports.stagedFarmers = async (req) => {
 
         let updatedData;
         if (fileExist.length <= 0) {
-          console.log("inside check fileExist");
           updatedData = data.map((eachdata) => {
             return { ...eachdata, file_name: file.name };
           });
           // Insert record into DB (stageFarmer)
+          console.log("updatedData :- ", updatedData);
           const stageFarmer = await StageFarmer.create(updatedData);
-          console.log("stageFarmer :-", stageFarmer);
+
           response.httpStatus = 200;
           response.message = "Insertion succeesful";
           response.data = stageFarmer;
@@ -363,7 +521,7 @@ exports.getStagedFarmers = async (req) => {
     const stageFarmerpending = await StageFarmer.find({
       stage_status: true,
       approval_status: false,
-    }).select("-createdAt -updatedAt -__v");
+    }).select("-createdAt -updatedAt -__v -stage_status -approval_status");
     // Note :- while inserting update the status to approval_status true
     // if approval status true ,stage_staus:true means this data should be
     // inserted into the Agreement table.
@@ -401,32 +559,35 @@ exports.createFarmer = async (req) => {
     data: null,
   };
 
-  // Read Json file and then add it DB
-  // if (!req.files || !req.files.file) {
-  //   (response.error = "no file selected"), (response.httpStatus = 400);
-  // }
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
 
   // Save Farm data in mongoDB , skip id,s.no key in json
-
   try {
-    // Read the contents of the file
-    // const fileContent = req.files.file.data.toString();
-
-    // // Parse the JSON data
-    // const data = JSON.parse(fileContent);
     const data = req.body;
-    console.log("data :- ", data);
 
-    // status setting stage table
+    // status RESET stage table
     data.map(async (farmer) => {
       await StageFarmer.updateOne(
-        { _id: farmer._id, stage_status: true, approval_status: false },
+        { _id: farmer._id },
         { stage_status: false, approval_status: true }
       );
     });
 
     const farmers = await Farmer.create(data, {
       select: `-_id -stage_status -approval_status -file_name`,
+    });
+
+    // Removing from staging stable
+    data.map(async (farmer) => {
+      await StageFarmer.deleteOne({ _id: farmer._id, stage_status: false });
     });
 
     if (farmers.length != 0) {
@@ -454,18 +615,27 @@ exports.updateFarmer = async (req) => {
   };
 
   const { id } = req.params;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
 
   const updatedData = req.body;
-  console.log("updatedData - ", updatedData);
+  // console.log("updatedData - ", updatedData);
   try {
     // First check farmer is their with id
     const farmer = await Farmer.findOne({ _id: id });
-    console.log("farmer :- ", farmer);
+    // console.log("farmer :- ", farmer);
 
     if (farmer) {
       // delete the farmer data..
-      const result = await Farmer.updateOne({ _id: id }, updatedData);
-      response.message = `Successfully updated ${result} document`;
+      await Farmer.updateOne({ _id: id }, updatedData);
+      response.message = `Successfully updated`;
       response.httpStatus = 200;
     } else {
       response.error = `farmer not found`;
@@ -489,13 +659,40 @@ exports.deleteFarmer = async (req) => {
   };
 
   const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     // First check farmer is their with id
     const farmer = await Farmer.findOne({ _id: id });
 
     if (farmer) {
-      // delete the farmer data..
-      const result = await Farmer.deleteOne({ _id: id });
+      // delete the farmer data..Also delete all farms, and close agreements for that farms.
+      // Check if this farmer Has some farm then Delete it
+      const farms = await Farm.find({ farmer_id: farmer._id });
+      // console.log("farms", farms);
+      if (farms.length > 0) {
+        const farmId = farms[0]._id;
+        await Farm.deleteMany({ farmer_id: farmer._id });
+        // Check if this farmer Has some Agreement which not active then Delete it
+        const agreements = await Agreement.find({ farm_id: farmId });
+        if (agreements) {
+          await Agreement.deleteMany({
+            farm_id: farmId,
+            agreementclose_status: true,
+          });
+        }
+      }
+      // Delete farmer
+      await Farmer.deleteOne({ _id: id });
       response.message = `Successfully deleted`;
       response.httpStatus = 200;
     } else {
@@ -503,7 +700,7 @@ exports.deleteFarmer = async (req) => {
       response.httpStatus = 404;
     }
   } catch (error) {
-    response.error = `failed operation ${error}`;
+    response.error = `failed operation 1 ${error}`;
     response.httpStatus = 500;
   }
   return response;
@@ -511,13 +708,6 @@ exports.deleteFarmer = async (req) => {
 
 // Get all farmer with page no.
 exports.getFarmers = async (req) => {
-  const sortOrder = req.query.sortOrder;
-
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 2;
-  const skip = (page - 1) * limit;
-
-  // General response format
   let response = {
     error: null,
     message: null,
@@ -525,24 +715,49 @@ exports.getFarmers = async (req) => {
     data: null,
   };
 
-  let farmers;
+  const sortOrder = req.query.sortOrder;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  const skip = (page - 1) * limit;
+
   try {
+    let farmerQuery = Farmer.find();
+    let totalDocuments = await Farmer.countDocuments();
+
     if (sortOrder === "low") {
-      farmers = await Farmer.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ rating: 1 })
-        .select("-__v");
+      farmerQuery = farmerQuery.sort({ rating: 1 });
     } else if (sortOrder === "high") {
-      farmers = await Farmer.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ rating: -1 })
-        .select("-__v");
-    } else {
-      farmers = await Farmer.find().select("-__v");
+      farmerQuery = farmerQuery.sort({ rating: -1 });
     }
-    (response.data = farmers), (response.httpStatus = 200);
+
+    if (isNaN(page) && isNaN(limit) && !sortOrder) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+      response.data = farmers.map((farmer) => ({
+        ...farmer._doc,
+        createdAt: farmer.createdAt.toLocaleString(),
+        updatedAt: farmer.updatedAt.toLocaleString(),
+      }));
+      response.httpStatus = 200;
+    } else if (isNaN(page) && isNaN(limit)) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+
+      response.data = farmers;
+      response.httpStatus = 200;
+    } else {
+      // Apply pagination
+      const farmers = await farmerQuery.skip(skip).limit(limit).select("-__v");
+      response.httpStatus = 200;
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: farmers.map((farmer) => ({
+          ...farmer._doc,
+          createdAt: farmer.createdAt.toLocaleString(),
+          updatedAt: farmer.updatedAt.toLocaleString(),
+        })),
+      };
+    }
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
   }
@@ -570,10 +785,13 @@ exports.validateFarms = async (req) => {
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
     const data = await csvToJson(file);
-
     // Check file type
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!farmSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
       response.httpStatus = 400;
     } else {
       const errorLines = [];
@@ -581,24 +799,36 @@ exports.validateFarms = async (req) => {
         const item = data[i];
         // console.log(`item ${i}:- `, item);
 
-        // Check if location already exist in DB
+        // Check if location,farmer_id already exist in DB
         let farmLocationExist = await Farm.find({
           location: item["location"],
         });
 
-        if (farmLocationExist.length != 0) {
-          console.log("checking DB");
+        let farmerId = await Farmer.find({
+          _id: item["farmer_id"],
+        });
 
+        if (farmLocationExist.length != 0 && farmerId.length == 0) {
           errorLines.push({
             line: i,
-            message: "Duplicate data found",
+            message: "Duplicate location and id or data not found",
+          });
+        } else if (farmLocationExist.length != 0) {
+          errorLines.push({
+            line: i,
+            message: "Duplicate location data found",
+          });
+        } else if (farmerId.length == 0) {
+          errorLines.push({
+            line: i,
+            message: "Duplicate farmer id or data not found",
           });
         }
 
         for (const key in item) {
           // check pin,farmer_id,phone these things should be unique
           if (!item[key] || item[key].length < 1) {
-            console.log("check field");
+            // console.log("check field");
             if (errorLines.map((err) => err.line === i)) {
               continue; // Skip this line if it already has an error
             } else {
@@ -655,7 +885,6 @@ exports.stagedFarms = async (req) => {
 
         let updatedData;
         if (fileExist.length <= 0) {
-          console.log("inside check fileExist");
           updatedData = data.map((eachdata) => {
             return { ...eachdata, file_name: file.name };
           });
@@ -680,8 +909,6 @@ exports.stagedFarms = async (req) => {
 
 exports.getStagedFarms = async (req) => {
   // General response format
-
-  // General response format
   let response = {
     error: null,
     message: null,
@@ -693,7 +920,7 @@ exports.getStagedFarms = async (req) => {
     const stageFarmpending = await StageFarm.find({
       stage_status: true,
       approval_status: false,
-    }).select("-createdAt -updatedAt -__v");
+    }).select("-createdAt -updatedAt -__v -stage_status -approval_status");
     // Note :- while inserting update the status to approval_status true
     // if approval status true ,stage_staus:true means this data should be
     // inserted into the Agreement table.
@@ -728,27 +955,14 @@ exports.createFarm = async (req) => {
     data: null,
   };
 
-  // Read Json file and then add it DB
-  // if (!req.files || !req.files.file) {
-  //   (response.error = "no file selected"), (response.error = 400);
-  // }
-
-  // Read the contents of the file
-  // const fileContent = req.files.file.data.toString();
   const data = req.body;
-  //  console.log("Farm data :- ", data);
-
   // status setting stage table
   data.map(async (farm) => {
     await StageFarm.updateOne(
-      { _id: farm._id, stage_status: true, approval_status: false },
+      { _id: farm._id },
       { stage_status: false, approval_status: true }
     );
   });
-
-  // // Parse the JSON data
-  // const data = JSON.parse(fileContent);
-  // console.log("data :", data);
 
   const updatedData = await Promise.all(
     data.map(async (farm, index) => {
@@ -777,7 +991,7 @@ exports.createFarm = async (req) => {
   for (let index = 0; index < updatedData.length; index++) {
     const farm = updatedData[index];
     farm.farm_nft_id = "";
-    console.log(`ipfs ${index}:`, farm.ipfs_url);
+    // console.log(`ipfs ${index}:`, farm.ipfs_url);
     // BlockChain Start
     const farmerAddr = process.env.FARMER_ADDR; //wallet adres
 
@@ -816,20 +1030,23 @@ exports.createFarm = async (req) => {
     farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
 
     let farm_nft_id = null;
-    const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
+    const mintPromise = new Promise((resolve, reject) => {
+      // create new promise
       farmNFTContract.getPastEvents(
         "Mint",
         {
-          fromBlock: latestBlock,
-          toBlock: latestBlock,
+          fromBlock: "latest",
         },
         function (error, events) {
-          // console.log(events[0]);
-          const result = events[0].returnValues;
-          farm_nft_id = result[1];
-          // console.log("Farm Id", result[1]);
-          farm.farm_nft_id = result[1];
-          // console.log("error :", error);
+          if (error) {
+            reject(error);
+          } else {
+            const result = events[0].returnValues;
+            farm_nft_id = result[1];
+            // console.log("Farm Id", result[1]);
+            farm.farm_nft_id = result[1]; // assign farm_nft_id to farm object
+            resolve();
+          }
         }
       );
     });
@@ -845,8 +1062,14 @@ exports.createFarm = async (req) => {
       select: `-_id -stage_status -approval_status -file_name`,
     });
 
+    // Removing from staging stable
+    updatedData.map(async (farm) => {
+      await StageFarm.deleteOne({ _id: farm._id }, { stage_status: false });
+    });
+
     if (farms.length != 0) {
       // console.log("checking if length");
+
       (response.message = "Data Insertion successful"),
         (response.httpStatus = 200),
         (response.data = updatedData);
@@ -872,13 +1095,34 @@ exports.deleteFarm = async (req) => {
   };
 
   const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     // First check farmer is their with id
     const farm = await Farm.findOne({ _id: id });
 
     if (farm) {
-      // delete the farmer data..
-      const result = await Farm.deleteOne({ _id: id });
+      // delete the farm data..
+
+      // delete the farm data..Also delete all farms, and close agreements for that farms.
+      // Check if this farm Has some agreement then Delete it
+      const agreements = await Agreement.find({ farm_id: farm._id });
+
+      if (agreements.length > 0) {
+        const farmId = agreements[0].farm_id;
+        await Agreement.deleteMany({ farm_id: farmId });
+      }
+
+      await Farm.deleteOne({ _id: id });
       response.message = `Successfully deleted`;
       response.httpStatus = 200;
     } else {
@@ -928,6 +1172,10 @@ exports.updateFarm = async (req) => {
 
 exports.getFarms = async (req) => {
   const sortOrder = req.query.sortOrder;
+  const cropTypes = req.query.cropTypes;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
   // General response format
   let response = {
     error: null,
@@ -936,39 +1184,54 @@ exports.getFarms = async (req) => {
     data: null,
   };
 
-  let farms;
   try {
-    farms = await Farm.find().select("-__v");
+    let farmQuery = Farm.find().select("-__v");
+    let totalDocuments = await farmQuery.countDocuments();
 
-    // sort based on rating.
+    // redefine the query before executing it again
+    farmQuery = Farm.find();
     if (sortOrder === "low") {
-      farms = await Farm.find().sort({ rating: 1 }).select("-__v");
+      farmQuery = farmQuery.sort({ rating: 1 });
     } else if (sortOrder === "high") {
-      farms = await Farm.find().sort({ rating: -1 }).select("-__v");
-    } else if (sortOrder === undefined) {
-      farms = await Farm.find().select("-__v");
+      farmQuery = farmQuery.sort({ rating: -1 });
     }
 
-    // filter based on crop types
-    if (req.query.cropTypes) {
-      let cropTypes = req.query.cropTypes.split(",");
-      farms = farms.filter((farm) => {
-        for (let i = 0; i < cropTypes.length; i++) {
-          if (farm[cropTypes[i]] === true) {
-            return true;
-          }
-        }
-        return false;
-      });
-      response.data = farms;
-      response.httpStatus = 200;
-    } else {
-      response.data = farms;
-      response.httpStatus = 200;
+    // Apply filtering based on crop types
+    if (cropTypes) {
+      let cropTypesArray = cropTypes.split(",");
+      farmQuery = farmQuery.where("cropTypes").in(cropTypesArray);
     }
+
+    // Apply pagination
+    if (page && limit) {
+      const skip = (page - 1) * limit;
+      const totalPages = Math.ceil(totalDocuments / limit);
+      const farms = await farmQuery.skip(skip).limit(limit);
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: farms.map((farm) => ({
+          ...farm._doc,
+          createdAt: farm.createdAt.toLocaleString(),
+          updatedAt: farm.updatedAt.toLocaleString(),
+        })),
+      };
+    } else {
+      const farms = await farmQuery;
+
+      response.data = farms.map((farm) => ({
+        ...farm._doc,
+        createdAt: farm.createdAt.toLocaleString(),
+        updatedAt: farm.updatedAt.toLocaleString(),
+      }));
+    }
+
+    response.httpStatus = 200;
   } catch (error) {
-    (response.error = "failed operation"), (response.httpStatus = 400);
+    console.log(error);
+    response.error = "failed operation";
+    response.httpStatus = 400;
   }
+
   return response;
 };
 
@@ -1024,7 +1287,7 @@ exports.getCustomers = async (req) => {
 
   let customers;
   try {
-    customers = await User.find().select("-__v");
+    customers = await User.find({ is_verified: true }).select("-__v");
     (response.data = customers), (response.httpStatus = 200);
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);

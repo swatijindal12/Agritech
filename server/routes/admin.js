@@ -26,6 +26,7 @@ const {
   getStagedFarmers,
   updateFarmer,
   deleteFarmer,
+  listAgreements,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -132,6 +133,11 @@ router
 router
   .route("/farmers")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getFarmers);
+
+// Get List of Agreement for Admin to edit,delete
+router
+  .route("/listagreements")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), listAgreements);
 
 // Insert customer data into DB.
 router

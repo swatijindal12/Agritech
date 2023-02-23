@@ -10,7 +10,7 @@ const agreementSchema = new mongoose.Schema(
       type: String,
     },
     farm_id: {
-      type: Number,
+      type: String,
     },
     address: {
       type: String,

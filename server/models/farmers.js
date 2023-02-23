@@ -9,10 +9,6 @@ const validateEmail = function (email) {
 // Farmer Model
 const farmerSchema = new mongoose.Schema(
   {
-    farmer_id: {
-      type: String,
-      required: true,
-    },
     name: {
       type: String,
       required: true,
@@ -72,5 +68,7 @@ const farmerSchema = new mongoose.Schema(
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
 );
 
-// Exporting userSchema as User
+// Pre hook to convert the date to a localized string before saving
+
+// Exporting farmerSchema as Farmer
 module.exports = mongoose.model("Farmer", farmerSchema);

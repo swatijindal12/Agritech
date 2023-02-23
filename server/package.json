@@ -20,6 +20,7 @@
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
     "@truffle/hdwallet-provider": "^2.1.4",
+    "ajv": "^8.12.0",
     "aws-sdk": "^2.1282.0",
     "axios": "^1.2.1",
     "cookie-parser": "^1.4.6",

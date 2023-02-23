@@ -6,10 +6,6 @@ const stageFarmerSchema = new mongoose.Schema(
     file_name: {
       type: String,
     },
-    farmer_id: {
-      type: String,
-      required: true,
-    },
     name: {
       type: String,
       required: true,

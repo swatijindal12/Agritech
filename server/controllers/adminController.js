@@ -70,6 +70,23 @@ exports.deleteAgreements = async (req, res, next) => {
     });
 };
 
+// List of agreements for admin edit/delete
+exports.listAgreements = async (req, res, next) => {
+  adminService
+    .listAgreements(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // Route to      => api/v1/admin/validate/farmer :: POST
 // Validate the Json data in table
 exports.validateFarmers = async (req, res, next) => {
