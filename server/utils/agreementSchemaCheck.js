@@ -16,9 +16,7 @@ const agreementSchemaCheck = async (data) => {
       address: {},
     },
   };
-
   const validate = ajv.compile(schema);
-
   const isValid = validate(data);
   return isValid;
 };
