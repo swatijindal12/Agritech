@@ -37,7 +37,7 @@ const MarketPlace = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/listagreements`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/marketplace/agreements`, {
         headers: {
           Authorization: "Bearer " + user?.data.token,
         },

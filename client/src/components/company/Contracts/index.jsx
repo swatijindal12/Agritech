@@ -57,7 +57,7 @@ const Contracts = () => {
       .get(
         user?.data.role === "admin"
           ? `${process.env.REACT_APP_BASE_URL}/admin/agreement`
-          : `${process.env.REACT_APP_BASE_URL}/admin/listagreements`,
+          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreements`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
