@@ -26,6 +26,7 @@ const Card = styled(Flexbox)`
   border-radius: 20px;
   width: 48%;
   justify-content: flex-start;
+  cursor: pointer;
 `;
 
 const CardData = styled.div`
