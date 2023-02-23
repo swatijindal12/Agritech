@@ -261,11 +261,11 @@ exports.updateAgreement = async (req) => {
     area: area,
   };
 
-  console.log("updatedData :", updatedData);
+  // console.log("updatedData :", updatedData);
 
   try {
-    // First check agreement is their with id
-    const agreement = await Agreement.findOne({ _id: id });
+    // First check agreement is their with id and not active
+    const agreement = await Agreement.findOne({ _id: id, sold_status: false });
     console.log("agreement :- ", agreement);
 
     if (agreement) {
@@ -687,7 +687,7 @@ exports.deleteFarmer = async (req) => {
         if (agreements) {
           await Agreement.deleteMany({
             farm_id: farmId,
-            agreementclose_status: true,
+            sold_status: true,
           });
         }
       }
