@@ -6,6 +6,7 @@ import Flexbox from "../Flexbox";
 import Button from "../Button";
 import CrossIcon from "../../../assets/red-cross.svg";
 import CheckIcon from "../../../assets/green-check.svg";
+import ErrorPopup from "./ErrorPopup";
 
 const Container = styled.div`
   padding: 1rem;
@@ -86,6 +87,7 @@ const StatusImage = styled.img`
   height: 50px;
   width: 50px;
   object-fit: cover;
+  cursor: pointer;
 `;
 
 const UploadText = styled.div`
@@ -114,6 +116,7 @@ const CsvUpload = () => {
   const [loading, setLoading] = useState(false);
   const user = useSelector(store => store.auth.user);
   const [uploadData, setUploadData] = useState({});
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     setUploadData(JSON.parse(localStorage.getItem("current-new-upload-data")));
@@ -244,12 +247,22 @@ const CsvUpload = () => {
                       return (
                         <StatusImageContainer>
                           <StatusImage
+                            onClick={() => {
+                              if (getErrorIndex(index)) {
+                                setShowErrorModal(index);
+                              }
+                            }}
                             src={getErrorIndex(index) ? CrossIcon : CheckIcon}
                           />
-                          {getErrorIndex(index) && (
-                            <span class="tooltiptext">
-                              {getErrorIndex(index)?.message}
-                            </span>
+                          {getErrorIndex(index) && showErrorModal === index && (
+                            // <span class="tooltiptext">
+                            //   {getErrorIndex(index)?.message}
+                            // </span>
+                            // <ErrorPopup errors={getErrorIndex(index)} />
+                            <ErrorPopup
+                              errors={getErrorIndex(index)}
+                              toggle={() => setShowErrorModal(false)}
+                            />
                           )}
                         </StatusImageContainer>
                       );
