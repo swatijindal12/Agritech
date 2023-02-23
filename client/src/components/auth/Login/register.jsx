@@ -153,7 +153,7 @@ const Register = () => {
         otp: otp,
       })
       .then(res => {
-        console.log(res);
+        console.log("res data",res);
         if (res.status === 200) {
           window.location.href = "/login";
         }
