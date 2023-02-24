@@ -255,10 +255,6 @@ const CsvUpload = () => {
                             src={getErrorIndex(index) ? CrossIcon : CheckIcon}
                           />
                           {getErrorIndex(index) && showErrorModal === index && (
-                            // <span class="tooltiptext">
-                            //   {getErrorIndex(index)?.message}
-                            // </span>
-                            // <ErrorPopup errors={getErrorIndex(index)} />
                             <ErrorPopup
                               errors={getErrorIndex(index)}
                               toggle={() => setShowErrorModal(false)}

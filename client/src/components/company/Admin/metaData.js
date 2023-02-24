@@ -6,9 +6,9 @@ export const navigationData = [
     redirection_url: "/marketplace",
     validate_url: "admin/validate-data",
     staged_list_get: "admin/stage",
-    final_upload_url: "admin/listagreements",
+    final_upload_url: "marketplace/agreement",
     get_list: "admin/listagreements",
-    type: "contract",
+    type: "agreement",
   },
   {
     name: "Farmers",
