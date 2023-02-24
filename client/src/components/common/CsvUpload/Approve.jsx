@@ -80,6 +80,16 @@ const StatusImage = styled.img`
   object-fit: cover;
 `;
 
+const UrlTd = styled.td`
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
+const ImagePreview = styled.img`
+  height: 5rem;
+`;
+
 const Approve = () => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
@@ -203,13 +213,24 @@ const Approve = () => {
                 return (
                   <tr>
                     {tableHeading.map((item, tdIndex) => {
-                      if (tdIndex === 0)
+                      if (tdIndex === 0) {
                         return (
                           <td>
                             <StatusImage src={CheckIcon} />
                           </td>
                         );
-                      return <td>{row[item]}</td>;
+                      }
+                      if (row[item]?.toString()?.includes("http"))
+                        return (
+                          <UrlTd onClick={() => window.open(row[item])}>
+                            {row[item].includes(".pdf") ? (
+                              item
+                            ) : (
+                              <ImagePreview src={row[item]} />
+                            )}
+                          </UrlTd>
+                        );
+                      else return <td>{row[item] || 0}</td>;
                     })}
                   </tr>
                 );

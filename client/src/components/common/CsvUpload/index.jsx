@@ -108,6 +108,16 @@ const Heading = styled.p`
   text-align: center;
 `;
 
+const UrlTd = styled.td`
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+`;
+
+const ImagePreview = styled.img`
+  height: 5rem;
+`;
+
 const CsvUpload = () => {
   const [data, setData] = useState(null);
   const [tableHeading, setTableHeading] = useState([]);
@@ -243,7 +253,7 @@ const CsvUpload = () => {
               return (
                 <Tr error={errors?.includes(index)}>
                   {tableHeading.map((item, tdIndex) => {
-                    if (tdIndex === 0)
+                    if (tdIndex === 0) {
                       return (
                         <StatusImageContainer>
                           <StatusImage
@@ -262,7 +272,18 @@ const CsvUpload = () => {
                           )}
                         </StatusImageContainer>
                       );
-                    return <td>{row[item]}</td>;
+                    }
+                    if (row[item]?.toString()?.includes("http"))
+                      return (
+                        <UrlTd onClick={() => window.open(row[item])}>
+                          {row[item].includes(".pdf") ? (
+                            item
+                          ) : (
+                            <ImagePreview src={row[item]} />
+                          )}
+                        </UrlTd>
+                      );
+                    else return <td>{row[item] || 0}</td>;
                   })}
                 </Tr>
               );
