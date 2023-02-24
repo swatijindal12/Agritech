@@ -81,7 +81,7 @@ const ErrorPopup = ({ errors, toggle }) => {
     <Container>
       <InnerContianer>
         <Cross src={CrossIcon} alt="cross-icon" onClick={toggle} />
-        <Message>Please Fix Erros and Try again </Message>
+        <Message>Please fix errors and try again </Message>
         {errorsList?.length > 0 &&
           errorsList?.map(item => {
             return (

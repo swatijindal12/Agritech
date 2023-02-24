@@ -57,7 +57,7 @@ const Contracts = () => {
       .get(
         user?.data.role === "admin"
           ? `${process.env.REACT_APP_BASE_URL}/admin/agreement`
-          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreements`,
+          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -89,18 +89,18 @@ const Contracts = () => {
           Closed
         </Option>
       </OptionContainer>
-      {((currentPage === "active" && active.length == 0) ||
-        (currentPage === "closed" && closed.length == 0)) && (
+      {((currentPage === "active" && active?.length == 0) ||
+        (currentPage === "closed" && closed?.length == 0)) && (
         <ImageContainer>
           <EmptyImage src={EmptyIcon} />
         </ImageContainer>
       )}
       <CardsContainer>
         {currentPage === "active"
-          ? active.map(item => {
+          ? active?.map(item => {
               return <ActiveCard data={item} key={item.agreements[0]} />;
             })
-          : closed.map(item => {
+          : closed?.map(item => {
               return <ClosedCard data={item} key={item.agreements[0]} />;
             })}
       </CardsContainer>
