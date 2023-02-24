@@ -5,11 +5,14 @@ import { addToCart } from "../../../redux/actions/cartActions";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
 import NFTPopup from "../../common/NFTPopup";
+import NewIcon from "../../../assets/new.svg";
 
 const Container = styled.div`
+  position: relative;
   padding: 1rem;
   border-radius: 8px;
   background-color: #f0ead254;
+  border: ${props => props.highlight && "2px solid #ADC178"};
   margin: 1rem 0;
 `;
 
@@ -65,7 +68,14 @@ const PopupContent = styled.p`
   }
 `;
 
-const Card = ({ data }) => {
+const New = styled.img`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  height: 1rem;
+`;
+
+const Card = ({ data, highlight }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedNFTId, setSelectedNFTId] = useState("");
 
@@ -113,7 +123,8 @@ const Card = ({ data }) => {
   ButtonText();
 
   return user ? (
-    <Container>
+    <Container highlight={highlight}>
+      {highlight && <New src={NewIcon} alt="new-tag" />}
       <Id>
         Contract NFT ID{" "}
         {data?.agreement_nft_id.map((nftId, index) => (

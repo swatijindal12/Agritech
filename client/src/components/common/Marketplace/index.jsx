@@ -13,7 +13,7 @@ const Container = styled.div`
 
 const CardsContainer = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   flex-wrap: wrap;
   column-gap: 1rem;
   margin-top: 1rem;
@@ -33,9 +33,25 @@ const ButtonContainer = styled(Flexbox)`
 
 const MarketPlace = () => {
   const [contract, setContract] = useState(null);
+  const [newAddedIds, setNewAddedIds] = useState([]);
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
+    getList();
+    getNewAddedIds();
+  }, []);
+
+  const getNewAddedIds = () => {
+    let newAddedArray = JSON.parse(sessionStorage.getItem("agreementNew"));
+    let tempArr = [];
+    if (newAddedArray) {
+      newAddedArray.forEach(item => tempArr.push(item._id));
+    }
+    console.log("here the new added is ", tempArr);
+    setNewAddedIds(tempArr);
+  };
+
+  const getList = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/marketplace/agreements`, {
         headers: {
@@ -47,13 +63,21 @@ const MarketPlace = () => {
         setContract(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
-  }, []);
+  };
 
   return (
     <Container>
       <CardsContainer>
         {contract?.map(item => {
-          return <Card data={item} key={item.agreements[0]} />;
+          return (
+            <Card
+              data={item}
+              key={item.agreements[0]}
+              highlight={item.agreements.some(item =>
+                newAddedIds.includes(item)
+              )}
+            />
+          );
         })}
       </CardsContainer>
     </Container>

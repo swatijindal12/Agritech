@@ -19,7 +19,7 @@ const FilterContainer = styled.div`
 const CardsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-evenly;
   margin: 2rem 0;
 
   @media only screen and (max-width: 990px) {
@@ -31,13 +31,24 @@ const Farms = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farms, setFarms] = useState(null);
+  const [newAddedIds, setNewAddedIds] = useState([]);
   const user = useSelector(store => store.auth.user);
 
   const toggleFilter = () => setShowFilter(!showFilter);
 
   useEffect(() => {
     getList();
+    getNewAddedIds();
   }, []);
+
+  const getNewAddedIds = () => {
+    let newAddedArray = JSON.parse(sessionStorage.getItem("farmNew"));
+    let tempArr = [];
+    if (newAddedArray) {
+      newAddedArray.forEach(item => tempArr.push(item._id));
+    }
+    setNewAddedIds(tempArr);
+  };
 
   const getList = () => {
     let queryString = "";
@@ -82,7 +93,13 @@ const Farms = () => {
       <br />
       <CardsContainer>
         {farms?.map(item => {
-          return <Card data={item} key={item._id} />;
+          return (
+            <Card
+              data={item}
+              key={item._id}
+              highlight={newAddedIds.includes(item._id)}
+            />
+          );
         })}
       </CardsContainer>
     </Container>
