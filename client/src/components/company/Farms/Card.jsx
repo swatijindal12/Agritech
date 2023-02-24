@@ -8,6 +8,7 @@ import StarRed from "../../../assets/farms/starRed.svg";
 import StarBlue from "../../../assets/farms/starBlue.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
 import NFTPopup from "../../common/NFTPopup";
+import NewIcon from "../../../assets/new.svg";
 
 const Container = styled.div`
   position: relative;
@@ -17,6 +18,8 @@ const Container = styled.div`
   padding: 0.5rem;
   border-radius: 8px;
   margin: 1rem 0;
+  border: ${props => props.highlight && "2px solid #ADC178"};
+  /* box-shadow: ${props => props.highlight && "5px 3px 3px #ADC178"}; */
   @media only screen and (max-width: 990px) {
     width: 100%;
   }
@@ -62,7 +65,6 @@ const Star = styled.img`
   @media only screen and (max-width: 990px) {
     margin-left: ${props =>
       props.marginLeftMobile ? props.marginLeftMobile : "1rem"};
-    //1.3rem;
     margin-top: 0.5rem;
   }
 `;
@@ -157,7 +159,14 @@ const RatingContainer = styled.div`
   align-items: center;
 `;
 
-const Card = ({ data }) => {
+const New = styled.img`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  height: 1rem;
+`;
+
+const Card = ({ data, highlight }) => {
   const [opened, setOpened] = useState(false);
   const [showTooltip1, setShowTooltip1] = useState(false);
   const [showTooltip2, setShowTooltip2] = useState(false);
@@ -175,7 +184,8 @@ const Card = ({ data }) => {
   // };
 
   return (
-    <Container>
+    <Container highlight={highlight}>
+      {highlight && <New src={NewIcon} alt="new-tag" />}
       <Image src={data.image_url} key={data.farm_nft_id} />
       <Flexbox justify="space-between" margin="0.5rem">
         {opened ? (

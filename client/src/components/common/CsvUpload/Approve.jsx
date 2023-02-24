@@ -138,6 +138,10 @@ const Approve = () => {
         if (res.data.error) {
           setShowVerificationError(res.data.error);
         } else {
+          sessionStorage.setItem(
+            `${selectedType.type}New`,
+            JSON.stringify(selectedItem)
+          );
           window.location.href = selectedType?.redirection_url;
           console.log("posted Succssfully ", res.data);
         }
