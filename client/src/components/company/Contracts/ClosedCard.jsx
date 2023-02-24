@@ -66,14 +66,14 @@ const Number = styled.p`
 
 const PopupContent = styled.p`
   padding: 0.5rem;
+  overflow-x: scroll;
+  max-width: 20rem;
   @media screen and (max-width: 990px) {
-    overflow-x: scroll;
     scroll-margin-top: 1rem;
   }
 `;
 
 const ClosedCard = ({ data }) => {
-  // const user = useSelector(store => store.auth.user);
   const [selectedNFTId, setSelectedNFTId] = useState("");
 
   const togglePopup = nftId => {
@@ -85,53 +85,55 @@ const ClosedCard = ({ data }) => {
   };
 
   return (
-    <Container>
-      <Id onClick={() => window.open(data?.tx_hash)}>
-        Contract NFT ID{" "}
-        {data.agreement_nft_id.map((nftId, index) => (
-          <React.Fragment key={index}>
-            {/* <a href={data?.tx_hash[index]} target="_blank">
-              #{nftId}
-            </a>{" "} */}
-            <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
-              #{nftId}{" "}
-            </a>
-            <NFTPopup
-              isOpen={selectedNFTId === nftId}
-              togglePopup={togglePopup}
-              tx_hash={data.tx_hash[index]}
-              width={100}
-            >
-              <PopupContent>
-                IPFS URL:
-                <a href={data?.ipfs_url[index]} target="_blank">
-                  {data?.ipfs_url[index]}
-                </a>
-              </PopupContent>
-            </NFTPopup>
-          </React.Fragment>
+    <>
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+          >
+            <PopupContent>
+              IPFS URL:
+              <a href={data?.ipfs_url[index]} target="_blank">
+                {data?.ipfs_url[index]}
+              </a>
+            </PopupContent>
+          </NFTPopup>
         ))}
-      </Id>
-      <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data?.farmer_name}</Name>
-        <div>
-          <Date>{data?._id.start_date}</Date>
-          <Date>{data?._id.end_date}</Date>
-        </div>
-      </Flexbox>
-      <Address>{data.address}</Address>
-      <TypeBox>
-        <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
-        <Area>Quantity: {data?.unit_bought}</Area>
-        <Area>{data?._id.area}</Area>
-      </TypeBox>
-      <TypeBox style={{ display: "block" }}>
-        <Name>{data?.customer_name || "Buyer Name"}</Name>
-        <Number>{data?.customer_phone}</Number>
-        <Address>{data?.customer_address || "Buyer Address"}</Address>
-      </TypeBox>
-      <Amount>₹{data?._id.price}</Amount>
-    </Container>
+      <Container>
+        <Id onClick={() => window.open(data?.tx_hash)}>
+          Contract NFT ID{" "}
+          {data.agreement_nft_id.map((nftId, index) => (
+            <React.Fragment key={index}>
+              <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
+                #{nftId}{" "}
+              </a>
+            </React.Fragment>
+          ))}
+        </Id>
+        <Flexbox justify="space-between" margin="0.3rem 0">
+          <Name>{data?.farmer_name}</Name>
+          <div>
+            <Date>{data?._id.start_date}</Date>
+            <Date>{data?._id.end_date}</Date>
+          </div>
+        </Flexbox>
+        <Address>{data.address}</Address>
+        <TypeBox>
+          <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
+          <Area>Quantity: {data?.unit_bought}</Area>
+          <Area>{data?._id.area}</Area>
+        </TypeBox>
+        <TypeBox style={{ display: "block" }}>
+          <Name>{data?.customer_name || "Buyer Name"}</Name>
+          <Number>{data?.customer_phone}</Number>
+          <Address>{data?.customer_address || "Buyer Address"}</Address>
+        </TypeBox>
+        <Amount>₹{data?._id.price}</Amount>
+      </Container>
+    </>
   );
 };
 

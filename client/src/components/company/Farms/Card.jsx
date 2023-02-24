@@ -140,8 +140,10 @@ const Tooltip = styled.div`
 
 const PopupContent = styled.p`
   padding: 0.5rem;
+  overflow-x: scroll;
+  max-width: 20rem;
+
   @media screen and (max-width: 990px) {
-    overflow-x: scroll;
     scroll-margin-top: 1rem;
   }
 `;
@@ -184,160 +186,166 @@ const Card = ({ data, highlight }) => {
   // };
 
   return (
-    <Container highlight={highlight}>
-      {highlight && <New src={NewIcon} alt="new-tag" />}
-      <Image src={data.image_url} key={data.farm_nft_id} />
-      <Flexbox justify="space-between" margin="0.5rem">
-        {opened ? (
-          <Flexbox>
-            <NameContainer>
-              <Name>{data.name}</Name>
-              <Id>
-                NFT TOKEN ID{" "}
-                <a style={{ color: "blue" }} onClick={() => togglePopup(true)}>
-                  #{data.farm_nft_id}
-                </a>
-                <NFTPopup
-                  isOpen={isPopupOpen}
-                  togglePopup={togglePopup}
-                  tx_hash={data.tx_hash}
-                >
-                  <PopupContent>
-                    IPFS URL:
-                    <a href={data?.ipfs_url} target="_blank">
-                      {data?.ipfs_url}
-                    </a>
-                  </PopupContent>
-                </NFTPopup>
-              </Id>
-            </NameContainer>
-          </Flexbox>
-        ) : (
-          <Name>{data.name}</Name>
-        )}
-        {!isPopupOpen && (
-          <Down
-            src={ExpandIcon}
-            opened={opened}
-            onClick={() => setOpened(!opened)}
-          />
-        )}
-      </Flexbox>
-      {opened && (
-        <>
-          <Name>{data.area}</Name>
-          <Flexbox justify="space-between" margin="0.5rem 0.5rem 0.5rem 0">
-            <Address>{data.address}</Address>
-            <img
-              src={LocationIcon}
-              onClick={() => window.open(data.location)}
+    <>
+      <Container>
+        <Image src={data.image_url} key={data.farm_nft_id} />
+        <Flexbox justify="space-between" margin="0.5rem">
+          {opened ? (
+            <Flexbox>
+              <NameContainer>
+                <Name>{data.name}</Name>
+                <Id>
+                  NFT TOKEN ID{" "}
+                  <a
+                    style={{ color: "blue" }}
+                    onClick={() => togglePopup(true)}
+                  >
+                    #{data.farm_nft_id}
+                  </a>
+                </Id>
+              </NameContainer>
+            </Flexbox>
+          ) : (
+            <Name>{data.name}</Name>
+          )}
+          {!isPopupOpen && (
+            <Down
+              src={ExpandIcon}
+              opened={opened}
+              onClick={() => setOpened(!opened)}
             />
-          </Flexbox>
-          <Video height="240" controls>
-            <source src={data.video_url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </Video>
+          )}
+        </Flexbox>
+        {opened && (
+          <>
+            <Name>{data.area}</Name>
+            <Flexbox justify="space-between" margin="0.5rem 0.5rem 0.5rem 0">
+              <Address>{data.address}</Address>
+              <img
+                src={LocationIcon}
+                onClick={() => window.open(data.location)}
+              />
+            </Flexbox>
+            <Video height="240" controls>
+              <source src={data.video_url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </Video>
 
-          <Id>{data.crops}</Id>
-          <Flexbox justify="space-between">
-            <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
-              Read more about farm practices
+            <Id>{data.crops}</Id>
+            <Flexbox justify="space-between">
+              <ViewMore onClick={() => window.open(data.farm_practice_pdf)}>
+                Read more about farm practices
+              </ViewMore>
+            </Flexbox>
+            <ViewMore onClick={() => window.open(data.farm_pdf)}>
+              View more about farm
             </ViewMore>
-          </Flexbox>
-          <ViewMore onClick={() => window.open(data.farm_pdf)}>
-            View more about farm
-          </ViewMore>
-          <Flexbox style={{ display: "block" }}>
-            <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
-            <Flexbox justify="space-content" style={{ maxHeight: "0.8rem" }}>
-              <RatingName>Farm</RatingName>
-              <InfoImg
-                src={InfoIcon}
-                onMouseEnter={handleInfoIcon1Hover}
-                onMouseLeave={handleInfoIcon1Hover}
-              />
-              <Tooltip show={showTooltip1}>
-                Farm Rating parameters:
-                <p>
-                  <br />{" "}
-                </p>
-                <p>1. Farm details</p>
-                <p>2. Farm land record</p>
-                <p>3. Soil type quality</p>
-                <p>4. Water quality</p>
-              </Tooltip>
-              <Star
-                src={Stars}
-                marginLeft={"-3.8rem"}
-                marginLeftMobile={"6.5rem"}
-              />
-              <RatingNumber>{data?.rating}</RatingNumber>
-            </Flexbox>
-            <Flexbox
-              justify="space-content"
-              style={{ alignItems: "baseline", maxHeight: "2rem" }}
-            >
-              <RatingName>Farm practices</RatingName>
-              <InfoImg
-                src={InfoIcon}
-                onMouseEnter={handleInfoIcon2Hover}
-                onMouseLeave={handleInfoIcon2Hover}
-              />
-              <Tooltip show={showTooltip2}>
-                Farm practices rating parameters:
-                <p>
-                  <br />{" "}
-                </p>
-                <p>1. Process identified</p>
-                <p>2. Quality of products utilized</p>
-                <p>3. Process Documented</p>
-                <p>4. Compliance process</p>
-              </Tooltip>
-              <RatingContainer>
-                {" "}
-                <Star
-                  src={StarRed}
-                  marginLeft={"-12.2rem"}
-                  marginLeftMobile={"2.2rem"}
+            <Flexbox style={{ display: "block" }}>
+              <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
+              <Flexbox justify="space-content" style={{ maxHeight: "0.8rem" }}>
+                <RatingName>Farm</RatingName>
+                <InfoImg
+                  src={InfoIcon}
+                  onMouseEnter={handleInfoIcon1Hover}
+                  onMouseLeave={handleInfoIcon1Hover}
                 />
-                <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
-              </RatingContainer>
-            </Flexbox>
-            <Flexbox
-              justify="space-content"
-              style={{ alignItems: "baseline", maxHeight: "3rem" }}
-            >
-              <RatingName>Farmer</RatingName>
-              <InfoImg
-                src={InfoIcon}
-                onMouseEnter={handleInfoIcon3Hover}
-                onMouseLeave={handleInfoIcon3Hover}
-              />
-              <Tooltip show={showTooltip3}>
-                Farmer rating parameters:
-                <p>
-                  <br />{" "}
-                </p>
-                <p>1. Process identified</p>
-                <p>2. Quality of products utilized</p>
-                <p>3. Process Documented</p>
-                <p>4. Compliance process</p>
-              </Tooltip>
-              <RatingContainer>
-                {" "}
+                <Tooltip show={showTooltip1}>
+                  Farm Rating parameters:
+                  <p>
+                    <br />{" "}
+                  </p>
+                  <p>1. Farm details</p>
+                  <p>2. Farm land record</p>
+                  <p>3. Soil type quality</p>
+                  <p>4. Water quality</p>
+                </Tooltip>
                 <Star
-                  src={StarBlue}
-                  marginLeft={"-7rem"}
-                  marginLeftMobile={"5.5rem"}
+                  src={Stars}
+                  marginLeft={"-3.8rem"}
+                  marginLeftMobile={"6.5rem"}
                 />
-                <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
-              </RatingContainer>
+                <RatingNumber>{data?.rating}</RatingNumber>
+              </Flexbox>
+              <Flexbox
+                justify="space-content"
+                style={{ alignItems: "baseline", maxHeight: "2rem" }}
+              >
+                <RatingName>Farm practices</RatingName>
+                <InfoImg
+                  src={InfoIcon}
+                  onMouseEnter={handleInfoIcon2Hover}
+                  onMouseLeave={handleInfoIcon2Hover}
+                />
+                <Tooltip show={showTooltip2}>
+                  Farm practices rating parameters:
+                  <p>
+                    <br />{" "}
+                  </p>
+                  <p>1. Process identified</p>
+                  <p>2. Quality of products utilized</p>
+                  <p>3. Process Documented</p>
+                  <p>4. Compliance process</p>
+                </Tooltip>
+                <RatingContainer>
+                  {" "}
+                  <Star
+                    src={StarRed}
+                    marginLeft={"-12.2rem"}
+                    marginLeftMobile={"2.2rem"}
+                  />
+                  <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
+                </RatingContainer>
+              </Flexbox>
+              <Flexbox
+                justify="space-content"
+                style={{ alignItems: "baseline", maxHeight: "3rem" }}
+              >
+                <RatingName>Farmer</RatingName>
+                <InfoImg
+                  src={InfoIcon}
+                  onMouseEnter={handleInfoIcon3Hover}
+                  onMouseLeave={handleInfoIcon3Hover}
+                />
+                <Tooltip show={showTooltip3}>
+                  Farmer rating parameters:
+                  <p>
+                    <br />{" "}
+                  </p>
+                  <p>1. Process identified</p>
+                  <p>2. Quality of products utilized</p>
+                  <p>3. Process Documented</p>
+                  <p>4. Compliance process</p>
+                </Tooltip>
+                <RatingContainer>
+                  {" "}
+                  <Star
+                    src={StarBlue}
+                    marginLeft={"-7rem"}
+                    marginLeftMobile={"5.5rem"}
+                  />
+                  <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
+                </RatingContainer>
+              </Flexbox>
             </Flexbox>
-          </Flexbox>
-          {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
-        </>
+            {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
+          </>
+        )}
+      </Container>
+      {isPopupOpen && (
+        <NFTPopup
+          isOpen={isPopupOpen}
+          togglePopup={togglePopup}
+          tx_hash={data.tx_hash}
+        >
+          <PopupContent>
+            IPFS URL:
+            <a href={data?.ipfs_url} target="_blank">
+              {data?.ipfs_url}
+            </a>
+          </PopupContent>
+        </NFTPopup>
       )}
-    </Container>
+    </>
   );
 };
 
