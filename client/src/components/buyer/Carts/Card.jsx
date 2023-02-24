@@ -80,53 +80,57 @@ const Card = ({ data, index }) => {
   };
 
   return (
-    <DetailCard>
-      <Cross src={CrossIcon} onClick={removeItemFromCart} />
-      <Flexbox justify="space-between" margin="0.5rem">
-        <NameConatiner margin-left="20%">
-          <Name>{data?.farmer_name}</Name>
-        </NameConatiner>
-        <Id>
-          {data?.agreement_nft_id.map((nftId, index) => {
-            if (data?.selected_quantity > index) {
-              return (
-                <React.Fragment key={index}>
+    <>
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+          >
+            <PopupContent>
+              IPFS URL:
+              <a href={data?.ipfs_url[index]} target="_blank">
+                {data?.ipfs_url[index]}
+              </a>
+            </PopupContent>
+          </NFTPopup>
+        ))}
+      <DetailCard>
+        <Cross src={CrossIcon} onClick={removeItemFromCart} />
+        <Flexbox justify="space-between" margin="0.5rem">
+          <NameConatiner margin-left="20%">
+            <Name>{data?.farmer_name}</Name>
+          </NameConatiner>
+          <Id>
+            {data?.agreement_nft_id.map((nftId, index) => {
+              if (data?.selected_quantity > index) {
+                return (
                   <a
                     style={{ color: "blue" }}
                     onClick={() => togglePopup(nftId)}
                   >
                     #{data.farm_nft_id}
                   </a>
-                  <NFTPopup
-                    isOpen={selectedNFTId === nftId}
-                    togglePopup={togglePopup}
-                    tx_hash={data.tx_hash}
-                  >
-                    <PopupContent>
-                      IPFS URL:
-                      <a href={data?.ipfs_url} target="_blank">
-                        {data?.ipfs_url}
-                      </a>
-                    </PopupContent>
-                  </NFTPopup>
-                </React.Fragment>
-              );
-            }
-          })}
-        </Id>
-      </Flexbox>
-      <Flexbox justify="space-between">
-        <div>
-          <Date>from {data?._id.start_date}</Date>
-          <Date>to {data?._id.end_date}</Date>
-        </div>
-        <Area>Selected Unit: {data.selected_quantity}</Area>
-      </Flexbox>
-      <Flexbox justify="space-between">
-        <p margin="1rem">{data?._id.crop}</p>
-        <Amount>₹ {data?._id.price * data.selected_quantity}</Amount>
-      </Flexbox>
-    </DetailCard>
+                );
+              }
+            })}
+          </Id>
+        </Flexbox>
+        <Flexbox justify="space-between">
+          <div>
+            <Date>from {data?._id.start_date}</Date>
+            <Date>to {data?._id.end_date}</Date>
+          </div>
+          <Area>Selected Unit: {data.selected_quantity}</Area>
+        </Flexbox>
+        <Flexbox justify="space-between">
+          <p margin="1rem">{data?._id.crop}</p>
+          <Amount>₹ {data?._id.price * data.selected_quantity}</Amount>
+        </Flexbox>
+      </DetailCard>
+    </>
   );
 };
 

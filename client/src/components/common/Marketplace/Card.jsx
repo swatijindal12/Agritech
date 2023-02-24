@@ -123,77 +123,79 @@ const Card = ({ data, highlight }) => {
   ButtonText();
 
   return user ? (
-    <Container highlight={highlight}>
-      {highlight && <New src={NewIcon} alt="new-tag" />}
-      <Id>
-        Contract NFT ID{" "}
-        {data?.agreement_nft_id.map((nftId, index) => (
-          <React.Fragment key={index}>
+    <>
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+          >
+            <PopupContent>
+              IPFS URL:
+              <a href={data?.ipfs_url[index]} target="_blank">
+                {data?.ipfs_url[index]}
+              </a>
+            </PopupContent>
+          </NFTPopup>
+        ))}
+      <Container>
+        <Id>
+          Contract NFT ID{" "}
+          {data?.agreement_nft_id.map((nftId, index) => (
             <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
               #{nftId}{" "}
             </a>
-            <NFTPopup
-              isOpen={selectedNFTId === nftId}
-              togglePopup={togglePopup}
-              tx_hash={data.tx_hash[index]}
-              width={100}
-            >
-              <PopupContent>
-                IPFS URL:
-                <a href={data?.ipfs_url[index]} target="_blank">
-                  {data?.ipfs_url[index]}
-                </a>
-              </PopupContent>
-            </NFTPopup>
-          </React.Fragment>
-        ))}
-      </Id>
-      <Flexbox justify="space-between">
-        <Name onClick={farmProfile}>{data?.farmer_name}</Name>
-        <div>
-          <Date>{`from ${data?._id.start_date}`}</Date>
-          <Date>{`to ${data?._id.end_date}`}</Date>
-        </div>
-      </Flexbox>
-      <Address>{data?.address}</Address>
-      <InnerContainer style={{ display: "block" }}>
-        <Crop>{data?._id.crop}</Crop>
+          ))}
+        </Id>
         <Flexbox justify="space-between">
-          <Area style={{ marginTop: "0.5rem" }}>
-            Quantity: {data?.unit_available}
-          </Area>
-          <Area>{data?._id.area}</Area>
-        </Flexbox>
-      </InnerContainer>
-      <Flexbox justify="space-between" margin="1rem 0">
-        <Amount>₹ {data?._id.price}</Amount>
-        {user.data.role === "customer" && (
+          <Name onClick={farmProfile}>{data?.farmer_name}</Name>
           <div>
-            <Flexbox justify="space-between" margin="0.5rem 0">
-              <Button
-                text="-"
-                margin="0.1rem"
-                onClick={decrementQuantity}
-                disabled={quantity === 1}
-              />
-              <p>{quantity}</p>
-              <Button
-                text="+"
-                margin="0.1rem"
-                onClick={incrementQuantity}
-                disabled={quantity === data?.unit_available}
-              />
-            </Flexbox>
-            <Button
-              text={ButtonText()}
-              margin="unset"
-              onClick={handleAddToCart}
-              disabled={ButtonText() !== "Add to cart"}
-            />
+            <Date>{`from ${data?._id.start_date}`}</Date>
+            <Date>{`to ${data?._id.end_date}`}</Date>
           </div>
-        )}
-      </Flexbox>
-    </Container>
+        </Flexbox>
+        <Address>{data?.address}</Address>
+        <InnerContainer style={{ display: "block" }}>
+          <Crop>{data?._id.crop}</Crop>
+          <Flexbox justify="space-between">
+            <Area style={{ marginTop: "0.5rem" }}>
+              Quantity: {data?.unit_available}
+            </Area>
+            <Area>{data?._id.area}</Area>
+          </Flexbox>
+        </InnerContainer>
+        <Flexbox justify="space-between" margin="1rem 0">
+          <Amount>₹ {data?._id.price}</Amount>
+          {user.data.role === "customer" && (
+            <div>
+              <Flexbox justify="space-between" margin="0.5rem 0">
+                <Button
+                  text="-"
+                  margin="0.1rem"
+                  onClick={decrementQuantity}
+                  disabled={quantity === 1}
+                />
+                <p>{quantity}</p>
+                <Button
+                  text="+"
+                  margin="0.1rem"
+                  onClick={incrementQuantity}
+                  disabled={quantity === data?.unit_available}
+                />
+              </Flexbox>
+              <Button
+                text={ButtonText()}
+                margin="unset"
+                onClick={handleAddToCart}
+                disabled={ButtonText() !== "Add to cart"}
+              />
+            </div>
+          )}
+        </Flexbox>
+      </Container>
+    </>
   ) : null;
 };
 

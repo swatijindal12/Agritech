@@ -3,27 +3,35 @@ import styled from "styled-components";
 import Button from "./Button";
 import Flexbox from "./Flexbox";
 
-const PopupBox = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+const Container = styled.div`
+  position: fixed;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
-  @media only screen and (max-width: 990px) {
-    width: ${props => (props.width ? props.width : "60%")};
-  }
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+`;
+
+const PopupBox = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+  max-width: 100vw;
+`;
+
+const Heading = styled.p`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #a98467;
 `;
 
 const NFTPopup = ({ children, tx_hash, togglePopup, isOpen, width }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(isOpen);
-  }, [isOpen]);
-
   const handleClose = () => {
-    setIsVisible(false);
     togglePopup(false);
   };
 
@@ -32,18 +40,25 @@ const NFTPopup = ({ children, tx_hash, togglePopup, isOpen, width }) => {
   };
 
   return (
-    <PopupBox style={{ display: isVisible ? "block" : "none" }} width={width}>
-      <h3 style={{ textAlign: "center" }}>Blockchain details</h3>
-      {children}
-      <Flexbox justify="space-content">
-        <Button
-          margin={"0.5rem"}
-          onClick={handleTxhash}
-          text={"Tx hash"}
-        ></Button>
-        <Button margin={"0.5rem"} onClick={handleClose} text={"Close"}></Button>
-      </Flexbox>
-    </PopupBox>
+    <Container>
+      <PopupBox>
+        <Heading style={{ textAlign: "center" }}>Blockchain Details</Heading>
+        <br />
+        {children}
+        <Flexbox justify="center">
+          <Button
+            margin={"0.5rem"}
+            onClick={handleTxhash}
+            text={"Tx hash"}
+          ></Button>
+          <Button
+            margin={"0.5rem"}
+            onClick={handleClose}
+            text={"Close"}
+          ></Button>
+        </Flexbox>
+      </PopupBox>
+    </Container>
   );
 };
 

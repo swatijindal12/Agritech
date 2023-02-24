@@ -117,6 +117,23 @@ const ActiveCard = ({ data }) => {
           error={showVerificationError}
         />
       )}
+
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+          >
+            <PopupContent>
+              IPFS URL:
+              <a href={data?.ipfs_url[index]} target="_blank">
+                {data?.ipfs_url[index]}
+              </a>
+            </PopupContent>
+          </NFTPopup>
+        ))}
       <Container>
         <Id>
           Contract NFT ID{" "}
@@ -125,19 +142,6 @@ const ActiveCard = ({ data }) => {
               <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
                 #{nftId}{" "}
               </a>
-              <NFTPopup
-                isOpen={selectedNFTId === nftId}
-                togglePopup={togglePopup}
-                tx_hash={data.tx_hash[index]}
-                width={100}
-              >
-                <PopupContent>
-                  IPFS URL:
-                  <a href={data?.ipfs_url[index]} target="_blank">
-                    {data?.ipfs_url[index]}
-                  </a>
-                </PopupContent>
-              </NFTPopup>
             </React.Fragment>
           ))}
         </Id>
