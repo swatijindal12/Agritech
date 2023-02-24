@@ -66,8 +66,9 @@ const Number = styled.p`
 
 const PopupContent = styled.p`
   padding: 0.5rem;
+  overflow-x: scroll;
+  max-width: 20rem;
   @media screen and (max-width: 990px) {
-    overflow-x: scroll;
     scroll-margin-top: 1rem;
   }
 `;
