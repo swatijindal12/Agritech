@@ -2,7 +2,6 @@ const Ajv = require("ajv");
 const ajv = new Ajv();
 
 const farmerSchemaCheck = (data) => {
-  console.log("inside farmerSchemaCheck 1.");
   const schema = {
     type: "array",
     items: {
