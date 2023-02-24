@@ -15,6 +15,7 @@ contract FarmNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
     mapping(address => uint256[]) private farmList;
 
     event Mint(address indexed minterAddr, uint256 farmId, string tokenURI);
+    event UpdateFarm(uint256 indexed farmId, string updatedTokenURI);
 
     constructor(
         string memory name_,
@@ -39,6 +40,11 @@ contract FarmNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
         _safeMint(msg.sender, farmId);
         farmList[farmerAddr].push(farmId);
         _setTokenURI(farmId, _tokenURI);
+    }
+
+    function updateFarm(uint256 farmId, string memory _updateTokenUri) external onlyOwner{
+        _setTokenURI(farmId, _updateTokenUri);
+        emit UpdateFarm(farmId, _updateTokenUri);
     }
     
     /**
