@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { addToCart } from "../../../redux/actions/cartActions";
+import { addToCart, removeFromCart } from "../../../redux/actions/cartActions";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
 import NFTPopup from "../../common/NFTPopup";
@@ -14,6 +14,12 @@ const Container = styled.div`
   background-color: #f0ead254;
   border: ${props => props.highlight && "2px solid #ADC178"};
   margin: 1rem 0;
+  width: 30rem;
+
+  @media screen and (max-width: 990px) {
+    margin: 1rem auto;
+    width: 97%;
+  }
 `;
 
 const Id = styled.p`
@@ -76,6 +82,12 @@ const New = styled.img`
   height: 1rem;
 `;
 
+const ButtonsContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    display: block;
+  }
+`;
+
 const Card = ({ data, highlight }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedNFTId, setSelectedNFTId] = useState("");
@@ -89,7 +101,11 @@ const Card = ({ data, highlight }) => {
   };
 
   const handleAddToCart = () => {
-    dispatch(addToCart({ ...data, selected_quantity: quantity }));
+    if (ButtonText() === "Add to cart") {
+      dispatch(addToCart({ ...data, selected_quantity: quantity }));
+    } else {
+      dispatch(removeFromCart(data.agreements[0]));
+    }
   };
 
   const incrementQuantity = useCallback(() => {
@@ -117,7 +133,7 @@ const Card = ({ data, highlight }) => {
       item => item.agreements[0] === data.agreements[0]
     );
     return cartContract.length > 0
-      ? `${cartContract[0].selected_quantity} Units added`
+      ? `REMOVE ${cartContract[0].selected_quantity} UNIT FROM CART`
       : "Add to cart";
   };
 
@@ -142,6 +158,7 @@ const Card = ({ data, highlight }) => {
           </NFTPopup>
         ))}
       <Container>
+        {highlight && <New src={NewIcon} alt="new tag" />}
         <Id>
           Contract NFT ID{" "}
           {data?.agreement_nft_id.map((nftId, index) => (
@@ -167,11 +184,11 @@ const Card = ({ data, highlight }) => {
             <Area>{data?._id.area}</Area>
           </Flexbox>
         </InnerContainer>
-        <Flexbox justify="space-between" margin="1rem 0">
+        <ButtonsContainer justify="space-between" margin="1rem 0">
           <Amount>₹ {data?._id.price}</Amount>
           {user.data.role === "customer" && (
             <div>
-              <Flexbox justify="space-between" margin="0.5rem 0">
+              <Flexbox justify="flex-end" margin="0.5rem 0">
                 <Button
                   text="-"
                   margin="0.1rem"
@@ -187,14 +204,16 @@ const Card = ({ data, highlight }) => {
                 />
               </Flexbox>
               <Button
-                text={ButtonText()}
+                text={ButtonText().toUpperCase()}
                 margin="unset"
                 onClick={handleAddToCart}
-                disabled={ButtonText() !== "Add to cart"}
+                color={ButtonText() === "Add to cart" ? "#ADC178" : "#FCBF49"}
+                mobileWidth="100%"
+                // disabled={ButtonText() !== "Add to cart"}
               />
             </div>
           )}
-        </Flexbox>
+        </ButtonsContainer>
       </Container>
     </>
   ) : null;

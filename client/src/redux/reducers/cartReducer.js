@@ -17,7 +17,11 @@ export default (state = INITIAL_STATE, action) => {
 
     case REMOVE_FROM_CART:
       let tempCart = state.cart;
-      tempCart.splice(action.payload, 1);
+      let index;
+      tempCart.forEach((item, i) => {
+        if (item.agreements[0] === action.payload) index = i;
+      });
+      tempCart.splice(index, 1);
       return {
         ...state,
         cart: [...tempCart],

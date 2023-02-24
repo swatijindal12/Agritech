@@ -69,7 +69,7 @@ const Card = ({ data, index }) => {
   const dispatch = useDispatch();
 
   const removeItemFromCart = () => {
-    dispatch(removeFromCart(index));
+    dispatch(removeFromCart(data.agreements[0]));
   };
 
   const togglePopup = nftId => {

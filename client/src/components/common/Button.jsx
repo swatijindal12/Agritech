@@ -18,16 +18,25 @@ const Container = styled.div`
   opacity: ${props => (props.disabled ? 0.3 : 1)};
   cursor: ${props => (props.disabled ? "not-allowed" : "pointer")};
   @media only screen and (max-width: 990px) {
-    width: ${props => (props.width ? props.width : "fit-content")};
+    width: ${props => (props.mobileWidth ? props.mobileWidth : "fit-content")};
   }
 `;
 
-const Button = ({ color, margin, width, text, disabled, onClick }) => {
+const Button = ({
+  color,
+  margin,
+  width,
+  text,
+  disabled,
+  onClick,
+  mobileWidth,
+}) => {
   return (
     <Container
       color={color}
       margin={margin}
       width={width}
+      mobileWidth={mobileWidth}
       disabled={disabled}
       onClick={() => {
         if (!disabled) onClick();
