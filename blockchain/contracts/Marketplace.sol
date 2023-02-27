@@ -16,16 +16,12 @@ contract Marketplace is Ownable {
         address indexed buyer,
         uint256 indexed farmNFTId,
         uint256 agreementNFTId,
-<<<<<<< HEAD
-        string updatedTokenURI
-=======
         string updateTokenURI
     );
     event UpdateAgreementData(
         uint256 indexed agreementNFTId,
         uint256 price, 
         string updatedIPFSUrl
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
     );
 
     struct AgreementInfo {
@@ -136,16 +132,12 @@ contract Marketplace is Ownable {
     function buyContract(
         address buyerAddr,
         uint256[] memory agreementNftId_,
-<<<<<<< HEAD
-        string memory transactionId,
-=======
         string[] memory transactionId,
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
         string[] memory updateTokenURI
     ) external {
         require(buyerAddr != address(0), "Zero address");
         require(
-            agreementNftId_.length == updateTokenURI.length,
+            agreementNftId_.length == transactionId.length,
             "Array length not same"
         );
         require(
@@ -156,18 +148,12 @@ contract Marketplace is Ownable {
 
         for (uint256 i = 0; i < arrayLength; ) {
             agreementList[msg.sender].push(agreementNftId_[i]);
-<<<<<<< HEAD
-            agreementDetails[agreementNftId_[i]].buyer = msg.sender;
-            agreementDetails[agreementNftId_[i]].razorTransId = transactionId;
-=======
             agreementDetails[agreementNftId_[i]].buyer = buyerAddr;
             agreementDetails[agreementNftId_[i]].razorTransId = transactionId[
                 i
             ];
             IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 
-            IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
             emit Buy(
                 buyerAddr,
                 agreementDetails[agreementNftId_[i]].farmNFTId,
