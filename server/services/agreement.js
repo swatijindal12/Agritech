@@ -200,6 +200,8 @@ exports.createAgreement = async (req) => {
     // Read the req.body and add ipfs_url to json data
     const updatedData = await Promise.all(
       data.map(async (contract) => {
+        const { _id, farm_id, file_name, ...rest } = contract;
+        console.log("rest", rest);
         await StageAgreement.updateOne(
           { _id: contract._id },
           { stage_status: false, approval_status: true }
@@ -216,7 +218,7 @@ exports.createAgreement = async (req) => {
           },
         };
 
-        const ipfsHash = await pinata.pinJSONToIPFS(contract, options);
+        const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
         contract.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
         // -------------- IPFS --------------------
         return { ...contract };
@@ -284,29 +286,40 @@ exports.createAgreement = async (req) => {
 
       // console.log(await web3.eth.getBlockNumber());
       let agreement_nft_id = null;
-      const mintPromise = web3.eth.getBlockNumber().then((latestBlock) => {
-        marketplaceContract.getPastEvents(
-          "Sell",
-          {
-            fromBlock: latestBlock,
-            toBlock: latestBlock,
-          },
-          function (error, events) {
-            const result = events[0].returnValues;
-            // console.log("result : - ", result);
-            agreement_nft_id = result[2];
-            // console.log("agreement_nft_id :- ", agreement_nft_id);
-            contract.agreement_nft_id = result[2];
-            // console.log(events[0]);
-          }
-        );
-      });
+      const mintPromise = web3.eth
+        .getBlockNumber()
+        .then((latestBlock) => {
+          return new Promise((resolve, reject) => {
+            marketplaceContract.getPastEvents(
+              "Sell",
+              {
+                fromBlock: latestBlock,
+                toBlock: latestBlock,
+              },
+              function (error, events) {
+                if (error) {
+                  reject(error);
+                } else if (events.length > 0) {
+                  const result = events[0].returnValues;
+                  agreement_nft_id = result[2];
+                  contract.agreement_nft_id = result[2];
+                  resolve(contract);
+                } else {
+                  resolve(contract);
+                }
+              }
+            );
+          });
+        })
+        .catch((error) => {
+          response.error = `failed operation ${error}`;
+          response.httpStatus = 400;
+        });
       mintPromises.push(mintPromise);
     }
     await Promise.all(mintPromises);
-    // BlockChain end
 
-    // Validating this Before Inserting..
+    // BlockChain end
 
     // updating in stage table and giving data to agreement collection to insert.
 
@@ -316,7 +329,6 @@ exports.createAgreement = async (req) => {
 
     // Removing from staging stable
     data.map(async (contract) => {
-      console.log("contract._id : ", contract._id);
       await stageAgreement.deleteOne({
         _id: contract._id,
         stage_status: false,
