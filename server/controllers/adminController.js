@@ -312,7 +312,7 @@ exports.getFarms = async (req, res, next) => {
     })
     .catch((error) => {
       res.status(400).json({
-        error: "failed operation",
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -394,7 +394,6 @@ exports.getAgreementsForAdmin = async (req, res, next) => {
 // Route to     => api/v1/admin/agreement/closed/:id
 // Give all the agreement active and close
 exports.closeAgreement = async (req, res, next) => {
-  console.log("Inside closeAgreement");
   adminService
     .closeAgreement(req)
     .then((response) => {

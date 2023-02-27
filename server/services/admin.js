@@ -64,26 +64,94 @@ exports.validate = async (req) => {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
 
-        // Check if farm_id
+        let errors = {
+          line: i,
+          farmer_name: "",
+          crop: "",
+          start_date: "",
+          end_date: "",
+          area: "",
+          price: "",
+          farm_id: "",
+          farm_nft_id: "",
+          address: "",
+        };
 
-        let farmId = item["farm_id"];
-
-        // Check farm table the farmer Id
-        let farm = await Farm.findOne({
-          _id: farmId,
-        });
-
-        if (farm == null) {
-          errorLines.push({ line: i, message: "Farm id not found" });
-          break;
+        if (!item.farmer_name && item.farmer_name.length >= 3) {
+          errors.name = "Name should be 3 characters long";
         }
 
-        for (const key in item) {
-          if (!item[key] || item[key].length < 1) {
-            //console.log("check :- ");
-            errorLines.push({ line: i, message: "Missing required data" });
-            break;
+        if (item.start_date) {
+          const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+          if (!dateRegex.test(item.start_date)) {
+            errors.start_date =
+              "Start date should be in the format of date/month/year";
           }
+        }
+
+        if (item.end_date) {
+          const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+          if (!dateRegex.test(item.end_date)) {
+            errors.end_date =
+              "End date should be in the format of date/month/year";
+          }
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "farmer_name",
+          "crop",
+          "start_date",
+          "end_date",
+          "area",
+          "price",
+          "farm_id",
+          "farm_nft_id",
+          "address",
+        ];
+
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
+          }
+        }
+        let farm;
+        try {
+          // Check for farm_id is not there.
+
+          const farmNFTId = item.farm_nft_id;
+          farm = await Farm.findOne({ _id: item.farm_id });
+          if (farm) {
+            console.log(
+              "farm.farm_nft_id ",
+              farm.farm_nft_id,
+              " => ",
+              farmNFTId
+            );
+            if (farm.farm_nft_id != farmNFTId) {
+              console.log("inside");
+              errors.farm_nft_id = "farm_nft_id not matching with farm";
+            }
+          } else {
+            errors.farm_id = "farm not found";
+          }
+        } catch (err) {
+          if (err instanceof mongoose.CastError) {
+            errors.farm_id = "Invalid farm ID";
+          }
+        }
+        if (
+          errors.farmer_name ||
+          errors.crop ||
+          errors.start_date ||
+          errors.end_date ||
+          errors.area ||
+          errors.price ||
+          errors.farm_id ||
+          errors.farm_nft_id ||
+          errors.address
+        ) {
+          errorLines.push(errors);
         }
       }
 
@@ -312,7 +380,7 @@ exports.deleteAgreement = async (req) => {
       // delete the agreement not active one
       const checkAgreement = await Agreement.deleteOne({
         _id: id,
-        agreementclose_status: true,
+        sold_status: false,
       });
 
       if (checkAgreement.deletedCount) {
@@ -323,7 +391,7 @@ exports.deleteAgreement = async (req) => {
         response.httpStatus = 400;
       }
     } else {
-      response.error = `agreement not found or agreement active`;
+      response.error = `agreement not found`;
       response.httpStatus = 404;
     }
   } catch (error) {
@@ -772,94 +840,6 @@ exports.getFarmers = async (req) => {
   return response;
 };
 
-//Remove it Validate Farm
-exports.validateFarmsOld = async (req) => {
-  // General response format
-
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  if (!req.files || !req.files.file) {
-    response.error = "no file selected";
-    response.httpStatus = 400;
-  } else {
-    // Read the contents of the file
-    // const fileContent = req.files.file.data.toString(); //JSON DATA
-    const file = req.files.file;
-    // Parse the JSON data
-    // const data = JSON.parse(fileContent); //JSON DATA
-    const data = await csvToJson(file);
-    // Check file type
-    if (file.mimetype != "text/csv") {
-      response.error = "select csv file";
-      response.httpStatus = 400;
-    } else if (!farmSchemaCheck(data)) {
-      // Check schema of the file
-      response.error = "data format do not match, download sample";
-      response.httpStatus = 400;
-    } else {
-      const errorLines = [];
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i];
-
-        // Check if location,farmer_id already exist in DB
-        let farmLocationExist = await Farm.find({
-          location: item["location"],
-        });
-
-        let farmerId = await Farmer.find({
-          _id: item["farmer_id"],
-        });
-
-        if (farmLocationExist.length != 0 && farmerId.length == 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate location and id or data not found",
-          });
-        } else if (farmLocationExist.length != 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate location data found",
-          });
-        } else if (farmerId.length == 0) {
-          errorLines.push({
-            line: i,
-            message: "Duplicate farmer id or data not found",
-          });
-        }
-
-        for (const key in item) {
-          // check pin,farmer_id,phone these things should be unique
-          if (!item[key] || item[key].length < 1) {
-            // console.log("check field");
-            if (errorLines.map((err) => err.line === i)) {
-              continue; // Skip this line if it already has an error
-            } else {
-              errorLines.push({ line: i, message: "Missing required data" });
-              break;
-            }
-          }
-        }
-      }
-
-      if (errorLines.length >= 1) {
-        // There are error some lines missing data
-        (response.httpStatus = 400), (response.error = errorLines);
-      } else {
-        // No error
-        (response.httpStatus = 200),
-          (response.message = "validation successful");
-      }
-      response.data = data;
-    }
-  }
-  return response;
-};
-
 // Validate Farm
 exports.validateFarms = async (req) => {
   // General response format
@@ -876,7 +856,7 @@ exports.validateFarms = async (req) => {
     response.httpStatus = 400;
   } else {
     // Read the contents of the file
-    // const fileContent = req.files.file.data.toString(); //JSON DATA
+
     const file = req.files.file;
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
@@ -971,15 +951,12 @@ exports.validateFarms = async (req) => {
           }
         }
 
-        if (
-          farmLocationExist.length != 0 &&
-          (farmer == undefined || farmer.length == 0)
-        ) {
+        if (farmLocationExist.length != 0 && farmer == undefined) {
           errors.farmer_id = "Farmer id is not found";
           errors.location = "Duplicate farm location";
         } else if (farmLocationExist.length != 0) {
           errors.location = "Duplicate farm location";
-        } else if (farmer?.length == 0 || farmer == undefined) {
+        } else if (farmer == undefined) {
           errors.farmer_id = "Farmer id is not found ";
         }
 
