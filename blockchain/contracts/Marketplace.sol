@@ -132,14 +132,14 @@ contract Marketplace is Ownable {
     function buyContract(
         address buyerAddr,
         uint256[] memory agreementNftId_,
-        string[] memory transactionId,
+        string memory transactionId,
         string[] memory updateTokenURI
     ) external {
         require(buyerAddr != address(0), "Zero address");
-        require(
-            agreementNftId_.length == transactionId.length,
-            "Array length not same"
-        );
+        // require(
+        //     agreementNftId_.length == transactionId.length,
+        //     "Array length not same"
+        // );
         require(
             agreementNftId_.length == updateTokenURI.length,
             "Length of array different"
@@ -149,9 +149,7 @@ contract Marketplace is Ownable {
         for (uint256 i = 0; i < arrayLength; ) {
             agreementList[msg.sender].push(agreementNftId_[i]);
             agreementDetails[agreementNftId_[i]].buyer = buyerAddr;
-            agreementDetails[agreementNftId_[i]].razorTransId = transactionId[
-                i
-            ];
+            agreementDetails[agreementNftId_[i]].razorTransId = transactionId;
             IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
 
             emit Buy(

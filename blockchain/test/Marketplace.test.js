@@ -255,7 +255,7 @@ describe('Marketplace', function () {
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],
-				['TID1'],
+				'TID1',
 				['UpdatedIPFSURL']
 			)
 
@@ -294,7 +294,7 @@ describe('Marketplace', function () {
 				)
 
 			await expect(
-				marketplace.buyContract(buyer1.address, [2], ['TID1'], [''])
+				marketplace.buyContract(buyer1.address, [2], 'TID1', [''])
 			).to.be.revertedWith(
 				'ERC721URIStorage: URI set of nonexistent token'
 			)
@@ -328,40 +328,10 @@ describe('Marketplace', function () {
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],
-				['TID1'],
+				'TID1',
 				['updatedTokenURI']
 			)
 			await marketplace.getAcceptedContractList(buyer1.address)
-		})
-
-		it('reverted if array length not same', async function () {
-			const {
-				farmNFT,
-				agreementNFT,
-				marketplace,
-				owner,
-				farmer1,
-				buyer1,
-			} = await loadFixture(deployNFT)
-
-			await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL)
-			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
-
-			await farmNFT.connect(owner).approve(marketplace.address, 1)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
-
-			await expect(
-				marketplace.buyContract(buyer1.address, [1], [], [''])
-			).to.be.revertedWith('Array length not same')
 		})
 
 		it('reverted if array length of agreementNFT & updateTokenURI not same', async function () {
@@ -390,7 +360,7 @@ describe('Marketplace', function () {
 				)
 
 			await expect(
-				marketplace.buyContract(buyer1.address, [1], [''], [])
+				marketplace.buyContract(buyer1.address, [1], '', [])
 			).to.be.revertedWith('Length of array different')
 		})
 	})
@@ -424,7 +394,7 @@ describe('Marketplace', function () {
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],
-				['TID1'],
+				'TID1',
 				['updatedIPFSURL']
 			)
 
