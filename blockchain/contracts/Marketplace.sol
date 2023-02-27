@@ -16,7 +16,16 @@ contract Marketplace is Ownable {
         address indexed buyer,
         uint256 indexed farmNFTId,
         uint256 agreementNFTId,
+<<<<<<< HEAD
         string updatedTokenURI
+=======
+        string updateTokenURI
+    );
+    event UpdateAgreementData(
+        uint256 indexed agreementNFTId,
+        uint256 price, 
+        string updatedIPFSUrl
+>>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
     );
 
     struct AgreementInfo {
@@ -65,11 +74,7 @@ contract Marketplace is Ownable {
         string memory agreementNftUri_
     ) external onlyOwner {
         require(price_ != 0, "Invalid price");
-        // require(
-        //     block.timestamp <= startDate_,
-        //     "startDate less than current time"
-        // );
-        require(startDate_ < endDate_, "end date should be less");
+        require(startDate_ < endDate_, "end date should not be less");
 
         uint256 agreementNftId_ = IAgreementNFT(agreementNFT).createAgreement(
             msg.sender,
@@ -88,43 +93,83 @@ contract Marketplace is Ownable {
     }
 
     /**
+    @dev to update contract NFT data
+    @param price_ uint256 updated price of contract
+    @param agreementNftId contract NFT id
+    @param startDate_ uint256 updated start date of contract
+    @param endDate_ uint256 updated end date of contract
+    Requirements:
+    -`price_` should not be zero 
+    -`starDate endDate` startDate should be less than endDate
+     */
+    function updateAgreementData(
+        uint256 agreementNftId,
+        uint256 price_,
+        uint256 startDate_,
+        uint256 endDate_,
+        string memory updateTokenURI ) external onlyOwner{
+           require(price_ != 0, "Invalid price");
+           require(startDate_ < endDate_, "end date should not be less");
+           
+           IAgreementNFT(agreementNFT).updateAgreement(agreementNftId, updateTokenURI);
+
+            agreementDetails[agreementNftId].price = price_;
+            agreementDetails[agreementNftId].startDate = startDate_;
+            agreementDetails[agreementNftId].endDate = endDate_;
+
+            emit UpdateAgreementData(agreementNftId, price_, updateTokenURI);
+    }
+
+
+    /**
     @dev to buy contract NFT
+    @param buyerAddr buyer address
     @param agreementNftId_ array of contract NFT id
     @param transactionId array of razorpay transaction id
+    @param updateTokenURI array of updated IPFS URL
     Requirements:
+    -`buyerAddr` buyer address should not be zero address
     -`agreementNftId_ & transactionId` length of array must be equal
-    -`msg.sender` must not be equal to farmerAddr & owner
-     */
+    `agreementNftId_ & updateTokenURI` length of array must be equal
+    */
 
     function buyContract(
+        address buyerAddr,
         uint256[] memory agreementNftId_,
+<<<<<<< HEAD
         string memory transactionId,
+=======
+        string[] memory transactionId,
+>>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
         string[] memory updateTokenURI
     ) external {
+        require(buyerAddr != address(0), "Zero address");
         require(
             agreementNftId_.length == updateTokenURI.length,
             "Array length not same"
         );
+        require(
+            agreementNftId_.length == updateTokenURI.length,
+            "Length of array different"
+        );
         uint256 arrayLength = agreementNftId_.length;
 
         for (uint256 i = 0; i < arrayLength; ) {
-            require(
-                msg.sender != agreementDetails[agreementNftId_[i]].farmerAddr &&
-                    msg.sender != owner(),
-                "Owner can't buy"
-            );
-            require(
-                agreementDetails[agreementNftId_[i]].agreementNftId != 0,
-                "Not on sale"
-            );
-
             agreementList[msg.sender].push(agreementNftId_[i]);
+<<<<<<< HEAD
             agreementDetails[agreementNftId_[i]].buyer = msg.sender;
             agreementDetails[agreementNftId_[i]].razorTransId = transactionId;
+=======
+            agreementDetails[agreementNftId_[i]].buyer = buyerAddr;
+            agreementDetails[agreementNftId_[i]].razorTransId = transactionId[
+                i
+            ];
+            IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
+>>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 
             IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
             emit Buy(
-                msg.sender,
+                buyerAddr,
                 agreementDetails[agreementNftId_[i]].farmNFTId,
                 agreementNftId_[i],
                 updateTokenURI[i]
@@ -138,22 +183,11 @@ contract Marketplace is Ownable {
     /**
     @dev to closed contract NFT
     @param agreementNftId_ contract NFT id
-    Requirements:
-    -`isClosedContract` to check whether contract NFT is on sale or not.
-    -`buyer` msg.sender must equal to buyer address
+    
     Emits a {ClosedContractNFT} event.
      */
 
-    function soldContractNFT(uint256 agreementNftId_) external {
-        require(
-            !(agreementDetails[agreementNftId_].isClosedContract),
-            "Not on sale"
-        );
-        // require(
-        //     msg.sender == agreementDetails[agreementNftId_].buyer,
-        //     "Only Buyer"
-        // );
-
+    function closeContractNFT(uint256 agreementNftId_) external {
        agreementDetails[agreementNftId_].isClosedContract = true;
 
         emit ClosedContractNFT(agreementNftId_);

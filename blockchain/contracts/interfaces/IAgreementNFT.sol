@@ -9,6 +9,11 @@ interface IAgreementNFT is IERC721 {
     ) external returns (uint256);
 
     function closeAgreement(address _buyerAddr, uint256 _agreementId) external;
+<<<<<<< HEAD
     
     function updateAgreement(uint256 agreementNFTId, string memory agreementIPFSUrl) external;
+=======
+ 
+    function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external;
+>>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 }

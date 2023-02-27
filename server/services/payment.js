@@ -101,7 +101,6 @@ exports.createOrder = async (req) => {
 
 // Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
-  console.log("Inside Payment Verification");
   const userId = req.user._id;
   const keyDetails = process.env.KEY_DETAILS;
 

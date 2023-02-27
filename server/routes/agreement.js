@@ -8,6 +8,8 @@ const {
   addToCart,
   removeFromCart,
   getCart,
+  getFarmById,
+  getAgreementsOfCustomer,
 } = require("../controllers/agreementContollers");
 
 // Importing controllers for payment
@@ -22,19 +24,30 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
 // Route => /api/v1/marketplace/agreement
 // Create agreement (ready for sale)
+router.route("/agreement").post(createAgreement);
+//isAuthenticatedUser, authorizeRoles("admin", "customer"),
+
+// Route => /api/v1/marketplace/farm/:id ,  comes from agreements of marketplace.
+router
+  .route("/farm/:id")
+  .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getFarmById);
+
+// Get all Agreements of the User.
 router
   .route("/agreement")
-  .post(
+  .get(
     isAuthenticatedUser,
     authorizeRoles("admin", "customer"),
-    createAgreement
+    getAgreementsOfCustomer
   );
+//isAuthenticatedUser, authorizeRoles("admin", "customer"),
 
 // Route => /api/v1/marketplace/agreements
-// Get agreements list for MarketPlaces
+// Get agreements list for MarketPlaces Admin as well as Customer
 router
   .route("/agreements")
   .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getAgreements);
+
 // Route => /api/v1/marketplace/key
 // Key for razorpay
 router

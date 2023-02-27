@@ -20,10 +20,13 @@
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
     "@truffle/hdwallet-provider": "^2.1.4",
+    "ajv": "^8.12.0",
     "aws-sdk": "^2.1282.0",
     "axios": "^1.2.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
+    "csvtojson": "^2.0.10",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "express": "^4.18.2",
