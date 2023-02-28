@@ -8,6 +8,8 @@ import DeletePopup from "./DeletePopup";
 import EditForm from "./EditForm";
 import Pagination from "../../common/Pagination";
 import VerificationPopup from "../../common/VerificationPopup";
+import Flexbox from "../../common/Flexbox";
+import Button from "../../common/Button";
 
 const Container = styled.div`
   padding: 1rem;
@@ -63,7 +65,29 @@ const PaginationContainer = styled.div`
   justify-content: center;
 `;
 
+const TopContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    display: block;
+  }
+`;
+
+const InputContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    width: 100vw;
+    padding: 1rem;
+    margin: 0 auto 1rem;
+  }
+`;
+
+const Input = styled.input`
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 24px;
+  background-color: #f5f5f5;
+`;
+
 const ModifyData = () => {
+  const [loading, setLoading] = useState(false);
   const [list, setList] = useState(null);
   const [tableHeading, setTableHeading] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -74,6 +98,7 @@ const ModifyData = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
+  const [searchText, setSearchText] = useState("");
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -81,9 +106,14 @@ const ModifyData = () => {
   );
 
   useEffect(() => {
+    getList();
+  }, [currentPage]);
+
+  const getList = () => {
+    setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=5`,
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=5&search=${searchText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -91,18 +121,26 @@ const ModifyData = () => {
         }
       )
       .then(res => {
+        let data = res.data.data.data;
+        setLoading(false);
         console.log("here the response is ", res.data);
-        setList(res.data.data.data);
-        setTotalPage(res.data.data.totalPages);
-        let tempArr = [];
-        tempArr.push("Edit");
-        tempArr.push("Delete");
-        for (const key in res.data.data.data[0]) {
-          tempArr.push(key);
+        if (data.length > 0) {
+          setList(data);
+          setTotalPage(res.data.data.totalPages);
+          let tempArr = [];
+          tempArr.push("Edit");
+          tempArr.push("Delete");
+          for (const key in data[0]) {
+            tempArr.push(key);
+          }
+          setTableHeading(tempArr);
         }
-        setTableHeading(tempArr);
+      })
+      .catch(err => {
+        setLoading(false);
+        console.log("error in fetching list ", err);
       });
-  }, [currentPage]);
+  };
 
   const handleEdit = password => {
     axios
@@ -184,7 +222,22 @@ const ModifyData = () => {
         />
       )}
       <Container>
-        <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
+        <TopContainer justify="flex-start">
+          <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
+          <InputContainer margin="0 2rem">
+            <Input
+              type="text"
+              placeholder="Enter phone number"
+              onChange={e => setSearchText(e.target.value)}
+            />
+            <Button
+              text={loading ? "...LOADING" : "SEARCH"}
+              margin="0 1rem"
+              onClick={getList}
+              disabled={loading}
+            />
+          </InputContainer>
+        </TopContainer>
         <TableContainer>
           <Table>
             <tr>
