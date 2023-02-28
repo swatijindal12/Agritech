@@ -1,6 +1,8 @@
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 const { anyValue } = require('@nomicfoundation/hardhat-chai-matchers/withArgs')
 const { expect } = require('chai')
+const { ethers, upgrades } = require('hardhat')
+
 
 const farm1IPFSURL =
 	'https://gateway.pinata.cloud/ipfs/QmXtaQiw3Z9m1cXpjUrwniTkGH8KUFat8icCUirRHg1KZu'
@@ -15,7 +17,9 @@ describe('Farm NFT', function () {
 		const [owner, farmer1, farmer2, farmer3] = await ethers.getSigners()
 
 		const FarmNFT = await ethers.getContractFactory('FarmNFT')
-		const nftAddr = await FarmNFT.deploy('ABC', 'abc')
+		const nftAddr = await upgrades.deployProxy(FarmNFT)
+
+		await nftAddr.deployed()
 
 		return { nftAddr, owner, farmer1, farmer2, farmer3 }
 	}
@@ -24,12 +28,12 @@ describe('Farm NFT', function () {
 		it('Should equal to name of the NFT', async function () {
 			const { nftAddr } = await loadFixture(deployNFT)
 
-			expect(await nftAddr.name()).to.equal('ABC')
+			expect(await nftAddr.name()).to.equal('FarmNFTToken')
 		})
 
 		it('Should equal to symbol of the NFT', async function () {
 			const { nftAddr } = await loadFixture(deployNFT)
-			expect(await nftAddr.symbol()).to.equal('abc')
+			expect(await nftAddr.symbol()).to.equal('FTK')
 		})
 	})
 
@@ -82,7 +86,9 @@ describe('Farm NFT', function () {
 
 			await expect(
 				nftAddr.connect(owner).updateFarm(1, updateFarm1IPFSURL)
-			).to.be.revertedWith('ERC721URIStorage: URI set of nonexistent token')
+			).to.be.revertedWith(
+				'ERC721URIStorage: URI set of nonexistent token'
+			)
 		})
 	})
 })

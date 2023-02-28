@@ -341,7 +341,6 @@ exports.updateAgreement = async (req) => {
   try {
     // First check agreement is their with id and not active
     const agreement = await Agreement.findOne({ _id: id, sold_status: false });
-    console.log("agreement :- ", agreement);
 
     if (agreement) {
       // Update the Agreement data..
@@ -754,23 +753,25 @@ exports.deleteFarmer = async (req) => {
       // delete the farmer data..Also delete all farms, and close agreements for that farms.
       // Check if this farmer Has some farm then Delete it
       const farms = await Farm.find({ farmer_id: farmer._id });
-      // console.log("farms", farms);
       if (farms.length > 0) {
-        const farmId = farms[0]._id;
-        await Farm.deleteMany({ farmer_id: farmer._id });
-        // Check if this farmer Has some Agreement which not active then Delete it
-        const agreements = await Agreement.find({ farm_id: farmId });
-        if (agreements) {
-          await Agreement.deleteMany({
-            farm_id: farmId,
-            sold_status: true,
-          });
-        }
+        // const farmId = farms[0]._id;
+        // await Farm.deleteMany({ farmer_id: farmer._id });
+        // // Check if this farmer Has some Agreement which not active then Delete it
+        // const agreements = await Agreement.find({ farm_id: farmId });
+        // if (agreements) {
+        //   await Agreement.deleteMany({
+        //     farm_id: farmId,
+        //     sold_status: true,
+        //   });
+        // }
+        response.error = `reference exist you can not delete`;
+        response.httpStatus = 400;
+      } else {
+        // Delete farmer
+        await Farmer.deleteOne({ _id: id });
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
       }
-      // Delete farmer
-      await Farmer.deleteOne({ _id: id });
-      response.message = `Successfully deleted`;
-      response.httpStatus = 200;
     } else {
       response.error = `farmer not found`;
       response.httpStatus = 404;
@@ -783,7 +784,7 @@ exports.deleteFarmer = async (req) => {
 };
 
 // Get all farmer with page no.
-exports.getFarmers = async (req) => {
+exports.getFarmersOld = async (req) => {
   let response = {
     error: null,
     message: null,
@@ -836,6 +837,75 @@ exports.getFarmers = async (req) => {
     }
   } catch (error) {
     (response.error = "failed operation"), (response.httpStatus = 400);
+  }
+  return response;
+};
+
+// Get all farmer with page no. with search Query
+exports.getFarmers = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const sortOrder = req.query.sortOrder;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  const skip = (page - 1) * limit;
+  const searchQuery = {};
+
+  if (req.query.name) {
+    searchQuery.name = new RegExp(req.query.name, "i");
+  }
+  if (req.query.phone) {
+    searchQuery.phone = parseInt(req.query.phone);
+  }
+  if (req.query.pin) {
+    searchQuery.pin = parseInt(req.query.pin);
+  }
+
+  try {
+    let farmerQuery = Farmer.find(searchQuery);
+    let totalDocuments = await Farmer.countDocuments(searchQuery);
+
+    if (sortOrder === "low") {
+      farmerQuery = farmerQuery.sort({ rating: 1 });
+    } else if (sortOrder === "high") {
+      farmerQuery = farmerQuery.sort({ rating: -1 });
+    }
+
+    if (isNaN(page) && isNaN(limit) && !sortOrder) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+      response.data = farmers.map((farmer) => ({
+        ...farmer._doc,
+        createdAt: farmer.createdAt.toLocaleString(),
+        updatedAt: farmer.updatedAt.toLocaleString(),
+      }));
+      response.httpStatus = 200;
+    } else if (isNaN(page) && isNaN(limit)) {
+      // Return all documents
+      const farmers = await farmerQuery.select("-__v");
+
+      response.data = farmers;
+      response.httpStatus = 200;
+    } else {
+      // Apply pagination
+      const farmers = await farmerQuery.skip(skip).limit(limit).select("-__v");
+      response.httpStatus = 200;
+      response.data = {
+        totalPages: Math.ceil(totalDocuments / limit),
+        data: farmers.map((farmer) => ({
+          ...farmer._doc,
+          createdAt: farmer.createdAt.toLocaleString(),
+          updatedAt: farmer.updatedAt.toLocaleString(),
+        })),
+      };
+    }
+  } catch (error) {
+    (response.error = `failed operation ${error}`), (response.httpStatus = 400);
   }
   return response;
 };
@@ -995,7 +1065,6 @@ exports.validateFarms = async (req) => {
 exports.stagedFarms = async (req) => {
   // General response format
 
-  console.log("stagedFarms service");
   let response = {
     error: null,
     message: null,
@@ -1258,13 +1327,15 @@ exports.deleteFarm = async (req) => {
       const agreements = await Agreement.find({ farm_id: farm._id });
 
       if (agreements.length > 0) {
-        const farmId = agreements[0].farm_id;
-        await Agreement.deleteMany({ farm_id: farmId });
+        // const farmId = agreements[0].farm_id;
+        // await Agreement.deleteMany({ farm_id: farmId });
+        response.error = `reference exist you can not delete`;
+        response.httpStatus = 400;
+      } else {
+        await Farm.deleteOne({ _id: id });
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
       }
-
-      await Farm.deleteOne({ _id: id });
-      response.message = `Successfully deleted`;
-      response.httpStatus = 200;
     } else {
       response.error = `farm not found`;
       response.httpStatus = 404;

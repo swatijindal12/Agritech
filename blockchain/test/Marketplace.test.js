@@ -1,6 +1,7 @@
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 const { anyValue } = require('@nomicfoundation/hardhat-chai-matchers/withArgs')
 const { expect } = require('chai')
+const { ethers, upgrades } = require('hardhat')
 
 const farm1IPFSURL =
 	'https://gateway.pinata.cloud/ipfs/QmXtaQiw3Z9m1cXpjUrwniTkGH8KUFat8icCUirRHg1KZu'
@@ -28,21 +29,20 @@ describe('Marketplace', function () {
 			farmer2,
 			buyer1,
 			buyer2,
-			validator1,
-			validator2,
 		] = await ethers.getSigners()
 
 		const FarmNFT = await ethers.getContractFactory('FarmNFT')
-		const farmNFT = await FarmNFT.deploy('FarmNFT', 'FT')
+		const farmNFT = await upgrades.deployProxy(FarmNFT)
+		await farmNFT.deployed()
 
 		const AgreementNFT = await ethers.getContractFactory('AgreementNFT')
-		const agreementNFT = await AgreementNFT.deploy('AgreementNFT', 'ANFT')
+		const agreementNFT = await upgrades.deployProxy(AgreementNFT)
 
 		const MarketPlace = await ethers.getContractFactory('Marketplace')
-		const marketplace = await MarketPlace.deploy(
+		const marketplace = await upgrades.deployProxy(MarketPlace, [
 			farmNFT.address,
-			agreementNFT.address
-		)
+			agreementNFT.address,
+		])
 
 		return {
 			farmNFT,
@@ -60,13 +60,13 @@ describe('Marketplace', function () {
 		it('Should equal to name of the NFT', async function () {
 			const { agreementNFT } = await loadFixture(deployNFT)
 
-			expect(await agreementNFT.name()).to.equal('AgreementNFT')
+			expect(await agreementNFT.name()).to.equal('AgreementNFTToken')
 		})
 
 		it('Should equal to symbol of the NFT', async function () {
 			const { agreementNFT } = await loadFixture(deployNFT)
 
-			expect(await agreementNFT.symbol()).to.equal('ANFT')
+			expect(await agreementNFT.symbol()).to.equal('ATK')
 		})
 	})
 
@@ -86,18 +86,14 @@ describe('Marketplace', function () {
 >>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 			await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL)
 			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
-
-			await farmNFT.connect(owner).approve(marketplace.address, 1)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
+			await marketplace.connect(owner).putContractOnSell(
+				farmer1.address,
+				1,
+				10,
+				1674181243,
+				1684549243,
+				agreementIPFSURI
+			)
 
 			const sellvalue = await marketplace.agreementDetails(1)
 			// console.log(sellvalue)
@@ -370,12 +366,6 @@ describe('Marketplace', function () {
 				)
 
 			await expect(
-<<<<<<< HEAD
-				marketplace
-					.connect(buyer1)
-					.buyContract([2], 'TID1', ['updated ToeknURI'])
-			).to.be.revertedWith('Not on sale')
-=======
 				marketplace.buyContract(buyer1.address, [2], ['TID1'], [''])
 			).to.be.revertedWith(
 				'ERC721URIStorage: URI set of nonexistent token'
@@ -408,18 +398,12 @@ describe('Marketplace', function () {
 					agreementIPFSURI
 				)
 
-<<<<<<< HEAD
-			await marketplace
-				.connect(buyer1)
-				.buyContract([1], 'TID1', ['updated ToeknURI'])
-=======
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],
 				['TID1'],
 				['updatedTokenURI']
 			)
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 			await marketplace.getAcceptedContractList(buyer1.address)
 		})
 
@@ -449,15 +433,6 @@ describe('Marketplace', function () {
 				)
 
 			await expect(
-<<<<<<< HEAD
-				marketplace.connect(buyer1).buyContract([1], 'TID1', [])
-			).to.be.revertedWith('Array length not same')
-		})
-	})
-
-	describe('closed agreement', async function () {
-		it('buyer will close the agreement', async function () {
-=======
 				marketplace.buyContract(buyer1.address, [1], [], [''])
 			).to.be.revertedWith('Array length not same')
 		})
@@ -513,7 +488,7 @@ describe('Marketplace', function () {
 		it('Reverted if contract already closed', async function () {
 =======
 			await expect(
-				marketplace.buyContract(buyer1.address, [1], [''], [])
+				marketplace.buyContract(buyer1.address, [1], '', [])
 			).to.be.revertedWith('Length of array different')
 		})
 	})
@@ -545,18 +520,6 @@ describe('Marketplace', function () {
 					agreementIPFSURI
 				)
 
-<<<<<<< HEAD
-			await marketplace
-				.connect(buyer1)
-				.buyContract([1], 'TID1', ['updated ToeknURI'])
-			await marketplace.connect(buyer1).soldContractNFT(1)
-			await expect(
-				marketplace.connect(buyer1).soldContractNFT(1)
-			).to.be.revertedWith('Not on sale')
-		})
-
-		it('Multiple contrat put on sell & buyer will buy contract NFT', async function () {
-=======
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],

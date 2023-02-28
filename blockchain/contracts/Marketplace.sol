@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: NONE
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./interfaces/IAgreementNFT.sol";
 
-contract Marketplace is Ownable {
+contract Marketplace is OwnableUpgradeable {
     event Sell(
         uint256 indexed farmNFTId,
         uint256 indexed price,
@@ -41,17 +41,17 @@ contract Marketplace is Ownable {
     // Mapping from buyer address to buy contractNFT list
     mapping(address => uint256[]) private agreementList;
 
-    IERC721 private immutable farmNFT;
-    IAgreementNFT private immutable agreementNFT;
+    IERC721 private farmNFT;
+    IAgreementNFT private agreementNFT;
 
-    constructor(address farmNFT_, address agreementNFT_) {
-        require(
-            farmNFT_ != address(0) && agreementNFT_ != address(0),
-            "Zero Address"
-        );
-        farmNFT = IERC721(farmNFT_);
-        agreementNFT = IAgreementNFT(agreementNFT_);
-    }
+    function initialize(address farmNFT_, address agreementNFT_)
+    external initializer
+   {
+    farmNFT = IERC721(farmNFT_);
+    agreementNFT = IAgreementNFT(agreementNFT_);
+    __Ownable_init();
+  }
+
     
     /**
     @dev put contract NFT on sell & call createAgreement() to create Contract NFT
@@ -121,25 +121,20 @@ contract Marketplace is Ownable {
     @dev to buy contract NFT
     @param buyerAddr buyer address
     @param agreementNftId_ array of contract NFT id
-    @param transactionId array of razorpay transaction id
+    @param transactionId  razorpay transaction id
     @param updateTokenURI array of updated IPFS URL
     Requirements:
     -`buyerAddr` buyer address should not be zero address
-    -`agreementNftId_ & transactionId` length of array must be equal
     `agreementNftId_ & updateTokenURI` length of array must be equal
     */
 
     function buyContract(
         address buyerAddr,
         uint256[] memory agreementNftId_,
-        string[] memory transactionId,
+        string memory transactionId,
         string[] memory updateTokenURI
     ) external {
         require(buyerAddr != address(0), "Zero address");
-        require(
-            agreementNftId_.length == transactionId.length,
-            "Array length not same"
-        );
         require(
             agreementNftId_.length == updateTokenURI.length,
             "Length of array different"
@@ -149,9 +144,7 @@ contract Marketplace is Ownable {
         for (uint256 i = 0; i < arrayLength; ) {
             agreementList[msg.sender].push(agreementNftId_[i]);
             agreementDetails[agreementNftId_[i]].buyer = buyerAddr;
-            agreementDetails[agreementNftId_[i]].razorTransId = transactionId[
-                i
-            ];
+            agreementDetails[agreementNftId_[i]].razorTransId = transactionId;
             IAgreementNFT(agreementNFT).updateAgreement(agreementNftId_[i], updateTokenURI[i]);
 
             emit Buy(
