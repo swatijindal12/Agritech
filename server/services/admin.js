@@ -341,7 +341,6 @@ exports.updateAgreement = async (req) => {
   try {
     // First check agreement is their with id and not active
     const agreement = await Agreement.findOne({ _id: id, sold_status: false });
-    console.log("agreement :- ", agreement);
 
     if (agreement) {
       // Update the Agreement data..
@@ -754,23 +753,25 @@ exports.deleteFarmer = async (req) => {
       // delete the farmer data..Also delete all farms, and close agreements for that farms.
       // Check if this farmer Has some farm then Delete it
       const farms = await Farm.find({ farmer_id: farmer._id });
-      // console.log("farms", farms);
       if (farms.length > 0) {
-        const farmId = farms[0]._id;
-        await Farm.deleteMany({ farmer_id: farmer._id });
-        // Check if this farmer Has some Agreement which not active then Delete it
-        const agreements = await Agreement.find({ farm_id: farmId });
-        if (agreements) {
-          await Agreement.deleteMany({
-            farm_id: farmId,
-            sold_status: true,
-          });
-        }
+        // const farmId = farms[0]._id;
+        // await Farm.deleteMany({ farmer_id: farmer._id });
+        // // Check if this farmer Has some Agreement which not active then Delete it
+        // const agreements = await Agreement.find({ farm_id: farmId });
+        // if (agreements) {
+        //   await Agreement.deleteMany({
+        //     farm_id: farmId,
+        //     sold_status: true,
+        //   });
+        // }
+        response.error = `reference exist you can not delete`;
+        response.httpStatus = 400;
+      } else {
+        // Delete farmer
+        await Farmer.deleteOne({ _id: id });
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
       }
-      // Delete farmer
-      await Farmer.deleteOne({ _id: id });
-      response.message = `Successfully deleted`;
-      response.httpStatus = 200;
     } else {
       response.error = `farmer not found`;
       response.httpStatus = 404;
