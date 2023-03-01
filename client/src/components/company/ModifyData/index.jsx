@@ -10,6 +10,7 @@ import Pagination from "../../common/Pagination";
 import VerificationPopup from "../../common/VerificationPopup";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
+import LogsModal from "./LogsModal";
 
 const Container = styled.div`
   padding: 1rem;
@@ -86,6 +87,16 @@ const Input = styled.input`
   background-color: #f5f5f5;
 `;
 
+const Logs = styled.p`
+  margin: 0 2rem 0 auto;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  color: #adc178;
+  cursor: pointer;
+`;
+
 const ModifyData = () => {
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState(null);
@@ -99,6 +110,7 @@ const ModifyData = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
   const [searchText, setSearchText] = useState("");
+  const [showLogs, setShowLogs] = useState(false);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -221,6 +233,7 @@ const ModifyData = () => {
           error={verificationError}
         />
       )}
+      {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}
       <Container>
         <TopContainer justify="flex-start">
           <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
@@ -237,6 +250,7 @@ const ModifyData = () => {
               disabled={loading}
             />
           </InputContainer>
+          <Logs onClick={() => setShowLogs(true)}>VIEW LOGS</Logs>
         </TopContainer>
         <TableContainer>
           <Table>
