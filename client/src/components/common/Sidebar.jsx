@@ -36,7 +36,10 @@ const NavItem = styled.div`
   font-size: 1.5rem;
   font-weight: 500;
   color: #6c584c;
+  color: ${props => (props.highlight ? "#ADC178" : "#6c584c")};
   margin: 2.5rem 0;
+  /* text-decoration: ${props => (props.highlight ? "underline" : "none")};
+  text-underline-offset: 0.5rem; */
 `;
 
 const Logout = styled.p`
@@ -74,7 +77,11 @@ const Sidebar = ({ show, toggle }) => {
         <Cross src={CrossIcon} onClick={toggle} />
         {currentNavItem?.map(navItem => {
           return (
-            <NavItem onClick={() => handleNavClick(navItem)} key={navItem.title}>
+            <NavItem
+              onClick={() => handleNavClick(navItem)}
+              key={navItem.title}
+              highlight={window.location.pathname === navItem.url}
+            >
               {navItem.title}
             </NavItem>
           );

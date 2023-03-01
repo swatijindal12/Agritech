@@ -35,6 +35,8 @@ const NavItem = styled.div`
   color: #6c584c;
   margin: 0 0.5rem;
   cursor: pointer;
+  text-decoration: ${props => (props.highlight ? "underline" : "none")};
+  text-underline-offset: 0.5rem;
 `;
 
 const MobileContainer = styled.div`
@@ -141,6 +143,7 @@ const Navbar = ({ toggleSidebar }) => {
               <NavItem
                 onClick={() => handleNavClick(navItem)}
                 key={navItem.title}
+                highlight={window.location.pathname === navItem.url}
               >
                 {navItem.title}
               </NavItem>
