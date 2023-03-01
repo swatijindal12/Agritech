@@ -12,6 +12,8 @@ import VerificationPopup from "../VerificationPopup";
 
 const Container = styled.div`
   padding: 1rem;
+  height: calc(100vh - 4rem);
+  background-color: #dde5b60a;
 `;
 
 const Selector = styled.div`
