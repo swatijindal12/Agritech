@@ -177,14 +177,6 @@ describe('Marketplace', function () {
 						1673250841,
 						agreementIPFSURI
 					)
-<<<<<<< HEAD
-			).to.be.revertedWith('end date should be less')
-		})
-
-		it("put 2 nft's on sell", async function () {
-			const { farmNFT, marketplace, owner, farmer1, farmer2 } =
-				await loadFixture(deployNFT)
-=======
 			).to.be.revertedWith('end date should not be less')
 		})
 
@@ -196,7 +188,6 @@ describe('Marketplace', function () {
 				farmer1,
 				farmer2,
 			} = await loadFixture(deployNFT)
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 
 			await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL)
 			await farmNFT.connect(owner).mint(farmer2.address, farm2IPFSURL)
@@ -288,18 +279,12 @@ describe('Marketplace', function () {
 				)
 
 			expect(await agreementNFT.tokenURI(1)).to.be.equal(agreementIPFSURI)
-<<<<<<< HEAD
-			await marketplace
-				.connect(buyer1)
-				.buyContract([1], 'TID1', ['updated ToeknURI'])
-=======
 			await marketplace.buyContract(
 				buyer1.address,
 				[1],
-				['TID1'],
+				'TID1',
 				['UpdatedIPFSURL']
 			)
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 
 			const sellvalue = await marketplace.agreementDetails(1)
 			expect(sellvalue.farmNFTId).to.be.equal(1)
@@ -309,36 +294,6 @@ describe('Marketplace', function () {
 			expect(sellvalue.buyer).to.be.equal(buyer1.address)
 		})
 
-<<<<<<< HEAD
-		it('Reverted if farmer can try to buy NFT', async function () {
-			const { farmNFT, marketplace, owner, farmer1 } = await loadFixture(
-				deployNFT
-			)
-
-			await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL)
-			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
-
-			await farmNFT.connect(owner).approve(marketplace.address, 1)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
-
-			await expect(
-				marketplace
-					.connect(owner)
-					.buyContract([1], 'TID1', ['updated ToeknURI'])
-			).to.be.revertedWith("Owner can't buy")
-		})
-
-=======
->>>>>>> 9dccb6f211b8b85ff4f6ae3663b94f20f1ad7465
 		it('Reverted if NFT is not on sale', async function () {
 			const {
 				tokenAddr,
