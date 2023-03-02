@@ -20,10 +20,16 @@ const Container = styled.div`
 const InnerContianer = styled.div`
   background-color: white;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.5rem;
   position: relative;
-  min-width: 23rem;
+  min-width: 30rem;
+  min-height: 19rem;
   text-align: left;
+
+  @media screen and (max-width: 990px) {
+    width: 90%;
+    min-width: unset;
+  }
 `;
 
 const Cross = styled.img`
@@ -33,10 +39,20 @@ const Cross = styled.img`
   cursor: pointer;
 `;
 
-const Message = styled.p`
+const Heading = styled.p`
   font-size: 1.5rem;
   font-weight: 500;
   color: #adc178;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  max-width: 18rem;
+  white-space: nowrap;
+`;
+
+const Message = styled.p`
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #6c584c;
   margin-bottom: 1rem;
   text-align: left;
   max-width: 18rem;
@@ -46,9 +62,11 @@ const Message = styled.p`
 const ErrorContainer = styled(Flexbox)`
   p {
     margin-left: 0.5rem;
+    margin-bottom: 0.5rem;
     font-size: 1rem;
     color: #6c584c;
     font-weight: 600;
+    white-space: pre-wrap;
   }
 `;
 
@@ -58,6 +76,7 @@ const Dot = styled.div`
   border-radius: 50%;
   border: 1px solid black;
   background-color: black;
+  margin-top: 10px;
 `;
 
 const ErrorPopup = ({ errors, toggle }) => {
@@ -81,11 +100,12 @@ const ErrorPopup = ({ errors, toggle }) => {
     <Container>
       <InnerContianer>
         <Cross src={CrossIcon} alt="cross-icon" onClick={toggle} />
-        <Message>Please fix errors and try again </Message>
+        <Heading>Errors List</Heading>
+        <Message>Please fix them and try again </Message>
         {errorsList?.length > 0 &&
           errorsList?.map(item => {
             return (
-              <ErrorContainer justify="flex-start">
+              <ErrorContainer justify="flex-start" align="flex-start">
                 <Dot />
                 <p>{item}</p>
               </ErrorContainer>

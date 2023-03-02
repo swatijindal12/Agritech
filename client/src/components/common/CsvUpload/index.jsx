@@ -276,10 +276,12 @@ const CsvUpload = () => {
                     if (row[item]?.toString()?.includes("http"))
                       return (
                         <UrlTd onClick={() => window.open(row[item])}>
-                          {row[item].includes(".pdf") ? (
-                            item
-                          ) : (
+                          {row[item].includes(".jpeg") ||
+                          row[item].includes(".png") ||
+                          row[item].includes(".jpg") ? (
                             <ImagePreview src={row[item]} />
+                          ) : (
+                            item
                           )}
                         </UrlTd>
                       );

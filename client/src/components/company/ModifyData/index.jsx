@@ -11,6 +11,8 @@ import VerificationPopup from "../../common/VerificationPopup";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
 import LogsModal from "./LogsModal";
+import Lottie from "lottie-react";
+import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   padding: 1rem;
@@ -83,8 +85,13 @@ const InputContainer = styled(Flexbox)`
 const Input = styled.input`
   padding: 1rem 2rem;
   border: none;
+  width: 18rem;
   border-radius: 24px;
   background-color: #f5f5f5;
+
+  @media screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Logs = styled.p`
@@ -95,6 +102,10 @@ const Logs = styled.p`
   text-underline-offset: 6px;
   color: #adc178;
   cursor: pointer;
+
+  @media screen and (max-width: 990px) {
+    margin: 1rem 0;
+  }
 `;
 
 const ModifyData = () => {
@@ -236,11 +247,11 @@ const ModifyData = () => {
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}
       <Container>
         <TopContainer justify="flex-start">
-          <Heading>{`Modify ${selectedType?.name} Lists`}</Heading>
+          <Heading>{`Manage ${selectedType?.name}`}</Heading>
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder="Enter phone number"
+              placeholder="Search by phone number and name"
               onChange={e => setSearchText(e.target.value)}
             />
             <Button
@@ -252,55 +263,63 @@ const ModifyData = () => {
           </InputContainer>
           <Logs onClick={() => setShowLogs(true)}>VIEW LOGS</Logs>
         </TopContainer>
-        <TableContainer>
-          <Table>
-            <tr>
-              {tableHeading?.map(item => {
-                return <th>{item.toUpperCase()}</th>;
+        {loading ? (
+          <Lottie
+            animationData={LoadingLottie}
+            loop={false}
+            style={{ height: "100px" }}
+          />
+        ) : (
+          <TableContainer>
+            <Table>
+              <tr>
+                {tableHeading?.map(item => {
+                  return <th>{item.toUpperCase()}</th>;
+                })}
+              </tr>
+              {list?.map(row => {
+                return (
+                  <tr>
+                    {tableHeading?.map((item, tdIndex) => {
+                      if (tdIndex === 0)
+                        return (
+                          <td>
+                            <img
+                              src={EditIcon}
+                              onClick={() => {
+                                setSelectedData(row);
+                                setShowUpdatePopup(true);
+                              }}
+                            />
+                          </td>
+                        );
+                      if (tdIndex === 1)
+                        return (
+                          <td>
+                            <img
+                              src={DeleteIcon}
+                              onClick={() => {
+                                setSelectedData(row);
+                                setShowDeletePopup(true);
+                              }}
+                            />
+                          </td>
+                        );
+                      if (row[item] === true) return <td>1</td>;
+                      if (row[item]?.toString()?.includes("http"))
+                        return (
+                          <UrlTd onClick={() => window.open(row[item])}>
+                            {item}
+                          </UrlTd>
+                        );
+                      else return <td>{row[item] || 0}</td>;
+                    })}
+                  </tr>
+                );
               })}
-            </tr>
-            {list?.map(row => {
-              return (
-                <tr>
-                  {tableHeading?.map((item, tdIndex) => {
-                    if (tdIndex === 0)
-                      return (
-                        <td>
-                          <img
-                            src={EditIcon}
-                            onClick={() => {
-                              setSelectedData(row);
-                              setShowUpdatePopup(true);
-                            }}
-                          />
-                        </td>
-                      );
-                    if (tdIndex === 1)
-                      return (
-                        <td>
-                          <img
-                            src={DeleteIcon}
-                            onClick={() => {
-                              setSelectedData(row);
-                              setShowDeletePopup(true);
-                            }}
-                          />
-                        </td>
-                      );
-                    if (row[item] === true) return <td>1</td>;
-                    if (row[item]?.toString()?.includes("http"))
-                      return (
-                        <UrlTd onClick={() => window.open(row[item])}>
-                          {item}
-                        </UrlTd>
-                      );
-                    else return <td>{row[item] || 0}</td>;
-                  })}
-                </tr>
-              );
-            })}
-          </Table>
-        </TableContainer>
+            </Table>
+          </TableContainer>
+        )}
         <PaginationContainer>
           <Pagination
             currentPage={currentPage}

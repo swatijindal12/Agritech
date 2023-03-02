@@ -28,12 +28,19 @@ const InnerContianer = styled.div`
   padding: 1rem;
   width: 80vw;
   height: 80vh;
+
+  @media screen and (max-width: 990px) {
+    width: 95%;
+  }
 `;
 
 const ListContainer = styled.div`
   height: 70%;
   margin-top: 1rem;
   overflow-y: auto;
+  @media screen and (max-width: 990px) {
+    height: 80%;
+  }
 `;
 
 const PaginationContainer = styled.div`
@@ -51,6 +58,11 @@ const Heading = styled.p`
   color: #6c584c;
   font-weight: 700;
   text-align: center;
+
+  @media screen and (max-width: 990px) {
+    font-size: 1.2rem;
+    text-align: left;
+  }
 `;
 
 const Cross = styled.img`
@@ -58,6 +70,12 @@ const Cross = styled.img`
   top: 1.5rem;
   right: 1.5rem;
   cursor: pointer;
+
+  @media screen and (max-width: 990px) {
+    height: 1rem;
+    top: 1rem;
+    right: 1rem;
+  }
 `;
 
 const TableContainer = styled.div`
@@ -99,7 +117,7 @@ const LogsModal = ({ toggle }) => {
   const getList = () => {
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/audit/farmer?page=${currentPage}&limit=2`,
+        `${process.env.REACT_APP_BASE_URL}/admin/audit/farmer?page=${currentPage}&limit=6`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
