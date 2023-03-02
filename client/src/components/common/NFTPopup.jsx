@@ -21,7 +21,7 @@ const PopupBox = styled.div`
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
-  /* max-width: 23rem; */
+  min-height: 12rem;
 `;
 
 const Heading = styled.p`
@@ -47,12 +47,12 @@ const NFTPopup = ({ children, tx_hash, togglePopup, isOpen, width }) => {
         {children}
         <Flexbox justify="center">
           <Button
-            margin={"0.5rem"}
+            margin={"1rem"}
             onClick={handleTxhash}
             text={"Tx hash"}
           ></Button>
           <Button
-            margin={"0.5rem"}
+            margin={"1rem"}
             onClick={handleClose}
             text={"Close"}
           ></Button>
