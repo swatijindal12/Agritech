@@ -21,7 +21,7 @@ const PopupBox = styled.div`
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
-  max-width: 23rem;
+  /* max-width: 23rem; */
 `;
 
 const Heading = styled.p`
