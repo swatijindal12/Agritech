@@ -140,11 +140,10 @@ const Tooltip = styled.div`
 
 const PopupContent = styled.p`
   padding: 0.5rem;
-  overflow-x: scroll;
-  max-width: 20rem;
-
   @media screen and (max-width: 990px) {
     scroll-margin-top: 1rem;
+    max-width: 20rem;
+    overflow-x: scroll;
   }
 `;
 
