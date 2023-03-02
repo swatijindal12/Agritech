@@ -66,6 +66,9 @@ const Error = styled.p`
 
 const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
   const [password, setPassword] = useState("");
+  const selectedType = JSON.parse(
+    localStorage.getItem("current-new-upload-data")
+  );
 
   return (
     <Container>
@@ -80,6 +83,13 @@ const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
           required
         />
         {error && <Error>Error: {error}</Error>}
+        {selectedType.name === "Farms" && (
+          <Error>Some matic are deducted due to blockchain transaction</Error>
+        )}
+        {selectedType.name === "Contracts" && (
+          <Error>Some matic are deducted due to blockchain transaction</Error>
+        )}
+
         <Flexbox justify="center">
           <Button
             onClick={() => onSubmit(password)}

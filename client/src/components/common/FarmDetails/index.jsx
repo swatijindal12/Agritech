@@ -216,7 +216,7 @@ const FarmDetails = () => {
               Read more about farm practices
             </ViewMore>
             <ViewMore onClick={() => window.open(farmDetails?.farm?.farm_pdf)}>
-              View more about farm
+              Read more about farm
             </ViewMore>
             <Flexbox style={{ display: "block" }}>
               <p style={{ marginTop: "0.5rem" }}>Rating</p>

@@ -64,7 +64,7 @@ const Card = ({ data, highlight }) => {
       </Flexbox>
       <Number style={{ opacity: "1" }}>{data.address}</Number>
       <ViewMore onClick={() => window.open(data.farmer_pdf)}>
-        view more
+        Read more
       </ViewMore>
     </Container>
   );
