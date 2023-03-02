@@ -70,6 +70,22 @@ exports.deleteAgreements = async (req, res, next) => {
     });
 };
 
+exports.updateAgreement = async (req, res, next) => {
+  adminService
+    .updateAgreement(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // List of agreements for admin edit/delete
 exports.listAgreements = async (req, res, next) => {
   adminService
@@ -413,6 +429,24 @@ exports.closeAgreement = async (req, res, next) => {
 exports.getdashBoard = async (req, res, next) => {
   adminService
     .getdashBoard(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to => api/v1/admin/audit/:table
+
+exports.getAudit = async (req, res, next) => {
+  adminService
+    .getAudit(req)
     .then((response) => {
       res.json(response);
     })
