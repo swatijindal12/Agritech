@@ -84,7 +84,7 @@ const TableContainer = styled.div`
 `;
 
 const Table = styled.table`
-  border: 1px solid black;
+  border: 1px solid #a9846733;
   border-collapse: collapse;
   margin: 2rem 0 0 0;
 
@@ -93,12 +93,12 @@ const Table = styled.table`
   }
 
   td {
-    border: 1px solid black;
+    border: 1px solid #a9846733;
     padding: 1rem;
     text-align: center;
   }
   th {
-    border: 1px solid black;
+    border: 1px solid #a9846733;
     padding: 1rem;
   }
 `;
@@ -109,6 +109,9 @@ const LogsModal = ({ toggle }) => {
   const user = useSelector(store => store.auth.user);
   const [tableHeading, setTableHeading] = useState([]);
   const [totalPage, setTotalpage] = useState(1);
+  const selectedType = JSON.parse(
+    localStorage.getItem("current-new-upload-data")
+  );
 
   useEffect(() => {
     getList();
@@ -117,7 +120,7 @@ const LogsModal = ({ toggle }) => {
   const getList = () => {
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/audit/farmer?page=${currentPage}&limit=6`,
+        `${process.env.REACT_APP_BASE_URL}/admin/audit/${selectedType.type}?page=${currentPage}&limit=6`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -142,7 +145,7 @@ const LogsModal = ({ toggle }) => {
     <Container>
       <InnerContianer>
         <Cross src={CrossIcon} alt="cross-icon" onClick={toggle} />
-        <Heading>History of updates</Heading>
+        <Heading>History of Update and Delete</Heading>
         <ListContainer>
           <TableContainer>
             <Table>
