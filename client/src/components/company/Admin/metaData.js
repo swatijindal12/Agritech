@@ -21,7 +21,7 @@ export const navigationData = [
     final_upload_url: "admin/farmer",
     get_list: "admin/farmers",
     type: "farmer",
-    search_text: "Search by phone number and name",
+    search_text: "Search by phone number, name and pin",
   },
   {
     name: "Farms",
