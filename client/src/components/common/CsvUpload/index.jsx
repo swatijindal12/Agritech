@@ -178,7 +178,7 @@ const CsvUpload = () => {
       );
     } else if (uploadData.name == "Contracts") {
       window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementTemplate.csv"
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
       );
     }
   };

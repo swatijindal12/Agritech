@@ -238,7 +238,7 @@ const Card = ({ data, highlight }) => {
               </ViewMore>
             </Flexbox>
             <ViewMore onClick={() => window.open(data.farm_pdf)}>
-              View more about farm
+              Read more about farm
             </ViewMore>
             <Flexbox style={{ display: "block" }}>
               <p style={{ marginTop: "1.5rem", fontSize: "20px" }}>Rating</p>
