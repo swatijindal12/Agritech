@@ -27,6 +27,8 @@ const {
   updateFarmer,
   deleteFarmer,
   listAgreements,
+  updateAgreement,
+  getAudit,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -53,6 +55,11 @@ router
 router
   .route("/agreement/:id")
   .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteAgreements);
+
+// update agreement which are not active
+router
+  .route("/agreement/:id")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateAgreement);
 
 // Insert farm data into DB.
 router
@@ -153,5 +160,10 @@ router
 router
   .route("/dashboard")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getdashBoard);
+
+// Get audit
+router
+  .route("/audit/:table")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAudit);
 
 module.exports = router;
