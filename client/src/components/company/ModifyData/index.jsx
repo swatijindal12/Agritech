@@ -251,7 +251,7 @@ const ModifyData = () => {
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder="Search by phone number and name"
+              placeholder={selectedType.search_text}
               onChange={e => setSearchText(e.target.value)}
             />
             <Button
@@ -266,7 +266,7 @@ const ModifyData = () => {
         {loading ? (
           <Lottie
             animationData={LoadingLottie}
-            loop={false}
+            loop={true}
             style={{ height: "100px" }}
           />
         ) : (

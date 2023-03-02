@@ -9,6 +9,7 @@ export const navigationData = [
     final_upload_url: "marketplace/agreement",
     get_list: "admin/listagreements",
     type: "agreement",
+    search_text: "Search by crop and name",
   },
   {
     name: "Farmers",
@@ -20,6 +21,7 @@ export const navigationData = [
     final_upload_url: "admin/farmer",
     get_list: "admin/farmers",
     type: "farmer",
+    search_text: "Search by phone number and name",
   },
   {
     name: "Farms",
@@ -31,5 +33,6 @@ export const navigationData = [
     final_upload_url: "admin/farm",
     get_list: "admin/farms",
     type: "farm",
+    search_text: "Search by name and pin",
   },
 ];
