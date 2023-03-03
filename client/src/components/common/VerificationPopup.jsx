@@ -84,10 +84,10 @@ const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
         />
         {error && <Error>Error: {error}</Error>}
         {selectedType.name === "Farms" && (
-          <Error>Some matic are deducted due to blockchain transaction</Error>
+          <Error>Approx cost of modifying farm will be $0.0097</Error>
         )}
         {selectedType.name === "Contracts" && (
-          <Error>Some matic are deducted due to blockchain transaction</Error>
+          <Error>Approx cost of modifying contract will be $0.0113</Error>
         )}
 
         <Flexbox justify="center">
