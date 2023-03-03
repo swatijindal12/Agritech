@@ -27,4 +27,4 @@ const farmerSchemaCheck = (data) => {
   return isValid;
 };
 
-module.exports = { farmerSchemaCheck };
+module.exports = farmerSchemaCheck;

@@ -287,9 +287,21 @@ exports.listAgreements = async (req) => {
   const limit = parseInt(req.query.limit)
   const skip = (page - 1) * limit
 
+  const searchQuery = {};
+
+  if (req.query.search) {
+    const searchValue = req.query.search;
+    searchQuery["$or"] = [
+      { farmer_name: new RegExp(req.query.search, "i") },
+      {
+        crop: new RegExp(req.query.search, "i"),
+      },
+    ];
+  }
+
   try {
-    let agreementQuery = Agreement.find()
-    let totalDocuments = await Agreement.countDocuments()
+    let agreementQuery = Agreement.find(searchQuery);
+    let totalDocuments = await Agreement.countDocuments(searchQuery);
 
     if (isNaN(page) && isNaN(limit)) {
       // Return all documents
@@ -773,6 +785,8 @@ exports.createFarmer = async (req) => {
 
 // Update Farmer Service
 exports.updateFarmer = async (req) => {
+  // Getting user from middleware
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -792,18 +806,33 @@ exports.updateFarmer = async (req) => {
     return response
   }
 
-  const updatedData = req.body
-  // console.log("updatedData - ", updatedData);
+  const updatedData = req.body;
+  console.log("updatedData - ", updatedData);
   try {
     // First check farmer is their with id
-    const farmer = await Farmer.findOne({ _id: id })
-    // console.log("farmer :- ", farmer);
+    let farmer = await Farmer.findOne({ _id: id });
 
     if (farmer) {
-      // delete the farmer data..
-      await Farmer.updateOne({ _id: id }, updatedData)
-      response.message = `Successfully updated`
-      response.httpStatus = 200
+      // old value
+      const old_values = { ...farmer.toJSON() };
+
+      await Farmer.updateOne({ _id: id }, updatedData);
+
+      let new_values = { ...updatedData };
+
+      // Creatingg Log
+      await Audit.create({
+        table_name: "farmers",
+        record_id: farmer.id,
+        change_type: "update",
+        old_value: JSON.stringify(old_values),
+        new_value: JSON.stringify(new_values),
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+      });
+      // creating response
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
     } else {
       response.error = `farmer not found`
       response.httpStatus = 404
@@ -817,6 +846,8 @@ exports.updateFarmer = async (req) => {
 
 // Delete Farmer Service /:id
 exports.deleteFarmer = async (req) => {
+  // Getting user from middleware
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -839,7 +870,9 @@ exports.deleteFarmer = async (req) => {
 
   try {
     // First check farmer is their with id
-    const farmer = await Farmer.findOne({ _id: id })
+    const farmer = await Farmer.findOne({ _id: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
 
     if (farmer) {
       // delete the farmer data..Also delete all farms, and close agreements for that farms.
@@ -859,10 +892,24 @@ exports.deleteFarmer = async (req) => {
         response.error = `reference exist you can not delete`
         response.httpStatus = 400
       } else {
-        // Delete farmer
-        await Farmer.deleteOne({ _id: id })
-        response.message = `Successfully deleted`
-        response.httpStatus = 200
+        // Old farmer
+        const old_values = { ...farmer.toJSON() };
+        // console.log("old_values ", old_values);
+        await Farmer.deleteOne({ _id: id });
+        const new_values = { ...farmer.toJSON() };
+        // console.log("new_values ", new_values);
+        await Audit.create({
+          table_name: "farmers",
+          record_id: farmer.id,
+          change_type: "delete",
+          old_value: JSON.stringify(old_values),
+          new_value: JSON.stringify(new_values),
+          user_id: userLogged.id,
+          user_name: userLogged.name,
+        });
+
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
       }
     } else {
       response.error = `farmer not found`
@@ -871,64 +918,6 @@ exports.deleteFarmer = async (req) => {
   } catch (error) {
     response.error = `failed operation 1 ${error}`
     response.httpStatus = 500
-  }
-  return response
-}
-
-// Get all farmer with page no.
-exports.getFarmersOld = async (req) => {
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  }
-
-  const sortOrder = req.query.sortOrder
-  const page = parseInt(req.query.page)
-  const limit = parseInt(req.query.limit)
-  const skip = (page - 1) * limit
-
-  try {
-    let farmerQuery = Farmer.find()
-    let totalDocuments = await Farmer.countDocuments()
-
-    if (sortOrder === 'low') {
-      farmerQuery = farmerQuery.sort({ rating: 1 })
-    } else if (sortOrder === 'high') {
-      farmerQuery = farmerQuery.sort({ rating: -1 })
-    }
-
-    if (isNaN(page) && isNaN(limit) && !sortOrder) {
-      // Return all documents
-      const farmers = await farmerQuery.select('-__v')
-      response.data = farmers.map((farmer) => ({
-        ...farmer._doc,
-        createdAt: farmer.createdAt.toLocaleString(),
-        updatedAt: farmer.updatedAt.toLocaleString(),
-      }))
-      response.httpStatus = 200
-    } else if (isNaN(page) && isNaN(limit)) {
-      // Return all documents
-      const farmers = await farmerQuery.select('-__v')
-
-      response.data = farmers
-      response.httpStatus = 200
-    } else {
-      // Apply pagination
-      const farmers = await farmerQuery.skip(skip).limit(limit).select('-__v')
-      response.httpStatus = 200
-      response.data = {
-        totalPages: Math.ceil(totalDocuments / limit),
-        data: farmers.map((farmer) => ({
-          ...farmer._doc,
-          createdAt: farmer.createdAt.toLocaleString(),
-          updatedAt: farmer.updatedAt.toLocaleString(),
-        })),
-      }
-    }
-  } catch (error) {
-    ;(response.error = 'failed operation'), (response.httpStatus = 400)
   }
   return response
 }
@@ -1441,6 +1430,7 @@ exports.deleteFarm = async (req) => {
 }
 
 exports.updateFarm = async (req) => {
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -1521,6 +1511,43 @@ exports.updateFarm = async (req) => {
       const result = await Farm.updateOne({ _id: id }, updatedData)
       response.message = `Successfully updated ${result} document`
       response.httpStatus = 200
+  const updatedData = req.body;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  // console.log("updatedData - ", updatedData);
+  try {
+    // First check farmer is their with id
+    const farm = await Farm.findOne({ _id: id });
+
+    if (farm) {
+      // update the farm data..
+      const old_values = { ...farm.toJSON() };
+      // console.log("old_values ", old_values);
+      await Farm.updateOne({ _id: id }, updatedData);
+
+      let new_values = { ...updatedData };
+
+      // console.log("new_values ", new_values);
+      await Audit.create({
+        table_name: "farms",
+        record_id: farm.id,
+        change_type: "update",
+        old_value: JSON.stringify(old_values),
+        new_value: JSON.stringify(new_values),
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+      });
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
     } else {
       response.error = `farm not found`
       response.httpStatus = 404
@@ -1544,18 +1571,29 @@ exports.getFarms = async (req) => {
     message: null,
     httpStatus: null,
     data: null,
+  };
+  const searchQuery = {};
+
+  if (req.query.search) {
+    const searchValue = req.query.search;
+    searchQuery["$or"] = [
+      { name: new RegExp(req.query.search, "i") },
+      {
+        pin: !isNaN(parseInt(searchValue)) ? parseInt(searchValue) : undefined,
+      },
+    ];
   }
 
   try {
-    let farmQuery = Farm.find().select('-__v')
-    let totalDocuments = await farmQuery.countDocuments()
+    let farmQuery = Farm.find(searchQuery).select("-__v");
+    let totalDocuments = await farmQuery.countDocuments(searchQuery);
 
     // redefine the query before executing it again
-    farmQuery = Farm.find()
-    if (sortOrder === 'low') {
-      farmQuery = farmQuery.sort({ rating: 1 })
-    } else if (sortOrder === 'high') {
-      farmQuery = farmQuery.sort({ rating: -1 })
+    farmQuery = Farm.find(searchQuery);
+    if (sortOrder === "low") {
+      farmQuery = farmQuery.sort({ rating: 1 });
+    } else if (sortOrder === "high") {
+      farmQuery = farmQuery.sort({ rating: -1 });
     }
 
     // Apply filtering based on crop types

@@ -28,7 +28,9 @@ const {
   updateFarmer,
   deleteFarmer,
   listAgreements,
-} = require('../controllers/adminController')
+  updateAgreement,
+  getAudit,
+} = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth')
@@ -57,9 +59,9 @@ router
 
 // update agreement which are not active
 router
-  .route('/agreement/:id')
-  .put(isAuthenticatedUser, authorizeRoles('admin'), updateAgreement)
-  
+  .route("/agreement/:id")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateAgreement);
+
 // Insert farm data into DB.
 router
   .route('/farm')
@@ -160,4 +162,9 @@ router
   .route('/dashboard')
   .get(isAuthenticatedUser, authorizeRoles('admin'), getdashBoard)
 
-module.exports = router
+// Get audit
+router
+  .route("/audit/:table")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAudit);
+
+module.exports = router;
