@@ -14,22 +14,28 @@ const mongoose = require("mongoose");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+const epocTimeConv = require("../utils/epocTimeConv");
 
 // Import for Blockchain
 const Web3 = require("web3");
 const farmNFTContractABI = require("../web3/farmContractABI");
+const marketplaceContractABI = require("../web3/marketPlaceABI");
+
 // const mintFarm = require("../web3/mintFarm");
 
 const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
-
+const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 
 const web3 = new Web3(provider);
 const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 
-// const mingFarm = () => {};
+const marketplaceContract = new web3.eth.Contract(
+  marketplaceContractABI,
+  marketplaceAddr
+);
 
 // Validate the agreement
 exports.validate = async (req) => {
@@ -323,7 +329,7 @@ exports.listAgreements = async (req) => {
   return response;
 };
 
-// Update Agreement Service :: toBe Confirmed
+// Update Agreement Service ::
 exports.updateAgreement = async (req) => {
   // General response format
   let response = {
@@ -335,37 +341,131 @@ exports.updateAgreement = async (req) => {
 
   const { id } = req.params;
 
-  const startDate = req.body.start_date;
-  const endDate = req.body.end_date;
-  const price = req.body.price;
-  const crop = req.body.crop;
-  const area = req.body.area;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  let startDate = req.body.start_date;
+  let endDate = req.body.end_date;
+  let amount = req.body.price;
+  let crop = req.body.crop;
+  let area = req.body.area;
 
   const updatedData = {
     start_date: startDate,
     end_date: endDate,
-    price: price,
+    price: amount,
     crop: crop,
     area: area,
   };
 
-  // console.log("updatedData :", updatedData);
+  // console.log('updatedData :', updatedData)
 
   try {
     // First check agreement is their with id and not active
-    const agreement = await Agreement.findOne({ _id: id, sold_status: false });
+    let agreement = await Agreement.findOne({ _id: id, sold_status: false });
+    console.log("AGREEMENT", agreement);
+    amount = amount === undefined ? agreement.price : amount;
+    startDate = startDate === undefined ? agreement.start_date : startDate;
+    endDate = endDate === undefined ? agreement.end_date : endDate;
+    crop = crop === undefined ? agreement.crop : crop;
+    area = area === undefined ? agreement.area : area;
+
+    // console.log('rest', rest)
 
     if (agreement) {
       // Update the Agreement data..
-      const result = await Agreement.updateOne({ _id: id }, updatedData);
-      response.message = `Successfully updated ${result} document`;
+      await Agreement.updateOne({ _id: id }, updatedData);
+      agreement = await Agreement.findOne({ _id: id, sold_status: false });
+
+      const {
+        _id,
+        farm_id,
+        file_name,
+        farmer_name,
+        address,
+        agreement_nft_id,
+        tx_hash,
+        farm_nft_id,
+        price,
+        ipfs_url,
+        ...rest
+      } = agreement._doc;
+
+      const options = {
+        pinataMetadata: {
+          name: agreement?.farm_nft_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      agreement.ipfs_url = ipfs_hash;
+      await agreement.save();
+
+      // -------------- IPFS --------------------
+
+      // BLOCKCHAIN TRANSACTION--------------------
+      const Tran = "https://mumbai.polygonscan.com/tx";
+      const agreement_nftId = agreement.agreement_nft_id;
+
+      const gasLimit = await marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .estimateGas({ from: adminAddr });
+
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      const updateContract = marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .encodeABI();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: marketplaceAddr,
+        value: "0x00",
+        data: updateContract,
+        from: adminAddr,
+      };
+
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+
+      agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      response.message = `Successfully updated `;
       response.httpStatus = 200;
     } else {
       response.error = `agreement not found`;
       response.httpStatus = 404;
     }
   } catch (error) {
-    response.error = `failed operation ${error}`;
+    response.error = `failed operation1 ${error}`;
     response.httpStatus = 500;
   }
   return response;
@@ -382,6 +482,17 @@ exports.deleteAgreement = async (req) => {
   };
 
   const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     // First check agreement is their with id
     const agreement = await Agreement.findOne({
@@ -716,7 +827,6 @@ exports.updateFarmer = async (req) => {
   }
 
   const updatedData = req.body;
-  console.log("updatedData - ", updatedData);
   try {
     // First check farmer is their with id
     let farmer = await Farmer.findOne({ _id: id });
@@ -1167,6 +1277,17 @@ exports.createFarm = async (req) => {
     data: null,
   };
 
+  const { id } = req.params;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   const data = req.body;
   // status setting stage table
   data.map(async (farm) => {
@@ -1299,6 +1420,7 @@ exports.createFarm = async (req) => {
 };
 
 exports.deleteFarm = async (req) => {
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -1321,13 +1443,13 @@ exports.deleteFarm = async (req) => {
 
   try {
     // First check farmer is their with id
-    const farm = await Farm.findOne({ _id: id });
+    let farm = await Farm.findOne({ _id: id });
 
     if (farm) {
       // delete the farm data..
 
-      // delete the farm data..Also delete all farms, and close agreements for that farms.
-      // Check if this farm Has some agreement then Delete it
+      // delete the farm data..
+      // Check if this farm has some agreement
       const agreements = await Agreement.find({ farm_id: farm._id });
 
       if (agreements.length > 0) {
@@ -1336,7 +1458,23 @@ exports.deleteFarm = async (req) => {
         response.error = `reference exist you can not delete`;
         response.httpStatus = 400;
       } else {
+        // Old farmer
+        const old_values = { ...farm.toJSON() };
+        // console.log("old_values ", old_values);
         await Farm.deleteOne({ _id: id });
+        farm = await Farm.findOne({ _id: id });
+        const new_values = { ...farm.toJSON() };
+        // console.log("new_values ", new_values);
+        await Audit.create({
+          table_name: "farm",
+          record_id: farm._id,
+          change_type: "delete",
+          old_value: JSON.stringify(old_values),
+          new_value: JSON.stringify(new_values),
+          user_id: userLogged.id,
+          user_name: userLogged.name,
+        });
+
         response.message = `Successfully deleted`;
         response.httpStatus = 200;
       }
@@ -1352,6 +1490,116 @@ exports.deleteFarm = async (req) => {
 };
 
 exports.updateFarm = async (req) => {
+  const userLogged = req.user;
+  const userId = userLogged._id;
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  const updatedData = req.body;
+
+  try {
+    // First check farmer is their with id
+    let farm = await Farm.findOne({ _id: id });
+
+    if (farm) {
+      // Old farmer
+      const old_values = { ...farm.toJSON() };
+      // console.log("old_values ", old_values);
+      // update the Farm data..
+      await Farm.updateOne({ _id: id }, updatedData);
+
+      farm = await Farm.findOne({ _id: id });
+      const new_values = { ...farm.toJSON() };
+      // console.log("new_values ", new_values);
+      await Audit.create({
+        table_name: "farm",
+        record_id: farm._id,
+        change_type: "update",
+        old_value: JSON.stringify(old_values),
+        new_value: JSON.stringify(new_values),
+        user_id: userId,
+        user_name: userLogged.name,
+      });
+
+      const {
+        _id,
+        farmer_id,
+        file_name,
+        name,
+        address,
+        tx_hash,
+        farm_nft_id,
+        ipfs_url,
+        ...rest
+      } = farm._doc;
+
+      // IPFS----
+      const options = {
+        pinataMetadata: {
+          name: farm.farmer_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      farm.ipfs_url = ipfs_hash;
+
+      await farm.save();
+
+      const Tran = "https://mumbai.polygonscan.com/tx";
+
+      //BLOCKCHAIN TRANSACTION-------
+      const gasLimit = await farmNFTContract.methods
+        .updateFarm(farm.farm_nft_id, ipfs_hash)
+        .estimateGas({ from: adminAddr });
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      const encodedData = farmNFTContract.methods
+        .updateFarm(farm.farm_nft_id, ipfs_hash)
+        .encodeABI();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: farmNFTAddr,
+        value: "0x00",
+        data: encodedData,
+        from: adminAddr,
+      };
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+      console.log("Transaction : ", transaction.transactionHash);
+      // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+      farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      await farm.save();
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
+    } else {
+      response.error = `farm not found`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
+exports.updateFarmOld = async (req) => {
   const userLogged = req.user;
   // General response format
   let response = {
@@ -1826,7 +2074,7 @@ exports.getAudit = async (req) => {
       };
       response.httpStatus = 200;
     } else if (req.params.table == "farm") {
-      let auditQuery = Audit.find({ table_name: "farms" }).select("-__v");
+      let auditQuery = Audit.find({ table_name: "farm" }).select("-__v");
       let totalDocuments = await Audit.countDocuments(auditQuery);
 
       const skip = (page - 1) * limit;
