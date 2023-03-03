@@ -11,12 +11,14 @@ const Container = styled.div`
   background-color: ${props => (props.color ? props.color : "#ADC178")};
   margin: ${props => (props.margin ? props.margin : "auto")};
   color: #ffffff;
+  color: ${props => (props.border ? props.border : "#ffffff")};
   font-size: 1rem;
   letter-spacing: 1.4px;
   font-weight: 700;
   width: ${props => (props.width ? props.width : "fit-content")};
   opacity: ${props => (props.disabled ? 0.3 : 1)};
   cursor: ${props => (props.disabled ? "not-allowed" : "pointer")};
+  border: ${props => props.border && `2px solid ${props.border}`};
   @media only screen and (max-width: 990px) {
     width: ${props => (props.mobileWidth ? props.mobileWidth : "fit-content")};
   }
@@ -30,6 +32,7 @@ const Button = ({
   disabled,
   onClick,
   mobileWidth,
+  border,
 }) => {
   return (
     <Container
@@ -41,6 +44,7 @@ const Button = ({
       onClick={() => {
         if (!disabled) onClick();
       }}
+      border={border}
     >
       {text}
     </Container>

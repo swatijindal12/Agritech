@@ -7,12 +7,16 @@ import Button from "../Button";
 import CrossIcon from "../../../assets/red-cross.svg";
 import CheckIcon from "../../../assets/green-check.svg";
 import ErrorPopup from "./ErrorPopup";
+import { useRef } from "react";
 
 const Container = styled.div`
   padding: 1rem;
 `;
 
 const TopContainer = styled(Flexbox)`
+  #csvInput {
+    display: none;
+  }
   @media only screen and (max-width: 990px) {
     flex-direction: column;
     row-gap: 1rem;
@@ -127,6 +131,8 @@ const CsvUpload = () => {
   const user = useSelector(store => store.auth.user);
   const [uploadData, setUploadData] = useState({});
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [inputText, setInputText] = useState("+ SELECT");
+  const inputRef = useRef();
 
   useEffect(() => {
     setUploadData(JSON.parse(localStorage.getItem("current-new-upload-data")));
@@ -134,6 +140,7 @@ const CsvUpload = () => {
 
   const handleFileChange = e => {
     if (e.target.files.length) {
+      setInputText(e.target.files[0].name);
       const inputFile = e.target.files[0];
       setFile(inputFile);
       const formData = new FormData();
@@ -219,11 +226,19 @@ const CsvUpload = () => {
     <Container>
       <Heading>{`Upload ${uploadData.name}`}</Heading>
       <TopContainer justify="center">
+        <Button
+          text={inputText}
+          margin="0"
+          color="#ffffff"
+          border="#182a88"
+          onClick={() => inputRef.current.click()}
+        />
         <input
           onChange={handleFileChange}
           id="csvInput"
           name="file"
           type="File"
+          ref={inputRef}
         />
         <Button
           text={loading ? "...UPLOADING" : "SEND FOR APPROVAL"}
