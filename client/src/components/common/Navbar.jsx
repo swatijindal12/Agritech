@@ -143,7 +143,10 @@ const Navbar = ({ toggleSidebar }) => {
               <NavItem
                 onClick={() => handleNavClick(navItem)}
                 key={navItem.title}
-                highlight={window.location.pathname === navItem.url}
+                highlight={
+                  window.location.pathname === navItem.url ||
+                  window.location.pathname.includes(navItem.url)
+                }
               >
                 {navItem.title}
               </NavItem>

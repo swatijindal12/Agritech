@@ -79,14 +79,18 @@ const Admin = () => {
               <CardTopContainer>Manage {item.name}</CardTopContainer>
               <CardBottomContainer>
                 <BottomContainer
-                  onClick={() => handleClick(item, "/csv-validator")}
+                  onClick={() => handleClick(item, "/admin/csv-validator")}
                 >
                   Upload New
                 </BottomContainer>
-                <BottomContainer onClick={() => handleClick(item, "/approve")}>
+                <BottomContainer
+                  onClick={() => handleClick(item, "/admin/approve")}
+                >
                   Approve Existing
                 </BottomContainer>
-                <BottomContainer onClick={() => handleClick(item, "/modify")}>
+                <BottomContainer
+                  onClick={() => handleClick(item, "/admin/modify")}
+                >
                   Modify
                 </BottomContainer>
               </CardBottomContainer>

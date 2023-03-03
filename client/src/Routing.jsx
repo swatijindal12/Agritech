@@ -58,11 +58,11 @@ const Routing = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/farms/:slug" element={<FarmDetails />} />
           <Route path="/about-us" element={<Aboutus />} />
-          <Route path="/csv-validator" element={<CsvUpload />} />
+          <Route path="/admin/csv-validator" element={<CsvUpload />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/approve" element={<Approve />} />
+          <Route path="/admin/approve" element={<Approve />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/modify" element={<ModifyData />} />
+          <Route path="/admin/modify" element={<ModifyData />} />
         </Routes>
       </Router>
     </>

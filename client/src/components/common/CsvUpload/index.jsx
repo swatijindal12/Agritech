@@ -201,7 +201,7 @@ const CsvUpload = () => {
       .then(res => {
         setLoading(false);
         console.log("res in setting new data: ", res);
-        window.location.href = "/approve";
+        window.location.href = "/admin/approve";
       })
       .catch(err => {
         setLoading(false);
