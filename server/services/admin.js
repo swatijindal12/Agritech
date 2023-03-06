@@ -605,6 +605,9 @@ exports.validateFarmers = async (req) => {
           email: "",
           phone: "",
           pin: "",
+          rating: "",
+          education: "",
+          address: "",
           image_url: "",
           farmer_pdf: "",
         };
@@ -645,6 +648,9 @@ exports.validateFarmers = async (req) => {
           "address",
           "phone",
           "pin",
+          "rating",
+          "education",
+          "address",
           "image_url",
           "farmer_pdf",
         ];
@@ -672,6 +678,9 @@ exports.validateFarmers = async (req) => {
           errors.email ||
           errors.phone ||
           errors.pin ||
+          errors.address ||
+          errors.rating ||
+          errors.education ||
           errors.image_url ||
           errors.farmer_pdf
         ) {
@@ -681,12 +690,15 @@ exports.validateFarmers = async (req) => {
 
       if (errorLines.length >= 1) {
         // There are error some lines missing data
-        (response.httpStatus = 400), (response.error = errorLines);
+        (response.httpStatus = 400),
+          (response.error = errorLines),
+          (response.data = data);
       } else {
         // check if the empty file
         if (data.length == 0) {
           response.httpStatus = 400;
           response.error = "Empty File";
+          response.data = data;
         } else {
           // No error
           response.httpStatus = 200;
@@ -1657,66 +1669,6 @@ exports.updateFarm = async (req) => {
       farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
 
       await farm.save();
-      response.message = `Successfully updated`;
-      response.httpStatus = 200;
-    } else {
-      response.error = `farm not found`;
-      response.httpStatus = 404;
-    }
-  } catch (error) {
-    response.error = `failed operation ${error}`;
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
-exports.updateFarmOld = async (req) => {
-  const userLogged = req.user;
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { id } = req.params;
-
-  const updatedData = req.body;
-
-  // Checking Header for password
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
-
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    return response;
-  }
-
-  // console.log("updatedData - ", updatedData);
-  try {
-    // First check farmer is their with id
-    const farm = await Farm.findOne({ _id: id });
-
-    if (farm) {
-      // update the farm data..
-      const old_values = { ...farm.toJSON() };
-      // console.log("old_values ", old_values);
-      await Farm.updateOne({ _id: id }, updatedData);
-
-      let new_values = { ...updatedData };
-
-      // console.log("new_values ", new_values);
-      await Audit.create({
-        table_name: "farms",
-        record_id: farm.id,
-        change_type: "update",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
-        user_id: userLogged.id,
-        user_name: userLogged.name,
-      });
       response.message = `Successfully updated`;
       response.httpStatus = 200;
     } else {
