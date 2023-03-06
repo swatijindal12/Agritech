@@ -176,6 +176,7 @@ const Approve = () => {
           togglePopup={() => setShowVerificationPopup(false)}
           onSubmit={password => handleUploadClick(password)}
           error={showVerificationError}
+          setError={setShowVerificationError}
         />
       )}
       <Container>

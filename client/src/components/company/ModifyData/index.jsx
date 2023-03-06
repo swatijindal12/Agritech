@@ -165,7 +165,7 @@ const ModifyData = () => {
       });
   };
 
-  const handleEdit = password => {
+  const handleEdit = (password, reason) => {
     axios
       .put(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
@@ -174,6 +174,7 @@ const ModifyData = () => {
           headers: {
             Authorization: "Bearer " + user?.data.token,
             password: password,
+            reason,
           },
         }
       )
@@ -193,7 +194,7 @@ const ModifyData = () => {
       });
   };
 
-  const handleDelete = adminPassword => {
+  const handleDelete = (adminPassword, reason) => {
     axios
       .delete(
         `${process.env.REACT_APP_BASE_URL}/admin/${selectedType.type}/${selectedData._id}`,
@@ -201,6 +202,7 @@ const ModifyData = () => {
           headers: {
             Authorization: "Bearer " + user?.data.token,
             password: adminPassword,
+            reason: reason,
           },
         }
       )
@@ -236,12 +238,16 @@ const ModifyData = () => {
       )}
       {showVerificationFor && (
         <VerificationPopup
-          onSubmit={password => {
-            if (showVerificationFor === "delete") handleDelete(password);
-            else if (showVerificationFor === "update") handleEdit(password);
+          onSubmit={(password, reason) => {
+            if (showVerificationFor === "delete")
+              handleDelete(password, reason);
+            else if (showVerificationFor === "update")
+              handleEdit(password, reason);
           }}
           togglePopup={() => setShowVerificationFor(false)}
           error={verificationError}
+          setError={setVerificationError}
+          getReason={true}
         />
       )}
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}

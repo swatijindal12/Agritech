@@ -18,9 +18,16 @@ const Container = styled.div`
 `;
 
 const InnerContianer = styled.div`
+  box-sizing: border-box;
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
+  min-width: 30rem;
+
+  @media screen and (max-width: 990px) {
+    min-width: unset;
+    width: 90%;
+  }
 `;
 
 const PopupBox = styled.div`
@@ -43,7 +50,13 @@ const Input = styled.input`
   width: 100%;
   min-width: 360px;
   border: none;
+  background-color: #f5f5f5;
   border-radius: 12px;
+
+  @media screen and (max-width: 990px) {
+    min-width: unset;
+    width: 100%;
+  }
 `;
 
 const Title = styled.p`
@@ -64,8 +77,15 @@ const Error = styled.p`
   margin: 1rem 0;
 `;
 
-const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
+const VerificationPopup = ({
+  togglePopup,
+  onSubmit,
+  error,
+  setError,
+  getReason,
+}) => {
   const [password, setPassword] = useState("");
+  const [reason, setReason] = useState("");
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
   );
@@ -83,6 +103,19 @@ const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
           required
         />
         {error && <Error>Error: {error}</Error>}
+        {getReason && (
+          <>
+            <Title>Specify reason of update</Title>
+            <Input
+              type="text"
+              placeholder="Reason"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              required
+            />
+          </>
+        )}
+
         {selectedType.name === "Farms" && (
           <Error>Approx cost of modifying farm will be $0.0097</Error>
         )}
@@ -92,12 +125,16 @@ const VerificationPopup = ({ togglePopup, onSubmit, error }) => {
 
         <Flexbox justify="center">
           <Button
-            onClick={() => onSubmit(password)}
+            onClick={() => onSubmit(password, reason)}
             text={"Submit"}
             margin="0.3rem 1rem"
+            disabled={(getReason && reason.length == 0) || password.length == 0}
           ></Button>
           <Button
-            onClick={togglePopup}
+            onClick={() => {
+              setError(false);
+              togglePopup();
+            }}
             text={"Close"}
             margin="0rem 0rem"
             color="#FCBF49"
