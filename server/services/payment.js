@@ -6,9 +6,15 @@ const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 
+// Importig PinataSDK For IPFS
+const pinataSDK = require("@pinata/sdk");
+const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+
 //Import Blockchain
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
+const private_key = process.env.PRIVATE_KEY;
+const adminAddr = process.env.ADMIN_ADDR;
 
 const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 const web3 = new Web3(provider);
@@ -107,7 +113,7 @@ exports.paymentVerification = async (req) => {
   let filterUser = JSON.parse(keyDetails).filter(function (user) {
     return user.user_id === userId.toString();
   });
-  console.log("filterUser", filterUser);
+  // console.log("filterUser", filterUser);
 
   // General response format
   let response = {
@@ -146,39 +152,81 @@ exports.paymentVerification = async (req) => {
               { _id: order_items[i].agreement_id },
               { sold_status: true, customer_id: userId } // change Made
             );
-            const single_agreement = await Agreement.findOne({
+            let single_agreement = await Agreement.findOne({
               _id: order_items[i].agreement_id,
             });
             const Agreement_nft_id = single_agreement.agreement_nft_id;
 
+            const {
+              _id,
+              farm_id,
+              file_name,
+              farmer_name,
+              address,
+              agreement_nft_id,
+              tx_hash,
+              farm_nft_id,
+              price,
+              ipfs_url,
+              ...rest
+            } = single_agreement._doc;
+
+            //Buyers detail Update in IPFS_URL
+            // Create New Ipfs_url
+            const options = {
+              pinataMetadata: {
+                name: single_agreement.farm_id.toString(),
+              },
+              pinataOptions: {
+                cidVersion: 0,
+              },
+            };
+
+            // console.log("REST : ", rest);
+
+            const ipfsHash = await pinata.pinJSONToIPFS(
+              { ...rest, user_id: userId },
+              options
+            );
+            const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+
+            single_agreement.ipfs_url = ipfs_hash;
+            await single_agreement.save();
+
+            ///
+
             // Blockchain Transaction start ...
-            const buyerAddr = filterUser[0].public_key;
-            const privateKeyBuyer = filterUser[0].private_key;
+            const buyerAddr = process.env.BUYER_ADDR;
+            // const privateKeyBuyer = filterUser[0].private_key;
             const gasLimit = await marketplaceContract.methods
-              .buyContract([Agreement_nft_id], [razorpay_payment_id])
-              .estimateGas({ from: buyerAddr });
+              .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
+                ipfs_hash,
+              ])
+              .estimateGas({ from: adminAddr });
 
             const bufferedGasLimit = Math.round(
               Number(gasLimit) + Number(gasLimit) * Number(0.2)
             );
 
-            const sell = marketplaceContract.methods
-              .buyContract([Agreement_nft_id], [razorpay_payment_id])
+            const sell = await marketplaceContract.methods
+              .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
+                ipfs_hash,
+              ])
               .encodeABI();
 
-            const gasPrice = await web3.eth.getGasPrice();
+            // const gasPrice = await web3.eth.getGasPrice();
 
             const tx = {
               gas: web3.utils.toHex(bufferedGasLimit),
               to: marketplaceAddr,
               value: "0x00",
               data: sell,
-              from: buyerAddr,
+              from: adminAddr,
             };
 
             const signedTx = await web3.eth.accounts.signTransaction(
               tx,
-              privateKeyBuyer
+              private_key
             );
 
             const transaction = await web3.eth.sendSignedTransaction(
@@ -194,7 +242,10 @@ exports.paymentVerification = async (req) => {
                   toBlock: latestBlock,
                 },
                 function (error, events) {
-                  console.log(events[0]);
+                  // console.log(events[0]);
+                  if (error) {
+                    console.log("BlockchainError", error);
+                  }
                 }
               );
             });
@@ -211,12 +262,13 @@ exports.paymentVerification = async (req) => {
         } else {
           response.error = "No order found";
           response.httpStatus = 404;
+          return response;
         }
       })
       .catch((err) => {
-        console.log(`error : ${err}`);
-        response.message = "failed operation";
+        response.message = `failed operation ${err}`;
         response.httpStatus = 500;
+        return response;
       });
     response.message = `Payment Successful`;
     response.httpStatus = 200;
@@ -224,6 +276,7 @@ exports.paymentVerification = async (req) => {
   } else {
     response.error = "Payment failed";
     response.httpStatus = 500;
+    return response;
   }
 
   return response;

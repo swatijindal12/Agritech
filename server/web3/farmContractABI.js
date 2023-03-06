@@ -2,14 +2,6 @@
 
 const farmNFTContractABI = [
   {
-    inputs: [
-      { internalType: "string", name: "name_", type: "string" },
-      { internalType: "string", name: "symbol_", type: "string" },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -52,6 +44,14 @@ const farmNFTContractABI = [
       { indexed: false, internalType: "bool", name: "approved", type: "bool" },
     ],
     name: "ApprovalForAll",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "uint8", name: "version", type: "uint8" },
+    ],
+    name: "Initialized",
     type: "event",
   },
   {
@@ -114,6 +114,25 @@ const farmNFTContractABI = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "farmId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "updatedTokenURI",
+        type: "string",
+      },
+    ],
+    name: "UpdateFarm",
+    type: "event",
+  },
+  {
     inputs: [
       { internalType: "address", name: "to", type: "address" },
       { internalType: "uint256", name: "tokenId", type: "uint256" },
@@ -142,6 +161,13 @@ const farmNFTContractABI = [
     name: "getFarmList",
     outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -240,13 +266,6 @@ const farmNFTContractABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "tokenArray",
-    outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [{ internalType: "uint256", name: "index", type: "uint256" }],
     name: "tokenByIndex",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -291,6 +310,16 @@ const farmNFTContractABI = [
   {
     inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "farmId", type: "uint256" },
+      { internalType: "string", name: "_updateTokenUri", type: "string" },
+    ],
+    name: "updateFarm",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
