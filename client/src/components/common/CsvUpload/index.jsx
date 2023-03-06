@@ -183,39 +183,6 @@ const CsvUpload = () => {
     }
   };
 
-  const handleSampleData = () => {
-    console.log(uploadData.name);
-    if (uploadData.name === "Farmers") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv"
-      );
-    } else if (uploadData.name === "Farms") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv"
-      );
-    } else if (uploadData.name === "Contracts") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
-      );
-    }
-  };
-
-  const handleSampleVideo = () => {
-    if (uploadData.name === "Farmers") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmerVideo.mp4"
-      );
-    } else if (uploadData.name === "Farms") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmVideo.mp4"
-      );
-    // } else if (uploadData.name === "Contracts") {
-    //   window.open(
-    //     "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
-    //   );
-    }
-  };
-
   const handleUpload = () => {
     setLoading(true);
     const formData = new FormData();
@@ -276,9 +243,11 @@ const CsvUpload = () => {
           text={"Download Template"}
           margin="0 1rem"
           color={"#d62828cc"}
-          onClick={handleSampleData}
+          onClick={() => window.open(uploadData.csv_url)}
         />
-        <Video onClick={handleSampleVideo}>Learn how to import data</Video>
+        <Video onClick={() => window.open(uploadData.video_url)}>
+          Learn how to import data
+        </Video>
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again
         </ErrorTag>
