@@ -190,6 +190,16 @@ exports.createAgreement = async (req) => {
     data: null,
   };
 
+  // Checking password header
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
   try {
     const data = req.body;
 
@@ -201,7 +211,7 @@ exports.createAgreement = async (req) => {
     const updatedData = await Promise.all(
       data.map(async (contract) => {
         const { _id, farm_id, file_name, ...rest } = contract;
-        console.log("rest", rest);
+
         await StageAgreement.updateOne(
           { _id: contract._id },
           { stage_status: false, approval_status: true }
@@ -328,16 +338,15 @@ exports.createAgreement = async (req) => {
     });
 
     // Removing from staging stable
-    data.map(async (contract) => {
-      await stageAgreement.deleteOne({
-        _id: contract._id,
-        stage_status: false,
-      });
+    const res = await StageAgreement.deleteMany({
+      _id: { $in: data.map((contr) => contr._id) },
+      stage_status: false,
     });
+    console.log("res", res);
 
-    (response.message = "Data Insertion successful"),
-      (response.httpStatus = 200),
-      (response.data = agreements);
+    response.message = "Data Insertion successful";
+    response.httpStatus = 200;
+    response.data = agreements;
   } catch (error) {
     response.error = `operation failed  ${error}`;
     response.httpStatus = 500;

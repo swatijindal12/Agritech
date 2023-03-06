@@ -129,14 +129,7 @@ exports.validate = async (req) => {
           const farmNFTId = item.farm_nft_id;
           farm = await Farm.findOne({ _id: item.farm_id });
           if (farm) {
-            console.log(
-              "farm.farm_nft_id ",
-              farm.farm_nft_id,
-              " => ",
-              farmNFTId
-            );
             if (farm.farm_nft_id != farmNFTId) {
-              console.log("inside");
               errors.farm_nft_id = "farm_nft_id not matching with farm";
             }
           } else {
@@ -167,8 +160,15 @@ exports.validate = async (req) => {
         (response.httpStatus = 400), (response.error = errorLines);
       } else {
         // No error
-        (response.httpStatus = 200),
-          (response.message = "validation successful");
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+        }
       }
       response.data = data;
     }
@@ -214,7 +214,7 @@ exports.stagedAgreements = async (req) => {
           const stageAgreement = await StageAgreement.create(updatedData);
 
           response.httpStatus = 200;
-          response.message = "Insertion succeesful";
+          response.message = "Insertion successful";
           response.data = stageAgreement;
         } else {
           response.httpStatus = 400;
@@ -350,6 +350,8 @@ exports.updateAgreement = async (req) => {
     response.httpStatus = 401;
     return response;
   }
+  //Checking header reason for change
+  const reason = req.headers["reason"];
 
   let startDate = req.body.start_date;
   let endDate = req.body.end_date;
@@ -382,6 +384,28 @@ exports.updateAgreement = async (req) => {
     if (agreement) {
       // Update the Agreement data..
       await Agreement.updateOne({ _id: id }, updatedData);
+
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        if (key in agreement) {
+          old_values[key] = agreement[key];
+        }
+        new_values[key] = updatedData[key];
+      }
+
+      // Creatingg Log
+      await Audit.create({
+        table_name: "agreement",
+        record_id: agreement._id,
+        change_type: "update",
+        old_value: JSON.stringify(old_values),
+        new_value: JSON.stringify(new_values),
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+        change_reason: reason,
+      });
+
       agreement = await Agreement.findOne({ _id: id, sold_status: false });
 
       const {
@@ -465,7 +489,7 @@ exports.updateAgreement = async (req) => {
       response.httpStatus = 404;
     }
   } catch (error) {
-    response.error = `failed operation1 ${error}`;
+    response.error = `failed operation ${error}`;
     response.httpStatus = 500;
   }
   return response;
@@ -473,6 +497,7 @@ exports.updateAgreement = async (req) => {
 
 // Delete Agreement Service /:id
 exports.deleteAgreement = async (req) => {
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -493,6 +518,9 @@ exports.deleteAgreement = async (req) => {
     return response;
   }
 
+  //reading reason from header
+  const reason = req.headers["reason"];
+
   try {
     // First check agreement is their with id
     const agreement = await Agreement.findOne({
@@ -504,6 +532,21 @@ exports.deleteAgreement = async (req) => {
       const checkAgreement = await Agreement.deleteOne({
         _id: id,
         sold_status: false,
+      });
+
+      const old_values = "No change";
+
+      const new_values = "No change";
+
+      await Audit.create({
+        table_name: "agreement",
+        record_id: agreement.id,
+        change_type: "delete",
+        old_value: JSON.stringify(old_values),
+        new_value: JSON.stringify(new_values),
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+        change_reason: reason,
       });
 
       if (checkAgreement.deletedCount) {
@@ -640,11 +683,17 @@ exports.validateFarmers = async (req) => {
         // There are error some lines missing data
         (response.httpStatus = 400), (response.error = errorLines);
       } else {
-        // No error
-        (response.httpStatus = 200),
-          (response.message = "validation successful");
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+        }
       }
-      response.data = data;
     }
   }
   return response;
@@ -686,7 +735,7 @@ exports.stagedFarmers = async (req) => {
             return { ...eachdata, file_name: file.name };
           });
           // Insert record into DB (stageFarmer)
-          console.log("updatedData :- ", updatedData);
+          // console.log("updatedData :- ", updatedData);
           const stageFarmer = await StageFarmer.create(updatedData);
 
           response.httpStatus = 200;
@@ -784,6 +833,7 @@ exports.createFarmer = async (req) => {
       select: `-_id -stage_status -approval_status -file_name`,
     });
 
+    console.log("data 12 :- ", data);
     // Removing from staging stable
     data.map(async (farmer) => {
       await StageFarmer.deleteOne({ _id: farmer._id, stage_status: false });
@@ -794,11 +844,12 @@ exports.createFarmer = async (req) => {
       response.httpStatus = 201;
       response.data = farmers;
     } else {
-      (response.error = "Data Insertion failed, duplicate data"),
-        (response.httpStatus = 500);
+      response.error = "Data Insertion failed, duplicate data";
+      response.httpStatus = 500;
     }
   } catch (error) {
-    (response.error = `Insertion failed ${error}`), (response.httpStatus = 500);
+    response.error = `Insertion failed ${error}`;
+    response.httpStatus = 500;
   }
   return response;
 };
@@ -825,6 +876,8 @@ exports.updateFarmer = async (req) => {
     response.httpStatus = 401;
     return response;
   }
+  //Checking header reason for change
+  const reason = req.headers["reason"];
 
   const updatedData = req.body;
   try {
@@ -832,22 +885,27 @@ exports.updateFarmer = async (req) => {
     let farmer = await Farmer.findOne({ _id: id });
 
     if (farmer) {
-      // old value
-      const old_values = { ...farmer.toJSON() };
-
       await Farmer.updateOne({ _id: id }, updatedData);
 
-      let new_values = { ...updatedData };
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        if (key in farmer) {
+          old_values[key] = farmer[key];
+        }
+        new_values[key] = updatedData[key];
+      }
 
       // Creatingg Log
       await Audit.create({
         table_name: "farmers",
-        record_id: farmer.id,
+        record_id: farmer._id,
         change_type: "update",
         old_value: JSON.stringify(old_values),
         new_value: JSON.stringify(new_values),
         user_id: userLogged.id,
         user_name: userLogged.name,
+        change_reason: reason,
       });
       // creating response
       response.message = `Successfully updated`;
@@ -887,6 +945,9 @@ exports.deleteFarmer = async (req) => {
     return response;
   }
 
+  //Checking header reason for change
+  const reason = req.headers["reason"];
+
   try {
     // First check farmer is their with id
     const farmer = await Farmer.findOne({ _id: id }).select(
@@ -898,24 +959,14 @@ exports.deleteFarmer = async (req) => {
       // Check if this farmer Has some farm then Delete it
       const farms = await Farm.find({ farmer_id: farmer._id });
       if (farms.length > 0) {
-        // const farmId = farms[0]._id;
-        // await Farm.deleteMany({ farmer_id: farmer._id });
-        // // Check if this farmer Has some Agreement which not active then Delete it
-        // const agreements = await Agreement.find({ farm_id: farmId });
-        // if (agreements) {
-        //   await Agreement.deleteMany({
-        //     farm_id: farmId,
-        //     sold_status: true,
-        //   });
-        // }
         response.error = `reference exist you can not delete`;
         response.httpStatus = 400;
       } else {
         // Old farmer
-        const old_values = { ...farmer.toJSON() };
+        const old_values = "No change";
         // console.log("old_values ", old_values);
         await Farmer.deleteOne({ _id: id });
-        const new_values = { ...farmer.toJSON() };
+        const new_values = "No change";
         // console.log("new_values ", new_values);
         await Audit.create({
           table_name: "farmers",
@@ -925,6 +976,7 @@ exports.deleteFarmer = async (req) => {
           new_value: JSON.stringify(new_values),
           user_id: userLogged.id,
           user_name: userLogged.name,
+          change_reason: reason,
         });
 
         response.message = `Successfully deleted`;
@@ -935,7 +987,7 @@ exports.deleteFarmer = async (req) => {
       response.httpStatus = 404;
     }
   } catch (error) {
-    response.error = `failed operation 1 ${error}`;
+    response.error = `failed operation${error}`;
     response.httpStatus = 500;
   }
   return response;
@@ -1166,11 +1218,17 @@ exports.validateFarms = async (req) => {
         // There are error some lines missing data
         (response.httpStatus = 400), (response.error = errorLines);
       } else {
-        // No error
-        (response.httpStatus = 200),
-          (response.message = "validation successful");
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+        }
       }
-      response.data = data;
     }
   }
   return response;
@@ -1421,6 +1479,7 @@ exports.createFarm = async (req) => {
 
 exports.deleteFarm = async (req) => {
   const userLogged = req.user;
+
   // General response format
   let response = {
     error: null,
@@ -1440,15 +1499,16 @@ exports.deleteFarm = async (req) => {
     response.httpStatus = 401;
     return response;
   }
+  const reason = req.headers["reason"];
 
   try {
     // First check farmer is their with id
-    let farm = await Farm.findOne({ _id: id });
-
+    let farm = await Farm.findOne({ _id: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
     if (farm) {
       // delete the farm data..
 
-      // delete the farm data..
       // Check if this farm has some agreement
       const agreements = await Agreement.find({ farm_id: farm._id });
 
@@ -1458,21 +1518,20 @@ exports.deleteFarm = async (req) => {
         response.error = `reference exist you can not delete`;
         response.httpStatus = 400;
       } else {
-        // Old farmer
-        const old_values = { ...farm.toJSON() };
-        // console.log("old_values ", old_values);
+        console.log("Inside delete else");
+        const old_values = "No change";
         await Farm.deleteOne({ _id: id });
-        farm = await Farm.findOne({ _id: id });
-        const new_values = { ...farm.toJSON() };
-        // console.log("new_values ", new_values);
+        const new_values = "No change";
+
         await Audit.create({
           table_name: "farm",
-          record_id: farm._id,
+          record_id: farm.id,
           change_type: "delete",
           old_value: JSON.stringify(old_values),
           new_value: JSON.stringify(new_values),
           user_id: userLogged.id,
           user_name: userLogged.name,
+          change_reason: reason,
         });
 
         response.message = `Successfully deleted`;
@@ -1502,6 +1561,17 @@ exports.updateFarm = async (req) => {
 
   const { id } = req.params;
 
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+  const reason = req.headers["reason"];
+
   const updatedData = req.body;
 
   try {
@@ -1510,13 +1580,13 @@ exports.updateFarm = async (req) => {
 
     if (farm) {
       // Old farmer
-      const old_values = { ...farm.toJSON() };
+      const old_values = { ...updatedData.toJSON() };
       // console.log("old_values ", old_values);
       // update the Farm data..
       await Farm.updateOne({ _id: id }, updatedData);
 
       farm = await Farm.findOne({ _id: id });
-      const new_values = { ...farm.toJSON() };
+      const new_values = { ...updatedData.toJSON() };
       // console.log("new_values ", new_values);
       await Audit.create({
         table_name: "farm",
@@ -1526,6 +1596,7 @@ exports.updateFarm = async (req) => {
         new_value: JSON.stringify(new_values),
         user_id: userId,
         user_name: userLogged.name,
+        change_reason: reason,
       });
 
       const {
@@ -2053,8 +2124,24 @@ exports.getAudit = async (req) => {
   // Check if params if farmer,farm,agreement
   try {
     if (req.params.table == "farmer" && page && limit) {
-      let auditQuery = Audit.find({ table_name: "farmers" }).select("-__v");
-      let totalDocuments = await Audit.countDocuments(auditQuery);
+      let auditQuery;
+      let totalDocuments;
+
+      //If search query
+      if (req.query.search) {
+        auditQuery = Audit.find({
+          table_name: "farmers",
+          $or: [
+            { user_name: { $regex: req.query.search, $options: "i" } },
+            { change_type: { $regex: req.query.search, $options: "i" } },
+            { record_id: { $regex: req.query.search, $options: "i" } },
+          ],
+        }).select("-__v");
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      } else {
+        let auditQuery = Audit.find({ table_name: "farmers" }).select("-__v");
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      }
 
       const skip = (page - 1) * limit;
 
@@ -2073,9 +2160,26 @@ exports.getAudit = async (req) => {
         })),
       };
       response.httpStatus = 200;
-    } else if (req.params.table == "farm") {
-      let auditQuery = Audit.find({ table_name: "farm" }).select("-__v");
-      let totalDocuments = await Audit.countDocuments(auditQuery);
+    } else if (req.params.table == "farm" && page && limit) {
+      let auditQuery;
+      let totalDocuments;
+      //If search query
+      if (req.query.search) {
+        auditQuery = Audit.find({
+          table_name: "farm",
+          $or: [
+            { user_name: { $regex: req.query.search, $options: "i" } },
+            { change_type: { $regex: req.query.search, $options: "i" } },
+            { record_id: { $regex: req.query.search, $options: "i" } },
+          ],
+        }).select("-__v -updateAt");
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      } else {
+        auditQuery = Audit.find({ table_name: "farm" }).select(
+          "-__v -updateAt"
+        );
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      }
 
       const skip = (page - 1) * limit;
 
@@ -2093,8 +2197,8 @@ exports.getAudit = async (req) => {
         })),
       };
       response.httpStatus = 200;
-    } else if (req.params.table == "agreement") {
-      let auditQuery = Audit.find({ table_name: "agreements" }).select("-__v");
+    } else if (req.params.table == "agreement" && page && limit) {
+      let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
       let totalDocuments = await Audit.countDocuments(auditQuery);
 
       const skip = (page - 1) * limit;

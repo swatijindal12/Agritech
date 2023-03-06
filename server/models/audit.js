@@ -23,6 +23,7 @@ const auditSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    change_reason: { type: String, default: "Change made" }, // add reason_change field
     old_value: { type: String },
     new_value: { type: String },
   },
