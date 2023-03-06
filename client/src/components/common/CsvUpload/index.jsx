@@ -122,6 +122,16 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
+const Video = styled.p`
+  margin: 0 2rem 0 auto;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  color: #adc178;
+  cursor: pointer;
+`;
+
 const CsvUpload = () => {
   const [data, setData] = useState(null);
   const [tableHeading, setTableHeading] = useState([]);
@@ -175,18 +185,34 @@ const CsvUpload = () => {
 
   const handleSampleData = () => {
     console.log(uploadData.name);
-    if (uploadData.name == "Farmers") {
+    if (uploadData.name === "Farmers") {
       window.open(
         "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv"
       );
-    } else if (uploadData.name == "Farms") {
+    } else if (uploadData.name === "Farms") {
       window.open(
         "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv"
       );
-    } else if (uploadData.name == "Contracts") {
+    } else if (uploadData.name === "Contracts") {
       window.open(
         "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
       );
+    }
+  };
+
+  const handleSampleVideo = () => {
+    if (uploadData.name === "Farmers") {
+      window.open(
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmerVideo.mp4"
+      );
+    } else if (uploadData.name === "Farms") {
+      window.open(
+        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmVideo.mp4"
+      );
+    // } else if (uploadData.name === "Contracts") {
+    //   window.open(
+    //     "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
+    //   );
     }
   };
 
@@ -252,6 +278,7 @@ const CsvUpload = () => {
           color={"#d62828cc"}
           onClick={handleSampleData}
         />
+        <Video onClick={handleSampleVideo}>Learn how to import data</Video>
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again
         </ErrorTag>
