@@ -122,6 +122,16 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
+const Video = styled.p`
+  margin: 0 2rem 0 auto;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  color: #adc178;
+  cursor: pointer;
+`;
+
 const CsvUpload = () => {
   const [data, setData] = useState(null);
   const [tableHeading, setTableHeading] = useState([]);
@@ -170,23 +180,6 @@ const CsvUpload = () => {
         .catch(err => {
           console.log("error in validating", err);
         });
-    }
-  };
-
-  const handleSampleData = () => {
-    console.log(uploadData.name);
-    if (uploadData.name == "Farmers") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv"
-      );
-    } else if (uploadData.name == "Farms") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv"
-      );
-    } else if (uploadData.name == "Contracts") {
-      window.open(
-        "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
-      );
     }
   };
 
@@ -250,8 +243,11 @@ const CsvUpload = () => {
           text={"Download Template"}
           margin="0 1rem"
           color={"#d62828cc"}
-          onClick={handleSampleData}
+          onClick={() => window.open(uploadData.csv_url)}
         />
+        <Video onClick={() => window.open(uploadData.video_url)}>
+          Learn how to import data
+        </Video>
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again
         </ErrorTag>
