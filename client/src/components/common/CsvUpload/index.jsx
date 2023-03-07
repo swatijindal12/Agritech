@@ -17,6 +17,7 @@ const MiddleContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
 
 const TopContainer = styled(Flexbox)`
@@ -114,12 +115,8 @@ const Heading = styled.p`
   font-size: 2rem;
   font-weight: 700;
   color: #6c584c;
-  margin: 0.5rem 44.5rem 1.5rem;
+  margin: 0.5rem 0rem 1.5rem;
   text-align: center;
-  @media only screen and (max-width: 1300px) {
-    margin: 0.5rem 26rem 1.5rem;
-    font-size: 2rem;
-  }
 `;
 
 const UrlTd = styled.td`
@@ -133,7 +130,8 @@ const ImagePreview = styled.img`
 `;
 
 const Video = styled.p`
-  margin: 0 2rem 0 auto;
+  position: absolute;
+  right: 1rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-decoration: underline;
