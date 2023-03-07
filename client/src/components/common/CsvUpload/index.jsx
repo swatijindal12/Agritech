@@ -13,6 +13,12 @@ const Container = styled.div`
   padding: 1rem;
 `;
 
+const MiddleContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const TopContainer = styled(Flexbox)`
   #csvInput {
     display: none;
@@ -108,8 +114,12 @@ const Heading = styled.p`
   font-size: 2rem;
   font-weight: 700;
   color: #6c584c;
-  margin: 0.5rem 0 1.5rem;
+  margin: 0.5rem 44.5rem 1.5rem;
   text-align: center;
+  @media only screen and (max-width: 1300px) {
+    margin: 0.5rem 26rem 1.5rem;
+    font-size: 2rem;
+  }
 `;
 
 const UrlTd = styled.td`
@@ -217,7 +227,12 @@ const CsvUpload = () => {
 
   return (
     <Container>
-      <Heading>{`Upload ${uploadData.name}`}</Heading>
+      <MiddleContainer>
+        <Heading>{`Upload ${uploadData.name}`}</Heading>
+        <Video onClick={() => window.open(uploadData.video_url)}>
+          Learn How
+        </Video>
+      </MiddleContainer>
       <TopContainer justify="center">
         <Button
           text={inputText}
@@ -245,9 +260,6 @@ const CsvUpload = () => {
           color={"#d62828cc"}
           onClick={() => window.open(uploadData.csv_url)}
         />
-        <Video onClick={() => window.open(uploadData.video_url)}>
-          Learn how to import data
-        </Video>
         <ErrorTag show={errors?.length > 0}>
           Resolve errors and choose file again
         </ErrorTag>
