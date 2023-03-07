@@ -10,7 +10,8 @@ export const navigationData = [
     get_list: "admin/listagreements",
     type: "agreement",
     search_text: "Search by crop and name",
-    video_url: "",
+    video_url:
+      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/ContractVideo.mp4",
     csv_url:
       "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv",
   },
