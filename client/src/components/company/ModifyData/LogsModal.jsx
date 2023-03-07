@@ -211,7 +211,7 @@ const LogsModal = ({ toggle }) => {
       <InnerContianer>
         <Cross src={CrossIcon} alt="cross-icon" onClick={toggle} />
         <HeadingContainer>
-          <Heading>History of Update and Delete</Heading>
+          <Heading>Change history</Heading>
           <InputContainer margin="0 2rem">
             <Input
               type="text"
