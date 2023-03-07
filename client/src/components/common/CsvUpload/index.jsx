@@ -151,7 +151,7 @@ const CsvUpload = () => {
   const user = useSelector(store => store.auth.user);
   const [uploadData, setUploadData] = useState({});
   const [showErrorModal, setShowErrorModal] = useState(false);
-  const [inputText, setInputText] = useState("+ SELECT");
+  const [inputText, setInputText] = useState("+ ADD CSV");
   const inputRef = useRef();
 
   useEffect(() => {
@@ -308,7 +308,7 @@ const CsvUpload = () => {
                           )}
                         </UrlTd>
                       );
-                    else return <td>{row[item] || 0}</td>;
+                    else return <td>{row[item]}</td>;
                   })}
                 </Tr>
               );

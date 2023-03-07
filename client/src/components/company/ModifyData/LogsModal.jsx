@@ -130,7 +130,7 @@ const InputContainer = styled(Flexbox)`
 const Input = styled.input`
   padding: 1rem 2rem;
   border: none;
-  width: 18rem;
+  width: 20rem;
   border-radius: 24px;
   background-color: #f5f5f5;
 
@@ -175,7 +175,7 @@ const LogsModal = ({ toggle }) => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/audit/${selectedType.type}?page=${currentPage}&limit=5&search=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/admin/audit/${selectedType.type}?page=${currentPage}&limit=3&search=${searchText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -215,7 +215,7 @@ const LogsModal = ({ toggle }) => {
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder={selectedType.search_text}
+              placeholder="Search by ID, Change type and User name"
               onChange={e => setSearchText(e.target.value)}
             />
             <Button

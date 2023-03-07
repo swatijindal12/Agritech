@@ -8,6 +8,7 @@ import { Navigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../redux/actions";
 import LoginImage from "../../../assets/login.png";
+import { useRef } from "react";
 
 const Container = styled.div`
   padding: 0;
@@ -100,10 +101,17 @@ const Login = () => {
   const dispatch = useDispatch();
   const user = useSelector(store => store.auth.user);
   const navigate = useNavigate();
+  const loginRef = useRef();
+  const otpRef = useRef();
+
+  useEffect(() => {
+    loginRef.current.focus();
+  }, []);
 
   useEffect(() => {
     let interval;
     if (authorised) {
+      otpRef.current.focus();
       interval = setInterval(() => {
         if (timeRemaining > 0) {
           setTimeRemaining(timeRemaining => timeRemaining - 1);
@@ -159,6 +167,7 @@ const Login = () => {
               <LogoImage src={Logo} alt="logo" />
               <br />
               <Input
+                ref={loginRef}
                 type="number"
                 placeholder="Enter Mobile Number"
                 value={number}
@@ -177,6 +186,7 @@ const Login = () => {
               <LogoImage src={Logo} alt="logo" />
               <br />
               <Input
+                ref={otpRef}
                 type="number"
                 placeholder="Enter OTP"
                 style={{ textAlign: "center" }}
