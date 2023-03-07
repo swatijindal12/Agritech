@@ -318,8 +318,12 @@ exports.listAgreements = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: agreements.map((agreement) => ({
           ...agreement._doc,
-          createdAt: agreement.createdAt.toLocaleString(),
-          updatedAt: agreement.updatedAt.toLocaleString(),
+          createdAt: agreement.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: agreement.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
     }
@@ -331,6 +335,7 @@ exports.listAgreements = async (req) => {
 
 // Update Agreement Service ::
 exports.updateAgreement = async (req) => {
+  const userLogged = req.user;
   // General response format
   let response = {
     error: null,
@@ -424,7 +429,7 @@ exports.updateAgreement = async (req) => {
 
       const options = {
         pinataMetadata: {
-          name: agreement?.farm_nft_id.toString(),
+          name: agreement.farm_nft_id.toString(),
         },
         pinataOptions: {
           cidVersion: 0,
@@ -542,8 +547,8 @@ exports.deleteAgreement = async (req) => {
         table_name: "agreement",
         record_id: agreement.id,
         change_type: "delete",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
+        old_value: old_values,
+        new_value: new_values,
         user_id: userLogged.id,
         user_name: userLogged.name,
         change_reason: reason,
@@ -605,6 +610,9 @@ exports.validateFarmers = async (req) => {
           email: "",
           phone: "",
           pin: "",
+          rating: "",
+          education: "",
+          address: "",
           image_url: "",
           farmer_pdf: "",
         };
@@ -645,6 +653,9 @@ exports.validateFarmers = async (req) => {
           "address",
           "phone",
           "pin",
+          "rating",
+          "education",
+          "address",
           "image_url",
           "farmer_pdf",
         ];
@@ -672,6 +683,9 @@ exports.validateFarmers = async (req) => {
           errors.email ||
           errors.phone ||
           errors.pin ||
+          errors.address ||
+          errors.rating ||
+          errors.education ||
           errors.image_url ||
           errors.farmer_pdf
         ) {
@@ -681,12 +695,15 @@ exports.validateFarmers = async (req) => {
 
       if (errorLines.length >= 1) {
         // There are error some lines missing data
-        (response.httpStatus = 400), (response.error = errorLines);
+        (response.httpStatus = 400),
+          (response.error = errorLines),
+          (response.data = data);
       } else {
         // check if the empty file
         if (data.length == 0) {
           response.httpStatus = 400;
           response.error = "Empty File";
+          response.data = data;
         } else {
           // No error
           response.httpStatus = 200;
@@ -890,19 +907,31 @@ exports.updateFarmer = async (req) => {
       const old_values = {};
       const new_values = {};
       for (const key in updatedData) {
-        if (key in farmer) {
+        // only log fields that are actually changing
+        if (key in farmer && farmer[key] !== updatedData[key]) {
           old_values[key] = farmer[key];
+          new_values[key] = updatedData[key];
+          farmer[key] = updatedData[key];
         }
-        new_values[key] = updatedData[key];
       }
+
+      //New value contain createdAT and updated, _id
+      delete new_values.createdAt;
+      delete new_values.updatedAt;
+      delete old_values._id;
+      delete new_values._id;
 
       // Creatingg Log
       await Audit.create({
         table_name: "farmers",
         record_id: farmer._id,
         change_type: "update",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
+        old_value: Object.keys(old_values).length
+          ? JSON.stringify(old_values)
+          : null,
+        new_value: Object.keys(new_values).length
+          ? JSON.stringify(new_values)
+          : null,
         user_id: userLogged.id,
         user_name: userLogged.name,
         change_reason: reason,
@@ -972,8 +1001,8 @@ exports.deleteFarmer = async (req) => {
           table_name: "farmers",
           record_id: farmer.id,
           change_type: "delete",
-          old_value: JSON.stringify(old_values),
-          new_value: JSON.stringify(new_values),
+          old_value: old_values,
+          new_value: new_values,
           user_id: userLogged.id,
           user_name: userLogged.name,
           change_reason: reason,
@@ -1008,15 +1037,6 @@ exports.getFarmers = async (req) => {
   const skip = (page - 1) * limit;
   const searchQuery = {};
 
-  // if (req.query.search) {
-  //   searchQuery.name = new RegExp(req.query.name, "i");
-  // }
-  // if (req.query.phone) {
-  //   searchQuery.phone = parseInt(req.query.phone);
-  // }
-  // if (req.query.pin) {
-  //   searchQuery.pin = parseInt(req.query.pin);
-  // }
   if (req.query.search) {
     const searchValue = req.query.search;
     searchQuery["$or"] = [
@@ -1047,8 +1067,12 @@ exports.getFarmers = async (req) => {
       const farmers = await farmerQuery.select("-__v");
       response.data = farmers.map((farmer) => ({
         ...farmer._doc,
-        createdAt: farmer.createdAt.toLocaleString(),
-        updatedAt: farmer.updatedAt.toLocaleString(),
+        createdAt: farmer.createdAt.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
+        updatedAt: farmer.updatedAt.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
       }));
       response.httpStatus = 200;
     } else if (isNaN(page) && isNaN(limit)) {
@@ -1065,8 +1089,12 @@ exports.getFarmers = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: farmers.map((farmer) => ({
           ...farmer._doc,
-          createdAt: farmer.createdAt.toLocaleString(),
-          updatedAt: farmer.updatedAt.toLocaleString(),
+          createdAt: farmer.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: farmer.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
     }
@@ -1527,8 +1555,8 @@ exports.deleteFarm = async (req) => {
           table_name: "farm",
           record_id: farm.id,
           change_type: "delete",
-          old_value: JSON.stringify(old_values),
-          new_value: JSON.stringify(new_values),
+          old_value: old_values,
+          new_value: new_values,
           user_id: userLogged.id,
           user_name: userLogged.name,
           change_reason: reason,
@@ -1580,20 +1608,44 @@ exports.updateFarm = async (req) => {
 
     if (farm) {
       // Old farmer
-      const old_values = { ...updatedData.toJSON() };
+      // const old_values = { ...updatedData.toJSON() };
       // console.log("old_values ", old_values);
       // update the Farm data..
       await Farm.updateOne({ _id: id }, updatedData);
+      // const new_values = { ...updatedData.toJSON() };
 
-      farm = await Farm.findOne({ _id: id });
-      const new_values = { ...updatedData.toJSON() };
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        // only log fields that are actually changing
+        if (key in farm && farm[key] !== updatedData[key]) {
+          old_values[key] = farm[key];
+          new_values[key] = updatedData[key];
+          farm[key] = updatedData[key];
+        }
+      }
+
+      //New value contain createdAT and updated, _id
+      delete new_values.createdAt;
+      delete new_values.updatedAt;
+      delete old_values.createdAt;
+      delete old_values.updatedAt;
+      delete old_values._id;
+      delete new_values._id;
+
       // console.log("new_values ", new_values);
       await Audit.create({
         table_name: "farm",
         record_id: farm._id,
         change_type: "update",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
+        // old_value: JSON.stringify(old_values),
+        // new_value: JSON.stringify(new_values),
+        old_value: Object.keys(old_values).length
+          ? JSON.stringify(old_values)
+          : null,
+        new_value: Object.keys(new_values).length
+          ? JSON.stringify(new_values)
+          : null,
         user_id: userId,
         user_name: userLogged.name,
         change_reason: reason,
@@ -1670,66 +1722,6 @@ exports.updateFarm = async (req) => {
   return response;
 };
 
-exports.updateFarmOld = async (req) => {
-  const userLogged = req.user;
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { id } = req.params;
-
-  const updatedData = req.body;
-
-  // Checking Header for password
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
-
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    return response;
-  }
-
-  // console.log("updatedData - ", updatedData);
-  try {
-    // First check farmer is their with id
-    const farm = await Farm.findOne({ _id: id });
-
-    if (farm) {
-      // update the farm data..
-      const old_values = { ...farm.toJSON() };
-      // console.log("old_values ", old_values);
-      await Farm.updateOne({ _id: id }, updatedData);
-
-      let new_values = { ...updatedData };
-
-      // console.log("new_values ", new_values);
-      await Audit.create({
-        table_name: "farms",
-        record_id: farm.id,
-        change_type: "update",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
-        user_id: userLogged.id,
-        user_name: userLogged.name,
-      });
-      response.message = `Successfully updated`;
-      response.httpStatus = 200;
-    } else {
-      response.error = `farm not found`;
-      response.httpStatus = 404;
-    }
-  } catch (error) {
-    response.error = `failed operation ${error}`;
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
 exports.getFarms = async (req) => {
   const sortOrder = req.query.sortOrder;
   const cropTypes = req.query.cropTypes;
@@ -1782,8 +1774,12 @@ exports.getFarms = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: farms.map((farm) => ({
           ...farm._doc,
-          createdAt: farm.createdAt.toLocaleString(),
-          updatedAt: farm.updatedAt.toLocaleString(),
+          createdAt: farm.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: farm.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
     } else {
@@ -1791,8 +1787,12 @@ exports.getFarms = async (req) => {
 
       response.data = farms.map((farm) => ({
         ...farm._doc,
-        createdAt: farm.createdAt.toLocaleString(),
-        updatedAt: farm.updatedAt.toLocaleString(),
+        createdAt: farm.createdAt.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
+        updatedAt: farm.updatedAt.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
       }));
     }
 
@@ -2064,11 +2064,7 @@ exports.closeAgreement = async (req) => {
 
   try {
     // Update ageementClose status to true :-
-    const agreementUpdated = await Agreement.updateOne(
-      { _id: id },
-      { agreementclose_status: true }
-    );
-    console.log("agreementUpdated :- ", agreementUpdated);
+    await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
     response.message = "Agreement closed Successful";
     response.httpStatus = 200;
   } catch (error) {
@@ -2139,7 +2135,7 @@ exports.getAudit = async (req) => {
         }).select("-__v");
         totalDocuments = await Audit.countDocuments(auditQuery);
       } else {
-        let auditQuery = Audit.find({ table_name: "farmers" }).select("-__v");
+        auditQuery = Audit.find({ table_name: "farmers" }).select("-__v");
         totalDocuments = await Audit.countDocuments(auditQuery);
       }
 
@@ -2155,8 +2151,12 @@ exports.getAudit = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: auditLog.map((audit) => ({
           ...audit._doc,
-          createdAt: audit.createdAt.toLocaleString(),
-          updatedAt: audit.updatedAt.toLocaleString(),
+          createdAt: audit.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: audit.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
       response.httpStatus = 200;
@@ -2192,8 +2192,12 @@ exports.getAudit = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: auditLog.map((audit) => ({
           ...audit._doc,
-          createdAt: audit.createdAt.toLocaleString(),
-          updatedAt: audit.updatedAt.toLocaleString(),
+          createdAt: audit.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: audit.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
       response.httpStatus = 200;
@@ -2213,8 +2217,12 @@ exports.getAudit = async (req) => {
         totalPages: Math.ceil(totalDocuments / limit),
         data: auditLog.map((audit) => ({
           ...audit._doc,
-          createdAt: audit.createdAt.toLocaleString(),
-          updatedAt: audit.updatedAt.toLocaleString(),
+          createdAt: audit.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+          updatedAt: audit.updatedAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
         })),
       };
       response.httpStatus = 200;
