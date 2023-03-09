@@ -92,15 +92,14 @@ exports.validate = async (req) => {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.start_date)) {
             errors.start_date =
-              "Start date should be in the format of date/month/year";
+              "Start date should be in the format of dd/mm/yyyy";
           }
         }
 
         if (item.end_date) {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.end_date)) {
-            errors.end_date =
-              "End date should be in the format of date/month/year";
+            errors.end_date = "End date should be in the format of dd/mm/yyyy";
           }
         }
 
