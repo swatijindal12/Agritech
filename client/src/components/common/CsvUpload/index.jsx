@@ -259,7 +259,9 @@ const CsvUpload = () => {
           onClick={() => window.open(uploadData.csv_url)}
         />
         <ErrorTag show={errors?.length > 0}>
-          Resolve errors and choose file again
+          {typeof errors == "string"
+            ? errors
+            : "Resolve errors and choose file again"}
         </ErrorTag>
       </TopContainer>
       {data?.length > 0 ? (
