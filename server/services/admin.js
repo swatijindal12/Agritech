@@ -629,11 +629,15 @@ exports.validateFarmers = async (req) => {
           errors.email = "Email should contain '@' and end with '.com'";
         }
 
-        if (!item.phone || item.phone.length !== 10) {
-          errors.phone = "Phone should be 10 characters long";
+        if (
+          !item.phone ||
+          !/^\d+$/.test(item.phone) ||
+          item.phone.length !== 10
+        ) {
+          errors.phone = "Phone should be of length of 10.";
         }
 
-        if (!item.pin || item.pin.length !== 6) {
+        if (!item.pin || !/^\d+$/.test(item.pin) || item.pin.length !== 6) {
           errors.pin = "PIN should be 6 characters long";
         }
 
@@ -1160,16 +1164,23 @@ exports.validateFarms = async (req) => {
 
         if (!item.image_url || !item.image_url.startsWith("https://")) {
           errors.image_url =
-            "Invalid image URL format. Must start with 'https://'";
+            "Invalid image URL format. Must start with 'https://' or Link url";
         }
-
         if (!item.farm_pdf || !item.farm_pdf.startsWith("https://")) {
-          errors.farm_pdf = "Farm PDF should start with 'https://'";
+          errors.farm_pdf = "Farm PDF should start with 'https://' or Link url";
         }
         if (!item.video_url || !item.video_url.startsWith("https://")) {
-          errors.video_url = "Video_url should start with 'https://'";
+          errors.video_url = "Video_url should start with 'https://' Link url";
         }
-
+        if (!item.location || !item.location.startsWith("https://")) {
+          errors.video_url =
+            "Location should start with 'https://' or Link url";
+        }
+        if (!item.farm_size || isNaN(item.farm_size.split(" ")[0])) {
+          errors.farm_size = "Farm size is not a number";
+        } else if (!item.farm_size.includes("Acres")) {
+          errors.farm_size = "Farm size should be in Acres like 1 Acres";
+        }
         if (
           !item.farm_practice_pdf ||
           !item.farm_practice_pdf.startsWith("https://")
