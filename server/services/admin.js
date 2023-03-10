@@ -58,11 +58,12 @@ exports.validate = async (req) => {
     // const data = JSON.parse(fileContent); //JSON DATA
     const data = await csvToJson(file);
     //console.log("data :- ", data);
+    const isValid = await agreementSchemaCheck(data);
     // Check file type
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
       response.httpStatus = 400;
-    } else if (!agreementSchemaCheck(data)) {
+    } else if (!isValid) {
       // Check schema of the file
       response.error = "data format do not match, download sample";
       response.httpStatus = 400;
@@ -92,16 +93,31 @@ exports.validate = async (req) => {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.start_date)) {
             errors.start_date =
-              "Start date should be in the format of date/month/year";
+              "Start date should be in the format of dd/mm/yy";
           }
         }
 
         if (item.end_date) {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.end_date)) {
-            errors.end_date =
-              "End date should be in the format of date/month/year";
+            errors.end_date = "End date should be in the format of dd/mm/yy";
           }
+        }
+        if (epocTimeConv(item.start_date) > epocTimeConv(item.end_date)) {
+          const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+          if (
+            !dateRegex.test(item.end_date) ||
+            !dateRegex.test(item.start_date)
+          ) {
+            errors.start_date =
+              "Start date & end date should be in the format of dd/mm/yy";
+          } else {
+            errors.end_date = "Start date should be less than end date";
+          }
+        }
+
+        if (item.price && isNaN(item.price)) {
+          errors.price = "Price should be a number";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -646,7 +662,16 @@ exports.validateFarmers = async (req) => {
             "Invalid image URL format. Must start with 'https://'";
         }
 
-        if (!item.farmer_pdf || !item.farmer_pdf.startsWith("https://")) {
+        if (!item.image_url || !/(jpeg|jpg|png)$/.test(item.image_url)) {
+          errors.image_url =
+            "Invalid image URL format. Must end with '.jpeg', '.jpg', or '.png'";
+        }
+
+        if (
+          !item.farmer_pdf ||
+          !item.farmer_pdf.startsWith("https://") ||
+          !item.farm_pdf.endsWith(".pdf")
+        ) {
           errors.farmer_pdf = "Farmer PDF should start with 'https://'";
         }
 
@@ -1087,7 +1112,12 @@ exports.getFarmers = async (req) => {
       response.httpStatus = 200;
     } else {
       // Apply pagination
-      const farmers = await farmerQuery.skip(skip).limit(limit).select("-__v");
+      const skip = (page - 1) * limit;
+      const farmers = await farmerQuery
+        .find(searchQuery)
+        .skip(skip)
+        .limit(limit)
+        .select("-__v");
       response.httpStatus = 200;
       response.data = {
         totalPages: Math.ceil(totalDocuments / limit),
@@ -1166,12 +1196,24 @@ exports.validateFarms = async (req) => {
           errors.image_url =
             "Invalid image URL format. Must start with 'https://' or Link url";
         }
-        if (!item.farm_pdf || !item.farm_pdf.startsWith("https://")) {
-          errors.farm_pdf = "Farm PDF should start with 'https://' or Link url";
+
+        if (!item.image_url || !/(jpeg|jpg|png)$/.test(item.image_url)) {
+          errors.image_url =
+            "Invalid image URL format. Must end with '.jpeg', '.jpg', or '.png'";
         }
-        if (!item.video_url || !item.video_url.startsWith("https://")) {
+
+        if (
+          !item.farm_pdf ||
+          !item.farm_pdf.startsWith("https://") ||
+          !item.farm_pdf.endsWith(".pdf")
+        ) {
+          errors.farm_pdf =
+            "Farm PDF should start with 'https://' or Link url and ends with '.pdf'";
+        }
+        if (!item.video_url) {
           errors.video_url = "Video_url should start with 'https://' Link url";
         }
+
         if (!item.location || !item.location.startsWith("https://")) {
           errors.video_url =
             "Location should start with 'https://' or Link url";
@@ -1183,9 +1225,11 @@ exports.validateFarms = async (req) => {
         }
         if (
           !item.farm_practice_pdf ||
-          !item.farm_practice_pdf.startsWith("https://")
+          !item.farm_practice_pdf.startsWith("https://") ||
+          !item.farm_practice_pdf.endsWith(".pdf")
         ) {
-          errors.video_url = "Farm_practice_pdf should start with 'https://'";
+          errors.farm_practice_pdf =
+            "Farm_practice_pdf should start with 'https://' and ends with '.pdf'";
         }
 
         // Check for missing fields and add them to the errors object for this item
