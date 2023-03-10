@@ -248,6 +248,14 @@ const ModifyData = () => {
           error={verificationError}
           setError={setVerificationError}
           getReason={true}
+          warning={
+            showVerificationFor === "update" &&
+            (selectedType.name === "Farms"
+              ? "Approx cost of modifying farm will be $0.0097"
+              : selectedType.name === "Contracts"
+              ? "Approx cost of modifying contract will be $0.0113"
+              : false)
+          }
         />
       )}
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}

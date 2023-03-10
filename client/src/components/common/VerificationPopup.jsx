@@ -83,6 +83,7 @@ const VerificationPopup = ({
   error,
   setError,
   getReason,
+  warning,
 }) => {
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
@@ -115,14 +116,7 @@ const VerificationPopup = ({
             />
           </>
         )}
-
-        {selectedType.name === "Farms" && (
-          <Error>Approx cost of modifying farm will be $0.0097</Error>
-        )}
-        {selectedType.name === "Contracts" && (
-          <Error>Approx cost of modifying contract will be $0.0113</Error>
-        )}
-
+        <Error>{warning}</Error>
         <Flexbox justify="center">
           <Button
             onClick={() => onSubmit(password, reason)}
