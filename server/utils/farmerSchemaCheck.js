@@ -24,7 +24,7 @@ const farmerSchemaCheck = (data) => {
   const validate = ajv.compile(schema);
 
   const isValid = validate(data);
-  return isValid;
+  return isValid; // return true or false
 };
 
 module.exports = farmerSchemaCheck;
