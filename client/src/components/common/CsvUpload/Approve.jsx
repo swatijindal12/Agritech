@@ -13,7 +13,6 @@ import VerificationPopup from "../VerificationPopup";
 const Container = styled.div`
   padding: 1rem;
   height: calc(100vh - 4rem);
-  background-color: #dde5b633;
 `;
 
 const Selector = styled.div`
@@ -59,7 +58,6 @@ const Table = styled.table`
 `;
 
 const UploadText = styled.div`
-  width: 100vw;
   height: 60vh;
   display: flex;
   justify-content: center;
@@ -92,7 +90,7 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
-const Approve = () => {
+const Approve = ({ setBackgroundColor }) => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -120,6 +118,7 @@ const Approve = () => {
   }, [selectedItem]);
 
   useEffect(() => {
+    setBackgroundColor("#dde5b633");
     axios
       .get(
         `${process.env.REACT_APP_BASE_URL}/${selectedType?.staged_list_get}`,

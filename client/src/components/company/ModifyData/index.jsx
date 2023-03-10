@@ -28,7 +28,7 @@ const Heading = styled.p`
 
 const TableContainer = styled.div`
   max-width: 100vw;
-  overflow-x: auto;
+  overflow-x: scroll;
 `;
 
 const Table = styled.table`

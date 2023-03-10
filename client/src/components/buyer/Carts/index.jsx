@@ -42,6 +42,11 @@ const Fallback = styled.img`
   opacity: 0.3;
 `;
 
+const CardsContainer = styled(Flexbox)`
+  flex-wrap: wrap;
+  justify-content: space-around;
+`;
+
 const Cart = () => {
   const [finalAmount, setFinalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
@@ -163,16 +168,18 @@ const Cart = () => {
           <Title>My Cart</Title>
         </Flexbox>
         <br />
-        {data?.length > 0 ? (
-          data?.map((item, index) => {
-            return <Card data={item} key={item.id} index={index} />;
-          })
-        ) : (
-          <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
-            <Fallback src={FallbackIcon} />
-            <p>Empty</p>
-          </Flexbox>
-        )}
+        <CardsContainer>
+          {data?.length > 0 ? (
+            data?.map((item, index) => {
+              return <Card data={item} key={item.id} index={index} />;
+            })
+          ) : (
+            <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
+              <Fallback src={FallbackIcon} />
+              <p>Empty</p>
+            </Flexbox>
+          )}
+        </CardsContainer>
         <Box>
           <FinalAmount>
             <span>Total </span> ₹ {finalAmount}

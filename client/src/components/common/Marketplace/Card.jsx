@@ -14,7 +14,7 @@ const Container = styled.div`
   background-color: #f0ead254;
   border: ${props => props.highlight && "2px solid #ADC178"};
   margin: 1rem 0;
-  width: 30rem;
+  width: 48%;
 
   @media screen and (max-width: 990px) {
     margin: 1rem auto;

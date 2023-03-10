@@ -14,15 +14,21 @@ const WebContainer = styled.div`
   z-index: 4;
   top: 0;
   left: 0;
-  display: flex;
-  align-items: center;
-  padding: 0.8rem 1.5rem;
-  width: 100%;
+
+  width: 100vw;
   background-color: #f0ead2;
 
   @media only screen and (max-width: 990px) {
     display: none;
   }
+`;
+
+const WebInnerContainer = styled.div`
+  max-width: 1280px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
 `;
 
 const NavItemsContainer = styled(Flexbox)`
@@ -136,41 +142,43 @@ const Navbar = ({ toggleSidebar }) => {
   return (
     <>
       <WebContainer>
-        <Logo src={LogoImg} />
-        <NavItemsContainer>
-          {currentNavItem?.map(navItem => {
-            return (
-              <NavItem
-                onClick={() => handleNavClick(navItem)}
-                key={navItem.title}
-                highlight={
-                  window.location.pathname === navItem.url ||
-                  window.location.pathname.includes(navItem.url)
-                }
-              >
-                {navItem.title}
-              </NavItem>
-            );
-          })}
-        </NavItemsContainer>
-        <NavRightContainer>
-          {user?.data?.role === "customer" && (
-            <CartContainer>
-              <CartNumber ref={cartNumberRef}>{cartItem.length}</CartNumber>
-              <Cart
-                src={CartImg}
-                onClick={() => (window.location.href = "/cart")}
+        <WebInnerContainer>
+          <Logo src={LogoImg} />
+          <NavItemsContainer>
+            {currentNavItem?.map(navItem => {
+              return (
+                <NavItem
+                  onClick={() => handleNavClick(navItem)}
+                  key={navItem.title}
+                  highlight={
+                    window.location.pathname === navItem.url ||
+                    window.location.pathname.includes(navItem.url)
+                  }
+                >
+                  {navItem.title}
+                </NavItem>
+              );
+            })}
+          </NavItemsContainer>
+          <NavRightContainer>
+            {user?.data?.role === "customer" && (
+              <CartContainer>
+                <CartNumber ref={cartNumberRef}>{cartItem.length}</CartNumber>
+                <Cart
+                  src={CartImg}
+                  onClick={() => (window.location.href = "/cart")}
+                />
+              </CartContainer>
+            )}
+            <Logout onClick={handleLogout}>LOGOUT</Logout>
+            {user?.data?.role === "admin" && (
+              <Button
+                text="DASHBOARD"
+                onClick={() => handleNavClick({ url: "/" })}
               />
-            </CartContainer>
-          )}
-          <Logout onClick={handleLogout}>LOGOUT</Logout>
-          {user?.data?.role === "admin" && (
-            <Button
-              text="DASHBOARD"
-              onClick={() => handleNavClick({ url: "/" })}
-            />
-          )}
-        </NavRightContainer>
+            )}
+          </NavRightContainer>
+        </WebInnerContainer>
       </WebContainer>
       <MobileContainer>
         <Logo src={LogoImg} />

@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Title from "../Title";
 import Card from "./Card";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import Flexbox from "../Flexbox";
-import Button from "../Button";
 
 const Container = styled.div`
   padding: 1rem;

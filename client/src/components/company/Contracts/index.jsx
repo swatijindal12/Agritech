@@ -26,6 +26,7 @@ const Option = styled.div`
   font-weight: 600;
   border-bottom: ${props => props.selected && "3px solid #718355"};
   padding-bottom: 0.5rem;
+  cursor: pointer;
 `;
 
 const EmptyImage = styled.img``;

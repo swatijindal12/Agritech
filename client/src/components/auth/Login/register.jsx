@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Logo from "../../../assets/logo.jpg";
 import Button from "../../common/Button";
-import LoginImage from "../../../assets/login.png";
-import Flexbox from "../../common/Flexbox";
+import LoginImage from "../../../assets/login.jpg";
 import axios from "axios";
 
 const Container = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
   padding: 0;
   display: flex;
+  width: 100vw;
   @media only screen and (max-width: 990px) {
     display: block;
     padding: 1rem;
     height: 100vh;
-    width: 100vw;
   }
 `;
 
@@ -47,9 +50,14 @@ const BackGround = styled.img`
 `;
 
 const MiddleContainer = styled.div`
-  margin-top: 6rem;
   display: block;
   text-align: center;
+  height: 100%;
+  overflow-y: scroll;
+
+  @media screen and (max-width: 990px) {
+    margin: 0;
+  }
 `;
 
 const Input = styled.input`
@@ -92,6 +100,7 @@ const ResendMessageStyle = styled.p`
   margin-bottom: 2.5rem;
   text-align: right;
   text-decoration: underline;
+  cursor: pointer;
 `;
 
 const Resend = styled.p`
@@ -104,11 +113,9 @@ const Resend = styled.p`
 const TitleContainer = styled.div`
   text-align: left;
   max-width: 90%;
-  margin-left: 10rem;
-  margin-right: 7rem;
+  margin: auto;
   @media screen and (max-width: 990px) {
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin: unset;
   }
 `;
 

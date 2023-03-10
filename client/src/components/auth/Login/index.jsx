@@ -7,12 +7,17 @@ import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../redux/actions";
-import LoginImage from "../../../assets/login.png";
+import LoginImage from "../../../assets/login.jpg";
 import { useRef } from "react";
 
 const Container = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
   padding: 0;
   display: flex;
+  width: 100vw;
   @media only screen and (max-width: 990px) {
     display: block;
     padding: 1rem;

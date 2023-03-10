@@ -18,7 +18,11 @@ const DetailCard = styled.div`
   padding: 0.5rem;
   border-radius: 8px;
   margin: 1rem 0;
-  width: 95%;
+  width: 45%;
+
+  @media screen and (max-width: 990px) {
+    width: 95%;
+  }
 `;
 
 const NameConatiner = styled.div`
@@ -112,7 +116,7 @@ const Card = ({ data, index }) => {
                     style={{ color: "blue" }}
                     onClick={() => togglePopup(nftId)}
                   >
-                    #{data.farm_nft_id}
+                    #{nftId}
                   </a>
                 );
               }

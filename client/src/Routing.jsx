@@ -20,13 +20,23 @@ import Admin from "./components/company/Admin";
 import Approve from "./components/common/CsvUpload/Approve";
 import Register from "./components/auth/Login/register";
 import ModifyData from "./components/company/ModifyData";
+import styled from "styled-components";
+
+const Container = styled.div`
+  background-color: ${props => props.backgroundColor && props.backgroundColor};
+`;
+
+const InnerContainer = styled.div`
+  max-width: 1280px;
+  margin: auto;
+`;
 
 const Routing = () => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState("");
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    // console.log("here the user is ", user);
     if (!user && window.location.href.indexOf("login") === -1) {
       window.location.href = "/login";
     }
@@ -37,7 +47,7 @@ const Routing = () => {
   };
 
   return (
-    <>
+    <Container backgroundColor={backgroundColor}>
       <Router>
         {user && (
           <>
@@ -45,27 +55,32 @@ const Routing = () => {
             <Navbar toggleSidebar={toggleSidebar} />
           </>
         )}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/farms" element={<Farms />} />
-          <Route path="/create-contract" element={<CreateContract />} />
-          <Route path="/farmers" element={<Farmers />} />
-          <Route path="/buyers" element={<Buyers />} />
-          <Route path="/buyers/:slug" element={<Profile />} />
-          <Route path="/contracts" element={<Contracts />} />
-          <Route path="/marketplace" element={<MarketPlace />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/farms/:slug" element={<FarmDetails />} />
-          <Route path="/about-us" element={<Aboutus />} />
-          <Route path="/admin/csv-validator" element={<CsvUpload />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/approve" element={<Approve />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/admin/modify" element={<ModifyData />} />
-        </Routes>
+        <InnerContainer>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/farms" element={<Farms />} />
+            <Route path="/create-contract" element={<CreateContract />} />
+            <Route path="/farmers" element={<Farmers />} />
+            <Route path="/buyers" element={<Buyers />} />
+            <Route path="/buyers/:slug" element={<Profile />} />
+            <Route path="/contracts" element={<Contracts />} />
+            <Route path="/marketplace" element={<MarketPlace />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/farms/:slug" element={<FarmDetails />} />
+            <Route path="/about-us" element={<Aboutus />} />
+            <Route path="/admin/csv-validator" element={<CsvUpload />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin/approve"
+              element={<Approve setBackgroundColor={setBackgroundColor} />}
+            />
+            <Route path="/register" element={<Register />} />
+            <Route path="/admin/modify" element={<ModifyData />} />
+          </Routes>
+        </InnerContainer>
       </Router>
-    </>
+    </Container>
   );
 };
 

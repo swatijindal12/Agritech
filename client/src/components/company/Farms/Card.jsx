@@ -12,14 +12,13 @@ import NewIcon from "../../../assets/new.svg";
 
 const Container = styled.div`
   position: relative;
-  width: 45%;
+  width: 48%;
   height: fit-content;
   background-color: #f0ead2;
   padding: 0.5rem;
   border-radius: 8px;
   margin: 1rem 0;
   border: ${props => props.highlight && "2px solid #ADC178"};
-  /* box-shadow: ${props => props.highlight && "5px 3px 3px #ADC178"}; */
   @media only screen and (max-width: 990px) {
     width: 100%;
   }
