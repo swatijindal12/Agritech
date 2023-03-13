@@ -100,7 +100,6 @@ const Resend = styled.p`
 
 const Error = styled.p`
   color: red;
-  /* margin-bottom: 1rem; */
 `;
 
 const Login = () => {
@@ -111,6 +110,7 @@ const Login = () => {
   const [timeRemaining, setTimeRemaining] = useState(30);
   const dispatch = useDispatch();
   const user = useSelector(store => store.auth.user);
+  const otpError = useSelector(store => store.auth.error);
   const navigate = useNavigate();
   const loginRef = useRef();
   const otpRef = useRef();
@@ -118,6 +118,10 @@ const Login = () => {
   useEffect(() => {
     loginRef.current.focus();
   }, []);
+
+  useEffect(() => {
+    setError(otpError);
+  }, [otpError]);
 
   useEffect(() => {
     let interval;
@@ -148,7 +152,6 @@ const Login = () => {
       })
       .catch(err => {
         console.log("error in sending otp", err);
-        setError(err?.response?.data?.error);
       });
   };
 
@@ -198,6 +201,7 @@ const Login = () => {
             <MiddleContainer>
               <LogoImage src={Logo} alt="logo" />
               <br />
+              {error && <Error>Error: {error}</Error>}
               <Input
                 ref={otpRef}
                 type="number"
