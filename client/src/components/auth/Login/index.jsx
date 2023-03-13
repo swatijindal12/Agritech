@@ -98,10 +98,16 @@ const Resend = styled.p`
   opacity: ${props => (props.active ? 1 : 0.3)};
 `;
 
+const Error = styled.p`
+  color: red;
+  /* margin-bottom: 1rem; */
+`;
+
 const Login = () => {
   const [number, setNumber] = useState("");
   const [authorised, setAuthorised] = useState(false);
   const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
   const [timeRemaining, setTimeRemaining] = useState(30);
   const dispatch = useDispatch();
   const user = useSelector(store => store.auth.user);
@@ -142,6 +148,7 @@ const Login = () => {
       })
       .catch(err => {
         console.log("error in sending otp", err);
+        setError(err?.response?.data?.error);
       });
   };
 
@@ -171,6 +178,7 @@ const Login = () => {
               <Heading>Login</Heading>
               <LogoImage src={Logo} alt="logo" />
               <br />
+              {error && <Error>Error: {error}</Error>}
               <Input
                 ref={loginRef}
                 type="number"
