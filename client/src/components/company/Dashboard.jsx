@@ -97,7 +97,7 @@ const Dashboard = () => {
               <p>Buyers</p>
             </CardData>
           </Card>
-          <Card color="#D62828" onClick={() => navigateTo("contracts")}>
+          <Card color="#D62828" onClick={() => navigateTo("marketplace")}>
             <img src={ContractsImage} alt="contract-icon" />
             <CardData>
               <Number>{data?.contracts || 0}</Number>
