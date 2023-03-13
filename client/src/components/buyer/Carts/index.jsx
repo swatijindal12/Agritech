@@ -9,6 +9,7 @@ import axios from "axios";
 import { clearCart } from "../../../redux/actions/cartActions";
 import FallbackIcon from "../../../assets/empty-cart.svg";
 import Modal from "./Modal";
+import Logo from "../../../assets/logo.png";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
@@ -117,8 +118,7 @@ const Cart = () => {
       currency: "INR",
       name: "Agritrust",
       description: "RazorPay payment",
-      image:
-        "https://razorpay.com/docs/build/browser/assets/images/payment-pages-v3-pp_complete_image.jpg",
+      image: Logo,
       order_id: order?.data.data.id,
       handler: function (response) {
         console.log("response :", response);

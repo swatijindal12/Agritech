@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Logo from "../../../assets/logo.jpg";
+import Logo from "../../../assets/logo.png";
 import Button from "../../common/Button";
 import LoginImage from "../../../assets/login.jpg";
 import axios from "axios";

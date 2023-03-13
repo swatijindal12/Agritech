@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
-import LogoImg from "../../assets/logo.jpg";
+import LogoImg from "../../assets/logo.png";
 import HamburgerImg from "../../assets/hamburger.svg";
 import CartImg from "../../assets/cart.svg";
 import { useSelector, useDispatch } from "react-redux";
