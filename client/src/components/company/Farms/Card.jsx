@@ -43,6 +43,7 @@ const Name = styled.p`
 const Id = styled.p`
   font-size: 0.8rem;
   color: #00000099;
+  cursor: pointer;
 `;
 
 const Down = styled.img`
@@ -325,7 +326,6 @@ const Card = ({ data, highlight }) => {
                 </RatingContainer>
               </Flexbox>
             </Flexbox>
-            {/* <Button text="CREATE CONTRACT" onClick={createContract} /> */}
           </>
         )}
       </Container>
@@ -334,14 +334,15 @@ const Card = ({ data, highlight }) => {
           isOpen={isPopupOpen}
           togglePopup={togglePopup}
           tx_hash={data.tx_hash}
-        >
-          <PopupContent>
-            IPFS URL:
-            <a href={data?.ipfs_url} target="_blank">
-              {data?.ipfs_url}
-            </a>
-          </PopupContent>
-        </NFTPopup>
+          getUrl={data?.ipfs_url}
+          dbData={data}
+          requiredFields={[
+            "rating",
+            "farmer_rating",
+            "farm_practice_rating",
+            "location",
+          ]}
+        />
       )}
     </>
   );

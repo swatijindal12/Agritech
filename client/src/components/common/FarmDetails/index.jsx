@@ -13,7 +13,6 @@ import BackButton from "../../../assets/back-button.svg";
 import InfoIcon from "../../../assets/info-icon.svg";
 import NFTPopup from "../../common/NFTPopup";
 import axios from "axios";
-// import { farmDetails } from "./tempData";
 
 const Container = styled.div`
   padding: 0.5rem;
@@ -21,20 +20,15 @@ const Container = styled.div`
   margin: 1rem 0;
 `;
 
+const Back = styled.img`
+  cursor: pointer;
+`;
+
 const Image = styled.img`
   height: 100%;
   width: 100%;
   object-fit: cover;
   border-radius: 8px;
-`;
-
-const PopupContent = styled.p`
-  padding: 0.5rem;
-  @media screen and (max-width: 990px) {
-    scroll-margin-top: 1rem;
-    max-width: 20rem;
-    overflow-x: scroll;
-  }
 `;
 
 const NameContainer = styled.div``;
@@ -48,6 +42,7 @@ const Name = styled.p`
 const Id = styled.p`
   font-size: 0.8rem;
   color: #00000099;
+  cursor: pointer;
 `;
 
 const InfoImg = styled.img`
@@ -174,7 +169,7 @@ const FarmDetails = () => {
         {farmDetails && (
           <div>
             <Flexbox justify="space-between">
-              <img src={BackButton} onClick={() => window.history.go(-1)} />
+              <Back src={BackButton} onClick={() => window.history.go(-1)} />
               <Title>{farmDetails?.farm?.name}</Title>
             </Flexbox>
             <br />
@@ -312,14 +307,15 @@ const FarmDetails = () => {
           isOpen={isPopupOpen}
           togglePopup={togglePopup}
           tx_hash={farmDetails?.farm?.tx_hash}
-        >
-          <PopupContent>
-            IPFS URL:
-            <a href={farmDetails?.farm?.ipfs_url} target="_blank">
-              {farmDetails?.farm?.ipfs_url}
-            </a>
-          </PopupContent>
-        </NFTPopup>
+          getUrl={farmDetails?.farm?.ipfs_url}
+          dbData={farmDetails?.farm}
+          requiredFields={[
+            "rating",
+            "farmer_rating",
+            "farm_practice_rating",
+            "location",
+          ]}
+        />
       )}
     </>
   );

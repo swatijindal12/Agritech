@@ -125,15 +125,10 @@ const ActiveCard = ({ data }) => {
             isOpen={selectedNFTId === nftId}
             togglePopup={togglePopup}
             tx_hash={data.tx_hash[index]}
-            width={100}
-          >
-            <PopupContent>
-              IPFS URL:
-              <a href={data?.ipfs_url[index]} target="_blank">
-                {data?.ipfs_url[index]}
-              </a>
-            </PopupContent>
-          </NFTPopup>
+            getUrl={data?.ipfs_url[index]}
+            dbData={data._id}
+            requiredFields={["start_date", "end_date", "crop", "area"]}
+          />
         ))}
       <Container>
         <Id>

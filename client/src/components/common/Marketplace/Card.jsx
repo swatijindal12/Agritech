@@ -26,11 +26,13 @@ const Id = styled.p`
   font-size: 0.8rem;
   font-weight: 700;
   opacity: 0.6;
+  cursor: pointer;
 `;
 
 const Name = styled.p`
   font-size: 1.5rem;
   font-weight: 700;
+  cursor: pointer;
 `;
 
 const Date = styled.p`
@@ -148,14 +150,10 @@ const Card = ({ data, highlight }) => {
             togglePopup={togglePopup}
             tx_hash={data.tx_hash[index]}
             width={100}
-          >
-            <PopupContent>
-              IPFS URL:
-              <a href={data?.ipfs_url[index]} target="_blank">
-                {data?.ipfs_url[index]}
-              </a>
-            </PopupContent>
-          </NFTPopup>
+            getUrl={data?.ipfs_url[index]}
+            dbData={data._id}
+            requiredFields={["start_date", "end_date", "crop", "area"]}
+          />
         ))}
       <Container>
         {highlight && <New src={NewIcon} alt="new tag" />}
