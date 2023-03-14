@@ -144,9 +144,9 @@ const Cart = () => {
           .catch(err => console.log("Error ", err));
       },
       prefill: {
-        name: "",
-        email: "agritrust@example.com",
-        contact: "9999999999",
+        name: user?.data.name,
+        email: user?.data.email,
+        contact: user?.data.phone,
       },
       notes: {
         address: "Razorpay Corporate Office",
