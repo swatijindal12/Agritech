@@ -34,6 +34,7 @@ const farmSchema = new mongoose.Schema(
     },
     rating: {
       type: Number, //Update after inserting..data in DB
+      required: [true, "Farm rating"],
     },
     tx_hash: {
       type: String,

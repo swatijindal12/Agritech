@@ -1,3 +1,4 @@
+const validator = require("validator");
 // import { Request, Response, NextFunction } from "express";
 const User = require("../models/users");
 const sendToken = require("../utils/jwtToken");
@@ -28,9 +29,38 @@ exports.createUser = async (req) => {
 
   try {
     ////Checking user with phone & email
-    if (userWithPhone && userWithEmail) {
+    if (userWithPhone) {
       response.httpStatus = 400;
-      response.error = "phone or email already exist";
+      response.error = "phone already exist";
+      return response;
+    } else if (userWithEmail) {
+      response.httpStatus = 400;
+      response.error = "email already exist";
+      return response;
+    } else if (
+      !validator.isAlpha(name) ||
+      !validator.isLength(name, { min: 3, max: 100 })
+    ) {
+      response.httpStatus = 400;
+      response.error =
+        "Name only contain alphabets & length must be greater than 3";
+      return response;
+    } else if (!validator.isMobilePhone(phone)) {
+      response.httpStatus = 400;
+      response.error = "Phone should be of length of 10";
+
+      return response;
+    } else if (!validator.isEmail(email)) {
+      response.httpStatus = 400;
+      response.error = "Invalid email address";
+
+      return response;
+    } else if (!validator.isLength(address, { min: 5, max: 100 })) {
+      response.httpStatus = 400;
+      response.error =
+        "Address should be of length greater than 5 less than 100";
+
+      return response;
     } else if (name && address && phone && email) {
       // if all field are entered then create user/customer
       const user = await User.create({ name, address, phone, email });
