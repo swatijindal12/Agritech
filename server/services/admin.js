@@ -15,6 +15,7 @@ const mongoose = require("mongoose");
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 const epocTimeConv = require("../utils/epocTimeConv");
+const validator = require("validator");
 
 // Import for Blockchain
 const Web3 = require("web3");
@@ -116,7 +117,7 @@ exports.validate = async (req) => {
           }
         }
 
-        if (item.price && isNaN(item.price)) {
+        if (item.price && isNaN(item.price && item.price % 1 !== 0)) {
           errors.price = "Price should be a number";
         }
 
@@ -350,7 +351,179 @@ exports.listAgreements = async (req) => {
 };
 
 // Update Agreement Service ::
+
 exports.updateAgreement = async (req) => {
+  const userLogged = req.user;
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+  //Checking header reason for change
+  const reason = req.headers["reason"];
+
+  const updatedData = req.body;
+  try {
+    // First check agreement is their with id and not active
+    let agreement = await Agreement.findOne({ _id: id, sold_status: false });
+
+    if (agreement) {
+      // Update the Agreement data..
+      await Agreement.updateOne({ _id: id }, updatedData);
+
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        // only log fields that are actually changing
+        if (key in agreement && agreement[key] !== updatedData[key]) {
+          old_values[key] = agreement[key];
+          new_values[key] = updatedData[key];
+          agreement[key] = updatedData[key];
+        }
+      }
+
+      //New value contain createdAT and updated, _id
+      delete new_values.createdAt;
+      delete new_values.updatedAt;
+      delete old_values.createdAt;
+      delete old_values.updatedAt;
+      delete old_values._id;
+      delete new_values._id;
+
+      // Creatingg Log
+      await Audit.create({
+        table_name: "agreement",
+        record_id: agreement._id,
+        change_type: "update",
+        // old_value: JSON.stringify(old_values),
+        // new_value: JSON.stringify(new_values),
+        old_value: Object.keys(old_values).length
+          ? JSON.stringify(old_values)
+          : null,
+        new_value: Object.keys(new_values).length
+          ? JSON.stringify(new_values)
+          : null,
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+        change_reason: reason,
+      });
+
+      agreement = await Agreement.findOne({ _id: id, sold_status: false });
+
+      const {
+        _id,
+        farm_id,
+        file_name,
+        farmer_name,
+        address,
+        agreement_nft_id,
+        tx_hash,
+        farm_nft_id,
+        price,
+        ipfs_url,
+        ...rest
+      } = agreement._doc;
+
+      const options = {
+        pinataMetadata: {
+          name: agreement.farm_nft_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      agreement.ipfs_url = ipfs_hash;
+      await agreement.save();
+
+      // -------------- IPFS --------------------
+
+      // BLOCKCHAIN TRANSACTION--------------------
+      const amount = req.body.price ? req.body.price : agreement.price;
+      const startDate = req.body.start_date
+        ? req.body.start_date
+        : agreement.start_date;
+      const endDate = req.body.start_date
+        ? req.body.end_date
+        : agreement.end_date;
+
+      const Tran = "https://mumbai.polygonscan.com/tx";
+      const agreement_nftId = agreement.agreement_nft_id;
+
+      const gasLimit = await marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .estimateGas({ from: adminAddr });
+
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      const updateContract = marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .encodeABI();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: marketplaceAddr,
+        value: "0x00",
+        data: updateContract,
+        from: adminAddr,
+      };
+
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+      agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      if (transaction.transactionHash) {
+        response.message = `Successfully updated `;
+        response.httpStatus = 200;
+      } else {
+        response.message = `Blockchain error `;
+        response.httpStatus = 500;
+      }
+    } else {
+      response.error = `agreement is active`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
+exports.updateAgreementOld = async (req) => {
   const userLogged = req.user;
   // General response format
   let response = {
@@ -379,30 +552,34 @@ exports.updateAgreement = async (req) => {
   let amount = req.body.price;
   let crop = req.body.crop;
   let area = req.body.area;
-
-  const updatedData = {
-    start_date: startDate,
-    end_date: endDate,
-    price: amount,
-    crop: crop,
-    area: area,
-  };
-
-  // console.log('updatedData :', updatedData)
+  let farmer_name = req.body.farmer_name;
 
   try {
     // First check agreement is their with id and not active
     let agreement = await Agreement.findOne({ _id: id, sold_status: false });
     console.log("AGREEMENT", agreement);
-    amount = amount === undefined ? agreement.price : amount;
-    startDate = startDate === undefined ? agreement.start_date : startDate;
-    endDate = endDate === undefined ? agreement.end_date : endDate;
-    crop = crop === undefined ? agreement.crop : crop;
-    area = area === undefined ? agreement.area : area;
-
-    // console.log('rest', rest)
 
     if (agreement) {
+      amount = amount === undefined ? agreement.price : amount;
+      startDate = startDate === undefined ? agreement.start_date : startDate;
+      endDate = endDate === undefined ? agreement.end_date : endDate;
+      crop = crop === undefined ? agreement.crop : crop;
+      area = area === undefined ? agreement.area : area;
+      farmer_name =
+        farmer_name === undefined ? agreement.farmer_name : farmer_name;
+
+      // console.log('rest', rest)
+      const updatedData = {
+        start_date: startDate,
+        end_date: endDate,
+        price: amount,
+        crop: crop,
+        area: area,
+        farmer_name: farmer_name,
+      };
+
+      console.log("updatedData", updatedData);
+
       // Update the Agreement data..
       await Agreement.updateOne({ _id: id }, updatedData);
 
@@ -506,7 +683,7 @@ exports.updateAgreement = async (req) => {
       response.message = `Successfully updated `;
       response.httpStatus = 200;
     } else {
-      response.error = `agreement not found`;
+      response.error = `agreement is active`;
       response.httpStatus = 404;
     }
   } catch (error) {
@@ -618,6 +795,9 @@ exports.validateFarmers = async (req) => {
     } else {
       const errorLines = [];
       // Creating List of errors.
+      const uniquePhones = new Set();
+      const uniqueEmails = new Set();
+
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
         let errors = {
@@ -632,6 +812,18 @@ exports.validateFarmers = async (req) => {
           image_url: "",
           farmer_pdf: "",
         };
+
+        if (uniquePhones.has(item.phone)) {
+          errors.phone = "Phone number already exists in the file";
+        } else {
+          uniquePhones.add(item.phone);
+        }
+
+        if (uniqueEmails.has(item.email)) {
+          errors.email = "Email already exists in the file";
+        } else {
+          uniqueEmails.add(item.email);
+        }
 
         if (!item.name && item.name.length >= 3) {
           errors.name = "Name should be 3 characters long";
@@ -668,9 +860,9 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
-          !item.farmer_pdf ||
-          !item.farmer_pdf.startsWith("https://") ||
-          !item.farm_pdf.endsWith(".pdf")
+          !item.farmer_pdf &&
+          !item.farmer_pdf.startsWith("https://") &&
+          !item.farmer_pdf.endsWith(".pdf")
         ) {
           errors.farmer_pdf = "Farmer PDF should start with 'https://'";
         }
@@ -926,7 +1118,86 @@ exports.updateFarmer = async (req) => {
   const reason = req.headers["reason"];
 
   const updatedData = req.body;
+
+  // Validation
+
   try {
+    // Define validation rules for updatedData
+    const validationRules = {
+      name: { type: "string", minLength: 3, maxLength: 50 },
+      address: { type: "string", minlegth: 5, maxlength: 200 },
+      pin: { type: "number", minLength: 6, maxLength: 6 },
+      phone: { type: "number", minLength: 10, maxLength: 10 },
+      email: { type: "string", format: "email" },
+      image_url: { type: "string" },
+      rating: { type: "number" },
+      education: { type: "string" },
+      farmer_pdf: { type: "string" },
+    };
+    // Validate updatedData against validation rules
+    if (
+      updatedData.name &&
+      (updatedData.name.length < 3 || updatedData.name.length > 50)
+    ) {
+      response.error =
+        "Invalid name: name must be between 3 and 50 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.address &&
+      (updatedData.address.length < 5 || updatedData.address.length > 200)
+    ) {
+      response.error =
+        "Invalid address: address must be between 5 and 200 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.pin && updatedData.pin.toString().length !== 6) {
+      response.error = "Invalid pin: pin must be 6 digits long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.phone && updatedData.phone.toString().length !== 10) {
+      response.error = "Invalid phone: phone number must be 10 digits long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.email && !validator.isEmail(updatedData.email)) {
+      response.error = "Invalid email: email must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.image_url && !validator.isURL(updatedData.image_url)) {
+      response.error = "Invalid image URL: image URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof updatedData.rating === Number) {
+      response.error = "Invalid rating";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof updatedData.education === String) {
+      response.error = "Invalid education";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.farmer_pdf && !validator.isURL(updatedData.farmer_pdf)) {
+      response.error =
+        "Invalid farmer PDF URL: farmer PDF URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
     // First check farmer is their with id
     let farmer = await Farmer.findOne({ _id: id });
 
@@ -1169,6 +1440,9 @@ exports.validateFarms = async (req) => {
       response.httpStatus = 400;
     } else {
       const errorLines = [];
+      // Creating List of errors.
+      const uniqueLocation = new Set();
+
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
 
@@ -1187,9 +1461,33 @@ exports.validateFarms = async (req) => {
           image_url: "",
           video_url: "",
         };
+        if (uniqueLocation.has(item.location)) {
+          errors.location = "Unique Location already exists in the file";
+        } else {
+          uniqueLocation.add(item.location);
+        }
 
-        if (!item.pin || item.pin.length !== 6) {
-          errors.pin = "PIN should be 6 characters long";
+        if (!item.pin || !/^\d+$/.test(item.pin) || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 Numeric long";
+        }
+
+        if (
+          !item.rating ||
+          isNaN(item.rating) ||
+          item.rating < 1 ||
+          item.rating > 10
+        ) {
+          errors.rating = "Rating should be a number between 1 and 10";
+        }
+
+        if (
+          !item.rating ||
+          isNaN(item.farm_practice_rating) ||
+          item.farm_practice_rating < 1 ||
+          item.farm_practice_rating > 10
+        ) {
+          errors.farm_practice_rating =
+            "Farm practice rating should be a number between 1 and 10";
         }
 
         if (!item.image_url || !item.image_url.startsWith("https://")) {
@@ -1658,6 +1956,149 @@ exports.updateFarm = async (req) => {
   const updatedData = req.body;
 
   try {
+    //Validation
+    const validationRules = {
+      farmer_id: { type: "string" },
+      name: { type: "string", minLength: 3, maxLength: 50 },
+      address: { type: "string", minlegth: 5, maxlength: 200 },
+      pin: { type: "number", minLength: 6, maxLength: 6 },
+      farm_nft_id: { type: "string" },
+      rating: { type: "number" },
+      image_url: { type: "string" },
+      video_url: { type: "string" },
+      location: { type: "string" },
+      farm_size: { type: "string" },
+      food_grain: { type: "boolean" },
+      vegetable: { type: "boolean" },
+      horticulture: { type: "boolean" },
+      floriculture: { type: "boolean" },
+      exotic_crop: { type: "boolean" },
+      farm_pdf: { type: "string" },
+      farm_practice_pdf: { type: "string" },
+      farm_practice_rating: { type: "number" },
+    };
+
+    if (typeof updatedData.farmer_id === String) {
+      response.error = "Invalid farmer id";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.name &&
+      (updatedData.name.length < 3 || updatedData.name.length > 50)
+    ) {
+      response.error =
+        "Invalid name: name must be between 3 and 50 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.address &&
+      (updatedData.address.length < 5 || updatedData.address.length > 200)
+    ) {
+      response.error =
+        "Invalid address: address must be between 5 and 200 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.pin && updatedData.pin.toString().length !== 6) {
+      response.error = "Invalid pin: pin must be 6 digits long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof farm_nft_id === String) {
+      response.error = "Invalud farm nft id";
+      response.httpStatus = 400;
+      return response;
+    }
+    if (typeof updatedData.rating !== "number") {
+      response.error = "Invalid rating";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.image_url && !validator.isURL(updatedData.image_url)) {
+      response.error = "Invalid image URL: image URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.video_url && !validator.isURL(updatedData.video_url)) {
+      response.error = "Invalid video URL: video URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.location && !validator.isURL(updatedData.location)) {
+      response.error =
+        "Invalid location URL: location URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof farm_size !== "string") {
+      response.error = "Invalid farm size";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof food_grain === Boolean) {
+      response.error = "Invalid food grain";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof vegetable === Boolean) {
+      response.error = "Invalid vegetable";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof horticulture === Boolean) {
+      response.error = "Invalid horticulture";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof floriculture === Boolean) {
+      response.error = "Invalid floriculture";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof exotic_crop === Boolean) {
+      response.error = "Invalid exotic crops";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.farm_pdf && !validator.isURL(updatedData.farm_pdf)) {
+      response.error =
+        "Invalid farm PDF URL: farm PDF URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.farm_practice_pdf &&
+      !validator.isURL(updatedData.farm_practice_pdf)
+    ) {
+      response.error =
+        "Invalid farm practice PDF URL: farm practice PDF URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof updatedData.farm_practice_rating === Number) {
+      response.error = "Invalid farm practice rating";
+      response.httpStatus = 400;
+      return response;
+    }
+
     // First check farmer is their with id
     let farm = await Farm.findOne({ _id: id });
 
@@ -1840,15 +2281,34 @@ exports.getFarms = async (req) => {
     } else {
       const farms = await farmQuery;
 
-      response.data = farms.map((farm) => ({
-        ...farm._doc,
-        createdAt: farm.createdAt.toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        }),
-        updatedAt: farm.updatedAt.toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        }),
-      }));
+      const farmData = await Promise.all(
+        farms.map(async (farm) => {
+          // console.log("FARM ID", farm.farmer_id)
+          const farmer = await Farm.findOne({ farmer_id: farm.farmer_id });
+          return {
+            ...farm._doc,
+            farmer_rating: farmer.rating,
+            createdAt: farm.createdAt.toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
+            updatedAt: farm.updatedAt.toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
+          };
+        })
+      );
+      response.data = farmData;
+
+      // response.data = farms.map((farm) => ({
+      //   ...farm._doc,
+      //   rating: farmerRating,
+      //   createdAt: farm.createdAt.toLocaleString("en-IN", {
+      //     timeZone: "Asia/Kolkata",
+      //   }),
+      //   updatedAt: farm.updatedAt.toLocaleString("en-IN", {
+      //     timeZone: "Asia/Kolkata",
+      //   }),
+      // }));
     }
 
     response.httpStatus = 200;
@@ -1922,8 +2382,6 @@ exports.getCustomers = async (req) => {
 };
 
 exports.getAgreementsForAdmin = async (req) => {
-  // console.log("Inside getAgreementsOfCustomer Service", req.user);
-
   // General response format
   let response = {
     error: null,
@@ -2104,7 +2562,7 @@ exports.getAgreementsForAdmin = async (req) => {
   return response;
 };
 
-exports.closeAgreement = async (req) => {
+exports.closeAgreementOld = async (req) => {
   //console.log("Inside closeAgreement");
   const { id } = req.params; // Agreement Id agreement to Update
   //console.log("id :- ", id);
@@ -2120,6 +2578,99 @@ exports.closeAgreement = async (req) => {
   try {
     // Update ageementClose status to true :-
     await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
+    response.message = "Agreement closed Successful";
+    response.httpStatus = 200;
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 200;
+  }
+
+  return response;
+};
+
+exports.closeAgreement = async (req) => {
+  //console.log("Inside closeAgreement");
+  const { id } = req.params; // Agreement Id agreement to Update
+
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  try {
+    // Update ageementClose status to true :-
+    await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
+    let agreementClose = await Agreement.findOne({ _id: id });
+
+    const {
+      _id,
+      farm_id,
+      file_name,
+      farmer_name,
+      address,
+      agreement_nft_id,
+      tx_hash,
+      farm_nft_id,
+      price,
+      ipfs_url,
+      ...rest
+    } = agreementClose._doc;
+
+    // IPFS----
+    const options = {
+      pinataMetadata: {
+        name: agreementClose.farm_nft_id.toString(),
+      },
+      pinataOptions: {
+        cidVersion: 0,
+      },
+    };
+
+    const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+    const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+    agreementClose.ipfs_url = ipfs_hash;
+
+    await agreementClose.save();
+
+    // IPFS END------------------------------------
+
+    const Tran = "https://mumbai.polygonscan.com/tx";
+
+    //Blockchain Transaction ---------------------
+    const gasLimit = await marketplaceContract.methods
+      .closeContractNFT(agreementClose.agreement_nft_id)
+      .estimateGas({ from: adminAddr });
+
+    const bufferedGasLimit = Math.round(
+      Number(gasLimit) + Number(gasLimit) * Number(0.2)
+    );
+
+    const closeContract = marketplaceContract.methods
+      .closeContractNFT(agreementClose.agreement_nft_id)
+      .encodeABI();
+
+    const tx = {
+      gas: web3.utils.toHex(bufferedGasLimit),
+      to: marketplaceAddr,
+      value: "0x00",
+      data: closeContract,
+      from: adminAddr,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+
+    const transaction = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+    // console.log('Transaction : ', transaction)
+
+    agreementClose.tx_hash = `${Tran}/${transaction.transactionHash}`;
+    await agreementClose.save();
+    //BLOCKCHAIN TRANS END-------------------------------------------
+
     response.message = "Agreement closed Successful";
     response.httpStatus = 200;
   } catch (error) {
@@ -2147,7 +2698,7 @@ exports.getdashBoard = async (req) => {
   try {
     const farms = await Farm.countDocuments();
     const farmers = await Farmer.countDocuments();
-    const customers = await User.countDocuments();
+    const customers = await User.countDocuments({ is_verified: true });
     const agreements = await Agreement.countDocuments({ sold_status: false });
     (response.httpStatus = 200), (response.data.farmers = farmers);
     response.data.customers = customers;

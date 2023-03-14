@@ -28,7 +28,7 @@ exports.createUser = async (req) => {
 
   try {
     ////Checking user with phone & email
-    if (userWithPhone && userWithEmail) {
+    if (!userWithPhone || !userWithEmail) {
       response.httpStatus = 400;
       response.error = "phone or email already exist";
     } else if (name && address && phone && email) {

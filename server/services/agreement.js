@@ -42,8 +42,8 @@ exports.getFarmById = async (req) => {
 
   // Find the farm By farm id
   try {
-    const farm = await Farm.findOne({ farmer_id: id });
-    const farmer = await Farmer.findOne({ farmer_id: id });
+    const farm = await Farm.findOne({ _id: id });
+    const farmer = await Farmer.findOne({ _id: farm.farmer_id });
     response.httpStatus = 200;
     response.data = {
       farm,
@@ -392,8 +392,13 @@ exports.getAgreements = async (req) => {
           unit_available: { $sum: 1 },
         },
       },
+      {
+        $sort: {
+          "id.start_date": 1, //sort order
+        },
+      },
     ]);
-    // console.log("Result: ", result);
+
     response.data = result;
     response.httpStatus = 200;
   } catch (err) {
