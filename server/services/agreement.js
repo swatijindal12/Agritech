@@ -180,8 +180,204 @@ exports.getAgreementsOfCustomer = async (req) => {
   return response;
 };
 
-// Creating Agreement Bulk Import.. On Upload.
 exports.createAgreement = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // Checking password header
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  try {
+    const data = req.body;
+
+    /* NOTE:- first update in stagetable to  (stage_status:false, aprroval_status:true)
+     stage_status: false & approval_staus: false:- will not show in review list
+     stage_status: true & approval_status: false :- will show in rejected list */
+
+    const farm = await Farm.findOne({ farm_id: data.farm_id });
+    // const agreement = await Agreement.findOne({ _id: data._id })
+
+    // console.log(agreement)
+    // // Read the req.body and add ipfs_url to json data
+    const updatedData = await Promise.all(
+      data.map(async (contract) => {
+        const {
+          file_name,
+          farmer_name,
+          address,
+          agreement_nft_id,
+          tx_hash,
+          farm_nft_id,
+          price,
+          ipfs_url,
+          createdAt,
+          updatedAt,
+          __v,
+          ...rest
+        } = contract;
+        rest.farmer_id = farm.farmer_id;
+        rest.location = farm.location;
+        rest.customer_id = "null";
+        rest.sold_status = "false";
+        rest.agreementclose_status = "false";
+
+        await StageAgreement.updateOne(
+          { _id: contract._id },
+          { stage_status: false, approval_status: true }
+        );
+        contract.ipfs_url = "";
+
+        // -------------- IPFS --------------------
+        const options = {
+          pinataMetadata: {
+            name: contract.farm_nft_id.toString(),
+          },
+          pinataOptions: {
+            cidVersion: 0,
+          },
+        };
+
+        const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+        contract.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+        // -------------- IPFS --------------------
+        return { ...contract };
+      })
+    );
+
+    // Blockchain Integration
+    const mintPromises = [];
+    const Tran = "https://mumbai.polygonscan.com/tx";
+    for (let index = 0; index < updatedData.length; index++) {
+      const contract = updatedData[index];
+      contract.agreement_nft_id = "";
+      // console.log("Single contract: ", contract);
+      const farmerAddr = process.env.FARMER_ADDR;
+
+      const start_date = epocTimeConv(contract.start_date);
+      const end_date = epocTimeConv(contract.end_date);
+      const gasLimit = await marketplaceContract.methods
+        .putContractOnSell(
+          farmerAddr,
+          contract.farm_nft_id,
+          contract.price,
+          start_date,
+          end_date,
+          contract.ipfs_url
+        )
+        .estimateGas({ from: adminAddr });
+
+      // console.log(gasLimit);
+
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      // console.log("bufferedGasLimit", bufferedGasLimit);
+      const sell = marketplaceContract.methods
+        .putContractOnSell(
+          farmerAddr,
+          contract.farm_nft_id,
+          contract.price,
+          start_date,
+          end_date,
+          contract.ipfs_url
+        )
+        .encodeABI();
+
+      const gasPrice = await web3.eth.getGasPrice();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: marketplaceAddr,
+        value: "0x00",
+        data: sell,
+        from: adminAddr,
+      };
+
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+
+      // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+      contract.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      // console.log(await web3.eth.getBlockNumber());
+      let agreement_nft_id = null;
+      const mintPromise = web3.eth
+        .getBlockNumber()
+        .then((latestBlock) => {
+          return new Promise((resolve, reject) => {
+            marketplaceContract.getPastEvents(
+              "Sell",
+              {
+                fromBlock: latestBlock,
+                toBlock: latestBlock,
+              },
+              function (error, events) {
+                if (error) {
+                  reject(error);
+                } else if (events.length > 0) {
+                  const result = events[0].returnValues;
+                  agreement_nft_id = result[2];
+                  contract.agreement_nft_id = result[2];
+                  resolve(contract);
+                } else {
+                  resolve(contract);
+                }
+              }
+            );
+          });
+        })
+        .catch((error) => {
+          response.error = `failed operation ${error}`;
+          response.httpStatus = 400;
+        });
+      mintPromises.push(mintPromise);
+    }
+    await Promise.all(mintPromises);
+
+    // BlockChain end
+
+    // updating in stage table and giving data to agreement collection to insert.
+
+    const agreements = await Agreement.create(updatedData, {
+      select: `-_id -stage_status -approval_status -file_name`,
+    });
+
+    // Removing from staging stable
+    const res = await StageAgreement.deleteMany({
+      _id: { $in: data.map((contr) => contr._id) },
+      stage_status: false,
+    });
+    console.log("res", res);
+
+    response.message = "Data Insertion successful";
+    response.httpStatus = 200;
+    response.data = agreements;
+  } catch (error) {
+    response.error = `operation failed  ${error}`;
+    response.httpStatus = 500;
+  }
+
+  return response;
+};
+
+// Creating Agreement Bulk Import.. On Upload.
+exports.createAgreementOld = async (req) => {
   // General response format
   let response = {
     error: null,

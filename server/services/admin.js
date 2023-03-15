@@ -352,8 +352,186 @@ exports.listAgreements = async (req) => {
 };
 
 // Update Agreement Service ::
-
 exports.updateAgreement = async (req) => {
+  const userLogged = req.user;
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+  //Checking header reason for change
+  const reason = req.headers["reason"];
+
+  const updatedData = req.body;
+  try {
+    // First check agreement is their with id and not active
+    let agreement = await Agreement.findOne({ _id: id, sold_status: false });
+
+    if (agreement) {
+      // Update the Agreement data..
+      await Agreement.updateOne({ _id: id }, updatedData);
+
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        // only log fields that are actually changing
+        if (key in agreement && agreement[key] !== updatedData[key]) {
+          old_values[key] = agreement[key];
+          new_values[key] = updatedData[key];
+          agreement[key] = updatedData[key];
+        }
+      }
+
+      //New value contain createdAT and updated, _id
+      delete new_values.createdAt;
+      delete new_values.updatedAt;
+      delete old_values.createdAt;
+      delete old_values.updatedAt;
+      delete old_values._id;
+      delete new_values._id;
+
+      // Creatingg Log
+      await Audit.create({
+        table_name: "agreement",
+        record_id: agreement._id,
+        change_type: "update",
+        // old_value: JSON.stringify(old_values),
+        // new_value: JSON.stringify(new_values),
+        old_value: Object.keys(old_values).length
+          ? JSON.stringify(old_values)
+          : null,
+        new_value: Object.keys(new_values).length
+          ? JSON.stringify(new_values)
+          : null,
+        user_id: userLogged.id,
+        user_name: userLogged.name,
+        change_reason: reason,
+      });
+
+      agreement = await Agreement.findOne({ _id: id, sold_status: false });
+      const farm = await Farm.findOne({ farm_id: agreement.farm_id });
+
+      const {
+        file_name,
+        farmer_name,
+        address,
+        agreement_nft_id,
+        tx_hash,
+        farm_nft_id,
+        price,
+        ipfs_url,
+        createdAt,
+        updatedAt,
+        __v,
+        ...rest
+      } = agreement._doc;
+
+      rest.farmer_id = farm.farmer_id;
+      rest.location = farm.location;
+
+      const options = {
+        pinataMetadata: {
+          name: agreement.farm_nft_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      agreement.ipfs_url = ipfs_hash;
+      await agreement.save();
+
+      // -------------- IPFS --------------------
+
+      // BLOCKCHAIN TRANSACTION--------------------
+      const amount = req.body.price ? req.body.price : agreement.price;
+      const startDate = req.body.start_date
+        ? req.body.start_date
+        : agreement.start_date;
+      const endDate = req.body.start_date
+        ? req.body.end_date
+        : agreement.end_date;
+
+      const Tran = "https://mumbai.polygonscan.com/tx";
+      const agreement_nftId = agreement.agreement_nft_id;
+
+      const gasLimit = await marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .estimateGas({ from: adminAddr });
+
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      const updateContract = marketplaceContract.methods
+        .updateAgreementData(
+          agreement_nftId,
+          amount,
+          epocTimeConv(startDate),
+          epocTimeConv(endDate),
+          ipfs_hash
+        )
+        .encodeABI();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: marketplaceAddr,
+        value: "0x00",
+        data: updateContract,
+        from: adminAddr,
+      };
+
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+
+      agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      await agreement.save();
+
+      if (transaction.transactionHash) {
+        response.message = `Successfully updated `;
+        response.httpStatus = 200;
+      } else {
+        response.message = `Blockchain error `;
+        response.httpStatus = 500;
+      }
+    } else {
+      response.error = `agreement is active`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
+exports.updateAgreementOld = async (req) => {
   const userLogged = req.user;
   // General response format
   let response = {
@@ -524,176 +702,6 @@ exports.updateAgreement = async (req) => {
   return response;
 };
 
-exports.updateAgreementOld = async (req) => {
-  const userLogged = req.user;
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { id } = req.params;
-
-  // Checking Header for password
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
-
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    return response;
-  }
-  //Checking header reason for change
-  const reason = req.headers["reason"];
-
-  let startDate = req.body.start_date;
-  let endDate = req.body.end_date;
-  let amount = req.body.price;
-  let crop = req.body.crop;
-  let area = req.body.area;
-  let farmer_name = req.body.farmer_name;
-
-  try {
-    // First check agreement is their with id and not active
-    let agreement = await Agreement.findOne({ _id: id, sold_status: false });
-    console.log("AGREEMENT", agreement);
-
-    if (agreement) {
-      amount = amount === undefined ? agreement.price : amount;
-      startDate = startDate === undefined ? agreement.start_date : startDate;
-      endDate = endDate === undefined ? agreement.end_date : endDate;
-      crop = crop === undefined ? agreement.crop : crop;
-      area = area === undefined ? agreement.area : area;
-      farmer_name =
-        farmer_name === undefined ? agreement.farmer_name : farmer_name;
-
-      // console.log('rest', rest)
-      const updatedData = {
-        start_date: startDate,
-        end_date: endDate,
-        price: amount,
-        crop: crop,
-        area: area,
-        farmer_name: farmer_name,
-      };
-
-      console.log("updatedData", updatedData);
-
-      // Update the Agreement data..
-      await Agreement.updateOne({ _id: id }, updatedData);
-
-      const old_values = {};
-      const new_values = {};
-      for (const key in updatedData) {
-        if (key in agreement) {
-          old_values[key] = agreement[key];
-        }
-        new_values[key] = updatedData[key];
-      }
-
-      // Creatingg Log
-      await Audit.create({
-        table_name: "agreement",
-        record_id: agreement._id,
-        change_type: "update",
-        old_value: JSON.stringify(old_values),
-        new_value: JSON.stringify(new_values),
-        user_id: userLogged.id,
-        user_name: userLogged.name,
-        change_reason: reason,
-      });
-
-      agreement = await Agreement.findOne({ _id: id, sold_status: false });
-
-      const {
-        _id,
-        farm_id,
-        file_name,
-        farmer_name,
-        address,
-        agreement_nft_id,
-        tx_hash,
-        farm_nft_id,
-        price,
-        ipfs_url,
-        ...rest
-      } = agreement._doc;
-
-      const options = {
-        pinataMetadata: {
-          name: agreement.farm_nft_id.toString(),
-        },
-        pinataOptions: {
-          cidVersion: 0,
-        },
-      };
-
-      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
-      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
-      agreement.ipfs_url = ipfs_hash;
-      await agreement.save();
-
-      // -------------- IPFS --------------------
-
-      // BLOCKCHAIN TRANSACTION--------------------
-      const Tran = "https://mumbai.polygonscan.com/tx";
-      const agreement_nftId = agreement.agreement_nft_id;
-
-      const gasLimit = await marketplaceContract.methods
-        .updateAgreementData(
-          agreement_nftId,
-          amount,
-          epocTimeConv(startDate),
-          epocTimeConv(endDate),
-          ipfs_hash
-        )
-        .estimateGas({ from: adminAddr });
-
-      const bufferedGasLimit = Math.round(
-        Number(gasLimit) + Number(gasLimit) * Number(0.2)
-      );
-
-      const updateContract = marketplaceContract.methods
-        .updateAgreementData(
-          agreement_nftId,
-          amount,
-          epocTimeConv(startDate),
-          epocTimeConv(endDate),
-          ipfs_hash
-        )
-        .encodeABI();
-
-      const tx = {
-        gas: web3.utils.toHex(bufferedGasLimit),
-        to: marketplaceAddr,
-        value: "0x00",
-        data: updateContract,
-        from: adminAddr,
-      };
-
-      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
-
-      const transaction = await web3.eth.sendSignedTransaction(
-        signedTx.rawTransaction
-      );
-
-      agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
-
-      response.message = `Successfully updated `;
-      response.httpStatus = 200;
-    } else {
-      response.error = `agreement is active`;
-      response.httpStatus = 404;
-    }
-  } catch (error) {
-    response.error = `failed operation ${error}`;
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
 // Delete Agreement Service /:id
 exports.deleteAgreement = async (req) => {
   const userLogged = req.user;
@@ -733,22 +741,21 @@ exports.deleteAgreement = async (req) => {
         sold_status: false,
       });
 
-      const old_values = "No change";
-
-      const new_values = "No change";
-
-      await Audit.create({
-        table_name: "agreement",
-        record_id: agreement.id,
-        change_type: "delete",
-        old_value: old_values,
-        new_value: new_values,
-        user_id: userLogged.id,
-        user_name: userLogged.name,
-        change_reason: reason,
-      });
-
       if (checkAgreement.deletedCount) {
+        // Update log only when deleted..
+        const old_values = "No change";
+        const new_values = "No change";
+        await Audit.create({
+          table_name: "agreement",
+          record_id: agreement.id,
+          change_type: "delete",
+          old_value: old_values,
+          new_value: new_values,
+          user_id: userLogged.id,
+          user_name: userLogged.name,
+          change_reason: reason,
+        });
+
         response.message = `Successfully deleted`;
         response.httpStatus = 200;
       } else {
@@ -1709,7 +1716,338 @@ exports.getStagedFarms = async (req) => {
   return response;
 };
 
+//Change made testing...
 exports.createFarm = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  const data = req.body;
+  const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
+  console.log("farmer", farmer);
+  // status setting stage table
+  data.map(async (farm) => {
+    await StageFarm.updateOne(
+      { _id: farm._id },
+      { stage_status: false, approval_status: true }
+    );
+  });
+
+  const updatedData = await Promise.all(
+    data.map(async (farm, index) => {
+      const {
+        name,
+        farmer_id,
+        file_name,
+        address,
+        pin,
+        farm_pdf,
+        farm_practice_pdf,
+        image_url,
+        video_url,
+        ...rest
+      } = farm;
+      rest.farmer_rating = farmer.rating;
+      console.log("rest", rest);
+      farm.ipfs_url = "";
+
+      // -------------- IPFS --------------------
+      const options = {
+        pinataMetadata: {
+          name: farm.farmer_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      farm.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      // -------------- IPFS --------------------
+      return { ...farm, user_id: farm.farmer_id };
+    })
+  );
+
+  // BlockChain Start
+  const mintPromises = [];
+  const Tran = "https://mumbai.polygonscan.com/tx";
+  for (let index = 0; index < updatedData.length; index++) {
+    const farm = updatedData[index];
+    farm.farm_nft_id = "";
+    // console.log(`ipfs ${index}:`, farm.ipfs_url);
+    // BlockChain Start
+    const farmerAddr = process.env.FARMER_ADDR; //wallet adres
+
+    const gasLimit = await farmNFTContract.methods
+      .mint(farmerAddr, `${farm.ipfs_url}`)
+      .estimateGas({ from: adminAddr });
+
+    const bufferedGasLimit = Math.round(
+      Number(gasLimit) + Number(gasLimit) * Number(0.2)
+    );
+
+    const encodedData = farmNFTContract.methods
+      .mint(farmerAddr, `${farm.ipfs_url}`)
+      .encodeABI();
+
+    const gasPrice = await web3.eth.getGasPrice();
+    const transactionFee =
+      parseFloat(gasPrice) * parseFloat(bufferedGasLimit.toString());
+
+    const tx = {
+      gas: web3.utils.toHex(bufferedGasLimit),
+      to: farmNFTAddr,
+      value: "0x00",
+      data: encodedData,
+      from: adminAddr,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+    // console.log('signedTx : ', signedTx)
+
+    const transaction = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+    // console.log("Transaction : ", transaction.transactionHash);
+    // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+    farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+    let farm_nft_id = null;
+    const mintPromise = new Promise((resolve, reject) => {
+      // create new promise
+      farmNFTContract.getPastEvents(
+        "Mint",
+        {
+          fromBlock: "latest",
+        },
+        function (error, events) {
+          if (error) {
+            reject(error);
+          } else {
+            const result = events[0].returnValues;
+            farm_nft_id = result[1];
+            // console.log("Farm Id", result[1]);
+            farm.farm_nft_id = result[1]; // assign farm_nft_id to farm object
+            resolve();
+          }
+        }
+      );
+    });
+    mintPromises.push(mintPromise);
+  }
+  await Promise.all(mintPromises);
+  // BlockChain End
+
+  // Save Farm data in mongoDB , skip id,s.no key in json
+  // console.log("updatedData :-", updatedData);
+  try {
+    const farms = await Farm.create(updatedData, {
+      select: `-_id -stage_status -approval_status -file_name`,
+    });
+
+    // Removing from staging stable
+    updatedData.map(async (farm) => {
+      await StageFarm.deleteOne({ _id: farm._id }, { stage_status: false });
+    });
+
+    if (farms.length != 0) {
+      // console.log("checking if length");
+
+      (response.message = "Data Insertion successful"),
+        (response.httpStatus = 200),
+        (response.data = updatedData);
+    } else {
+      // console.log("checking else length");
+      (response.error = "Data Insertion failed duplicate data"),
+        (response.httpStatus = 500);
+    }
+  } catch (error) {
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
+  }
+
+  return response;
+};
+
+exports.createFarmOld1 = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  const data = req.body;
+  const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
+
+  // status setting stage table
+  data.map(async (farm) => {
+    await StageFarm.updateOne(
+      { _id: farm._id },
+      { stage_status: false, approval_status: true }
+    );
+  });
+
+  const updatedData = await Promise.all(
+    data.map(async (farm, index) => {
+      const {
+        name,
+        farmer_id,
+        file_name,
+        address,
+        pin,
+        farm_pdf,
+        farm_practice_pdf,
+        image_url,
+        video_url,
+        ...rest
+      } = farm;
+      rest.farmer_rating = farmer.rating;
+      console.log("rest", rest);
+      farm.ipfs_url = "";
+
+      // -------------- IPFS --------------------
+      const options = {
+        pinataMetadata: {
+          name: farm.farmer_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      farm.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      // -------------- IPFS --------------------
+      return { ...farm, user_id: farm.farmer_id };
+    })
+  );
+
+  // BlockChain Start
+  const mintPromises = [];
+  const Tran = "https://mumbai.polygonscan.com/tx";
+  for (let index = 0; index < updatedData.length; index++) {
+    const farm = updatedData[index];
+    farm.farm_nft_id = "";
+    // console.log(`ipfs ${index}:`, farm.ipfs_url);
+    // BlockChain Start
+    const farmerAddr = process.env.FARMER_ADDR; //wallet adres
+
+    const gasLimit = await farmNFTContract.methods
+      .mint(farmerAddr, `${farm.ipfs_url}`)
+      .estimateGas({ from: adminAddr });
+
+    const bufferedGasLimit = Math.round(
+      Number(gasLimit) + Number(gasLimit) * Number(0.2)
+    );
+
+    const encodedData = farmNFTContract.methods
+      .mint(farmerAddr, `${farm.ipfs_url}`)
+      .encodeABI();
+
+    const gasPrice = await web3.eth.getGasPrice();
+    const transactionFee =
+      parseFloat(gasPrice) * parseFloat(bufferedGasLimit.toString());
+
+    const tx = {
+      gas: web3.utils.toHex(bufferedGasLimit),
+      to: farmNFTAddr,
+      value: "0x00",
+      data: encodedData,
+      from: adminAddr,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+    console.log("signedTx : ", signedTx);
+
+    const transaction = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+    // console.log("Transaction : ", transaction.transactionHash);
+    // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+    farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+    let farm_nft_id = null;
+    const mintPromise = new Promise((resolve, reject) => {
+      // create new promise
+      farmNFTContract.getPastEvents(
+        "Mint",
+        {
+          fromBlock: "latest",
+        },
+        function (error, events) {
+          if (error) {
+            reject(error);
+          } else {
+            const result = events[0].returnValues;
+            farm_nft_id = result[1];
+            // console.log("Farm Id", result[1]);
+            farm.farm_nft_id = result[1]; // assign farm_nft_id to farm object
+            resolve();
+          }
+        }
+      );
+    });
+    mintPromises.push(mintPromise);
+  }
+  await Promise.all(mintPromises);
+  // BlockChain End
+
+  // Save Farm data in mongoDB , skip id,s.no key in json
+  // console.log("updatedData :-", updatedData);
+  try {
+    const farms = await Farm.create(updatedData, {
+      select: `-_id -stage_status -approval_status -file_name`,
+    });
+
+    // Removing from staging stable
+    updatedData.map(async (farm) => {
+      await StageFarm.deleteOne({ _id: farm._id }, { stage_status: false });
+    });
+
+    if (farms.length != 0) {
+      // console.log("checking if length");
+
+      (response.message = "Data Insertion successful"),
+        (response.httpStatus = 200),
+        (response.data = updatedData);
+    } else {
+      // console.log("checking else length");
+      (response.error = "Data Insertion failed duplicate data"),
+        (response.httpStatus = 500);
+    }
+  } catch (error) {
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
+  }
+
+  return response;
+};
+
+exports.createFarmOld2 = async (req) => {
   let response = {
     error: null,
     message: null,
@@ -1930,7 +2268,7 @@ exports.deleteFarm = async (req) => {
   return response;
 };
 
-exports.updateFarm = async (req) => {
+exports.updateFarmOld = async (req) => {
   const userLogged = req.user;
   const userId = userLogged._id;
   // General response format
@@ -2219,6 +2557,311 @@ exports.updateFarm = async (req) => {
   return response;
 };
 
+exports.updateFarm = async (req) => {
+  const userLogged = req.user;
+  const userId = userLogged._id;
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { id } = req.params;
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+  const reason = req.headers["reason"];
+
+  const updatedData = req.body;
+
+  try {
+    //Validation
+    const validationRules = {
+      farmer_id: { type: "string" },
+      name: { type: "string", minLength: 3, maxLength: 50 },
+      address: { type: "string", minlegth: 5, maxlength: 200 },
+      pin: { type: "number", minLength: 6, maxLength: 6 },
+      farm_nft_id: { type: "string" },
+      rating: { type: "number" },
+      image_url: { type: "string" },
+      video_url: { type: "string" },
+      location: { type: "string" },
+      farm_size: { type: "string" },
+      food_grain: { type: "boolean" },
+      vegetable: { type: "boolean" },
+      horticulture: { type: "boolean" },
+      floriculture: { type: "boolean" },
+      exotic_crop: { type: "boolean" },
+      farm_pdf: { type: "string" },
+      farm_practice_pdf: { type: "string" },
+      farm_practice_rating: { type: "number" },
+    };
+
+    if (typeof updatedData.farmer_id === String) {
+      response.error = "Invalid farmer id";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.name &&
+      (updatedData.name.length < 3 || updatedData.name.length > 50)
+    ) {
+      response.error =
+        "Invalid name: name must be between 3 and 50 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.address &&
+      (updatedData.address.length < 5 || updatedData.address.length > 200)
+    ) {
+      response.error =
+        "Invalid address: address must be between 5 and 200 characters long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.pin && updatedData.pin.toString().length !== 6) {
+      response.error = "Invalid pin: pin must be 6 digits long";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof farm_nft_id === String) {
+      response.error = "Invalud farm nft id";
+      response.httpStatus = 400;
+      return response;
+    }
+    if (updatedData.rating < 1 || updatedData.rating > 10) {
+      response.error = "Invalid rating";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.image_url && !validator.isURL(updatedData.image_url)) {
+      response.error = "Invalid image URL: image URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.video_url && !validator.isURL(updatedData.video_url)) {
+      response.error = "Invalid video URL: video URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.location && !validator.isURL(updatedData.location)) {
+      response.error =
+        "Invalid location URL: location URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (isNaN(updatedData.farm_size.split(" ")[0])) {
+      response.error = "Farm size is not a number";
+      response.httpStatus = 400;
+      return response;
+    } else if (!updatedData.farm_size.includes("Acres")) {
+      response.error = "Farm size should be in Acres like 1 Acres";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof food_grain === Boolean) {
+      response.error = "Invalid food grain";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof vegetable === Boolean) {
+      response.error = "Invalid vegetable";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof horticulture === Boolean) {
+      response.error = "Invalid horticulture";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof floriculture === Boolean) {
+      response.error = "Invalid floriculture";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (typeof exotic_crop === Boolean) {
+      response.error = "Invalid exotic crops";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (updatedData.farm_pdf && !validator.isURL(updatedData.farm_pdf)) {
+      response.error =
+        "Invalid farm PDF URL: farm PDF URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.farm_practice_pdf &&
+      !validator.isURL(updatedData.farm_practice_pdf)
+    ) {
+      response.error =
+        "Invalid farm practice PDF URL: farm practice PDF URL must be in a valid format";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    if (
+      updatedData.farm_practice_rating < 1 ||
+      updatedData.farm_practice_rating > 10
+    ) {
+      response.error = "Invalid farm practice rating";
+      response.httpStatus = 400;
+      return response;
+    }
+
+    // First check farmer is their with id
+    let farm = await Farm.findOne({ _id: id });
+    let farmer = await Farmer.findOne({ _id: farm.farmer_id });
+    if (farm) {
+      // Old farmer
+      // const old_values = { ...updatedData.toJSON() };
+      // console.log("old_values ", old_values);
+      // update the Farm data..
+      const updateStatus = await Farm.updateOne({ _id: id }, updatedData);
+      console.log("updateStatus 123 : ", updateStatus);
+      // const new_values = { ...updatedData.toJSON() };
+
+      const old_values = {};
+      const new_values = {};
+      for (const key in updatedData) {
+        // only log fields that are actually changing
+        if (key in farm && farm[key] !== updatedData[key]) {
+          old_values[key] = farm[key];
+          new_values[key] = updatedData[key];
+          farm[key] = updatedData[key];
+        }
+      }
+
+      //New value contain createdAT and updated, _id
+      delete new_values.createdAt;
+      delete new_values.updatedAt;
+      delete old_values.createdAt;
+      delete old_values.updatedAt;
+      delete old_values._id;
+      delete new_values._id;
+
+      // console.log("new_values ", new_values);
+      await Audit.create({
+        table_name: "farm",
+        record_id: farm._id,
+        change_type: "update",
+        // old_value: JSON.stringify(old_values),
+        // new_value: JSON.stringify(new_values),
+        old_value: Object.keys(old_values).length
+          ? JSON.stringify(old_values)
+          : null,
+        new_value: Object.keys(new_values).length
+          ? JSON.stringify(new_values)
+          : null,
+        user_id: userId,
+        user_name: userLogged.name,
+        change_reason: reason,
+      });
+
+      const {
+        name,
+        farmer_id,
+        file_name,
+        address,
+        pin,
+        farm_pdf,
+        farm_practice_pdf,
+        image_url,
+        video_url,
+        tx_hash,
+        ipfs_url,
+        createdAt,
+        updatedAt,
+        __v,
+        ...rest
+      } = farm._doc;
+
+      rest.farmer_rating = farmer.rating;
+
+      // IPFS----
+      const options = {
+        pinataMetadata: {
+          name: farm.farmer_id.toString(),
+        },
+        pinataOptions: {
+          cidVersion: 0,
+        },
+      };
+
+      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
+      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+      farm.ipfs_url = ipfs_hash;
+
+      await farm.save();
+
+      const Tran = "https://mumbai.polygonscan.com/tx";
+
+      //BLOCKCHAIN TRANSACTION-------
+      const gasLimit = await farmNFTContract.methods
+        .updateFarm(farm.farm_nft_id, ipfs_hash)
+        .estimateGas({ from: adminAddr });
+      const bufferedGasLimit = Math.round(
+        Number(gasLimit) + Number(gasLimit) * Number(0.2)
+      );
+
+      const encodedData = farmNFTContract.methods
+        .updateFarm(farm.farm_nft_id, ipfs_hash)
+        .encodeABI();
+
+      const tx = {
+        gas: web3.utils.toHex(bufferedGasLimit),
+        to: farmNFTAddr,
+        value: "0x00",
+        data: encodedData,
+        from: adminAddr,
+      };
+      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
+      const transaction = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+      console.log("Transaction : ", transaction.transactionHash);
+      // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
+      farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
+
+      await farm.save();
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
+    } else {
+      response.error = `farm not found`;
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
 exports.getFarms = async (req) => {
   const sortOrder = req.query.sortOrder;
   const cropTypes = req.query.cropTypes;
@@ -2285,7 +2928,7 @@ exports.getFarms = async (req) => {
       const farmData = await Promise.all(
         farms.map(async (farm) => {
           // console.log("FARM ID", farm.farmer_id)
-          const farmer = await Farm.findOne({ farmer_id: farm.farmer_id });
+          const farmer = await Farmer.findOne({ _id: farm.farmer_id });
           return {
             ...farm._doc,
             farmer_rating: farmer.rating,
@@ -2441,67 +3084,6 @@ exports.getAgreementsForAdmin = async (req) => {
         },
       },
     ]);
-
-    // const activeContractsWithCustomerData = await Agreement.aggregate([
-    //   {
-    //     $match: {
-    //       sold_status: true,
-    //       agreementclose_status: false,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$area",
-    //       farmer_name: { $first: "$farmer_name" },
-    //       farm_id: { $first: "$farm_id" },
-    //       crop: { $first: "$crop" },
-    //       address: { $first: "$address" },
-    //       price: { $first: "$price" },
-    //       start_date: { $first: "$start_date" },
-    //       end_date: { $first: "$end_date" },
-    //       agreements: { $push: "$_id" },
-    //       customer_id: { $push: "$customer_id" },
-    //       ipfs_url: { $push: "$ipfs_url" },
-    //       tx_hash: { $push: "$tx_hash" },
-    //       agreement_nft_id: { $push: "$agreement_nft_id" },
-    //       unit_available: { $sum: 1 },
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       localField: "customer_id",
-    //       foreignField: "_id",
-    //       as: "customer_data",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$customer_data",
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$_id",
-    //       farmer_name: { $first: "$farmer_name" },
-    //       farm_id: { $first: "$farm_id" },
-    //       crop: { $first: "$crop" },
-    //       address: { $first: "$address" },
-    //       price: { $first: "$price" },
-    //       start_date: { $first: "$start_date" },
-    //       end_date: { $first: "$end_date" },
-    //       agreements: { $first: "$agreements" },
-    //       customer_id: { $first: "$customer_id" },
-    //       ipfs_url: { $first: "$ipfs_url" },
-    //       tx_hash: { $first: "$tx_hash" },
-    //       agreement_nft_id: { $first: "$agreement_nft_id" },
-    //       unit_available: { $first: "$unit_available" },
-    //       customer_name: { $first: "$customer_data.name" },
-    //       customer_phone: { $first: "$customer_data.phone" },
-    //       customer_email: { $first: "$customer_data.email" },
-    //       customer_address: { $first: "$customer_data.address" },
-    //     },
-    //   },
-    // ]);
-
     const closeContractswithCustomerData = await Agreement.aggregate([
       {
         $match: {
@@ -2563,32 +3145,6 @@ exports.getAgreementsForAdmin = async (req) => {
   return response;
 };
 
-exports.closeAgreementOld = async (req) => {
-  //console.log("Inside closeAgreement");
-  const { id } = req.params; // Agreement Id agreement to Update
-  //console.log("id :- ", id);
-
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  try {
-    // Update ageementClose status to true :-
-    await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
-    response.message = "Agreement closed Successful";
-    response.httpStatus = 200;
-  } catch (error) {
-    response.error = `failed operation ${error}`;
-    response.httpStatus = 200;
-  }
-
-  return response;
-};
-
 exports.closeAgreement = async (req) => {
   //console.log("Inside closeAgreement");
   const { id } = req.params; // Agreement Id agreement to Update
@@ -2605,10 +3161,9 @@ exports.closeAgreement = async (req) => {
     // Update ageementClose status to true :-
     await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
     let agreementClose = await Agreement.findOne({ _id: id });
+    const farm = await Farm.findOne({ farm_id: agreementClose.farm_id });
 
     const {
-      _id,
-      farm_id,
       file_name,
       farmer_name,
       address,
@@ -2617,8 +3172,14 @@ exports.closeAgreement = async (req) => {
       farm_nft_id,
       price,
       ipfs_url,
+      createdAt,
+      updatedAt,
+      __v,
       ...rest
     } = agreementClose._doc;
+
+    rest.farmer_id = farm.farmer_id;
+    rest.location = farm.location;
 
     // IPFS----
     const options = {
