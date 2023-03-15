@@ -49,7 +49,7 @@ const Card = ({ data }) => {
   };
 
   return (
-    <Container onClick={openProfile}>
+    <Container>
       <Image
         src={
           data.image ||

@@ -222,17 +222,19 @@ const Approve = ({ setBackgroundColor }) => {
                           </td>
                         );
                       }
-                      if (row[item]?.toString()?.includes("http"))
-                        return (
+                      if (row[item]?.toString()?.includes("http")) {
+                        return row[item].includes(".jpg") ||
+                          row[item].includes(".png") ||
+                          row[item].includes(".jpeg") ? (
                           <UrlTd onClick={() => window.open(row[item])}>
-                            {row[item].includes(".pdf") ? (
-                              item
-                            ) : (
-                              <ImagePreview src={row[item]} />
-                            )}
+                            <ImagePreview src={row[item]} />
+                          </UrlTd>
+                        ) : (
+                          <UrlTd onClick={() => window.open(row[item])}>
+                            {item}
                           </UrlTd>
                         );
-                      else return <td>{row[item] || 0}</td>;
+                      } else return <td>{row[item].toString()}</td>;
                     })}
                   </tr>
                 );
