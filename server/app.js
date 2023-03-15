@@ -1,6 +1,6 @@
 const express = require("express");
-
 const app = express();
+
 // Importing to read file
 const fileupload = require("express-fileupload");
 
