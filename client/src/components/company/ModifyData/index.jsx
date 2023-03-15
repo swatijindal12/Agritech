@@ -129,14 +129,14 @@ const ModifyData = () => {
   );
 
   useEffect(() => {
-    getList();
+    getList(currentPage);
   }, [currentPage]);
 
-  const getList = () => {
+  const getList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${currentPage}&limit=5&search=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${page}&limit=5&search=${searchText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -271,7 +271,10 @@ const ModifyData = () => {
             <Button
               text={loading ? "...LOADING" : "SEARCH"}
               margin="0 1rem"
-              onClick={getList}
+              onClick={() => {
+                setCurrentPage(1);
+                getList(1);
+              }}
               disabled={loading}
             />
           </InputContainer>
