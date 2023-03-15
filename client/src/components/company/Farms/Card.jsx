@@ -331,6 +331,7 @@ const Card = ({ data, highlight }) => {
       </Container>
       {isPopupOpen && (
         <NFTPopup
+          heading="Farm NFT"
           isOpen={isPopupOpen}
           togglePopup={togglePopup}
           tx_hash={data.tx_hash}

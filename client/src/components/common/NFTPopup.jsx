@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Button from "./Button";
 import Flexbox from "./Flexbox";
+import CrossIcon from "../../assets/cross.svg";
 
 const Container = styled.div`
   position: fixed;
@@ -20,11 +20,19 @@ const Container = styled.div`
 `;
 
 const PopupBox = styled.div`
+  position: relative;
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
   height: 80vh;
   width: 70rem;
+`;
+
+const CrossImage = styled.img`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
 `;
 
 const Heading = styled.p`
@@ -33,8 +41,22 @@ const Heading = styled.p`
   color: #a98467;
 `;
 
+const Heading2 = styled.p`
+  font-size: 1rem;
+  font-weight: 700;
+  color: #a98467;
+  margin-top: 1.5rem;
+`;
+
+const Link = styled.p`
+  font-size: 0.8rem;
+  color: blue;
+  cursor: pointer;
+  margin: 0.5rem 0;
+`;
+
 const TableContainer = styled.div`
-  height: 80%;
+  height: 70%;
   overflow-y: auto;
   display: flex;
   justify-content: center;
@@ -42,7 +64,8 @@ const TableContainer = styled.div`
   table {
     border: 1px solid black;
     border-collapse: collapse;
-    margin: 2rem 0 0 0;
+    margin: 1rem 0 0 0;
+    width: 100%;
 
     tr {
       white-space: pre-wrap;
@@ -52,12 +75,12 @@ const TableContainer = styled.div`
 
     td {
       border: 1px solid black;
-      padding: 1rem;
+      padding: 0 1rem;
       text-align: center;
     }
     th {
       border: 1px solid black;
-      padding: 1rem;
+      padding: 0 1rem;
     }
   }
 `;
@@ -67,7 +90,14 @@ const TableData = styled.div`
   word-wrap: break-word;
 `;
 
-const NFTPopup = ({ tx_hash, getUrl, togglePopup, dbData, requiredFields }) => {
+const NFTPopup = ({
+  tx_hash,
+  getUrl,
+  togglePopup,
+  dbData,
+  requiredFields,
+  heading,
+}) => {
   const [blockchainData, setBlockchainData] = useState(null);
 
   useEffect(() => {
@@ -90,8 +120,8 @@ const NFTPopup = ({ tx_hash, getUrl, togglePopup, dbData, requiredFields }) => {
   return (
     <Container>
       <PopupBox>
-        <Heading style={{ textAlign: "center" }}>Blockchain Details</Heading>
-        <br />
+        <CrossImage src={CrossIcon} alt="cross-icon" onClick={handleClose} />
+        <Heading style={{ textAlign: "center" }}>{heading}</Heading>
         <TableContainer>
           <table>
             <tr>
@@ -118,15 +148,9 @@ const NFTPopup = ({ tx_hash, getUrl, togglePopup, dbData, requiredFields }) => {
             })}
           </table>
         </TableContainer>
-        <Flexbox justify="center">
-          <Button margin="1rem" onClick={handleTxhash} text="Tx hash"></Button>
-          <Button
-            margin="1rem"
-            onClick={handleClose}
-            text="Close"
-            color="#FCBF49"
-          />
-        </Flexbox>
+        <Heading2>Verify in Blockchain</Heading2>
+        <Link onClick={() => window.open(getUrl)}>Farm NFT metadata</Link>
+        <Link onClick={handleTxhash}>Farm NFT transaction</Link>
       </PopupBox>
     </Container>
   );
