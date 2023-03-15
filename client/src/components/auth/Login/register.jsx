@@ -119,6 +119,11 @@ const TitleContainer = styled.div`
   }
 `;
 
+const Error = styled.p`
+  font-size: 1rem;
+  color: red;
+`;
+
 const Register = () => {
   const [number, setNumber] = useState("");
   const [name, setName] = useState("");
@@ -127,6 +132,7 @@ const Register = () => {
   const [otp, setOtp] = useState("");
   const [authorised, setAuthorised] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -159,6 +165,7 @@ const Register = () => {
       })
       .catch(err => {
         console.log("error in sending otp", err);
+        setError(err.response.data.error);
       });
   };
 
@@ -194,6 +201,7 @@ const Register = () => {
             <Heading>Register</Heading>
             <LogoImage src={Logo} alt="Logo" />
             <br />
+            {error && <Error>Error : {error}</Error>}
             <TitleContainer>
               <Title>NAME</Title>
               <Input
