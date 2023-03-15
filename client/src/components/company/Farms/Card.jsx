@@ -322,7 +322,7 @@ const Card = ({ data, highlight }) => {
                     marginLeft={"-7rem"}
                     marginLeftMobile={"5.5rem"}
                   />
-                  <RatingNumber2>{data?.farm_practice_rating}</RatingNumber2>
+                  <RatingNumber2>{data?.farmer_rating}</RatingNumber2>
                 </RatingContainer>
               </Flexbox>
             </Flexbox>
