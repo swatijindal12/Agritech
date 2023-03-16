@@ -157,9 +157,9 @@ exports.paymentVerification = async (req) => {
             });
             const Agreement_nft_id = single_agreement.agreement_nft_id;
 
+            const farm = await Farm.findOne({ _id: single_agreement.farm_id })
+
             const {
-              _id,
-              farm_id,
               file_name,
               farmer_name,
               address,
@@ -168,8 +168,14 @@ exports.paymentVerification = async (req) => {
               farm_nft_id,
               price,
               ipfs_url,
+              createdAt,
+              updatedAt,
+              __v,
               ...rest
-            } = single_agreement._doc;
+            } = single_agreement._doc
+      
+            rest.farmer_id = farm.farmer_id
+            rest.location = farm.location
 
             //Buyers detail Update in IPFS_URL
             // Create New Ipfs_url
