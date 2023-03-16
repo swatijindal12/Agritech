@@ -9,4 +9,6 @@ export default styled.div`
   padding: ${props => (props.padding ? props.padding : "0")};
   background-color: ${props =>
     props.background ? props.background : "transparent"};
+  column-gap: ${props => (props.columnGap ? props.columnGap : "unset")};
+  row-gap: ${props => (props.rowGap ? props.rowGap : "unset")};
 `;

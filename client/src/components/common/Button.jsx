@@ -21,6 +21,11 @@ const Container = styled.div`
   border: ${props => props.border && `2px solid ${props.border}`};
   @media only screen and (max-width: 990px) {
     width: ${props => (props.mobileWidth ? props.mobileWidth : "fit-content")};
+    padding: 0.62rem 1.5rem;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    font-weight: 600;
   }
 `;
 
