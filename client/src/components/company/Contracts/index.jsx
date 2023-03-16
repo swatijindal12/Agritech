@@ -75,7 +75,7 @@ const Contracts = () => {
 
   return (
     <Container>
-      <Title>Farming Contracts</Title>
+      {/* <Title>Farming Contracts</Title> */}
       <OptionContainer>
         <Option
           selected={currentPage === "active"}

@@ -126,7 +126,7 @@ const VerificationPopup = ({
           ></Button>
           <Button
             onClick={() => {
-              setError(false);
+              if (setError) setError(false);
               togglePopup();
             }}
             text={"Close"}
