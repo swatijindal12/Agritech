@@ -152,6 +152,7 @@ const Login = () => {
       })
       .catch(err => {
         console.log("error in sending otp", err);
+        setError(err?.response?.data?.error);
       });
   };
 
