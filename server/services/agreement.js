@@ -553,7 +553,7 @@ exports.createAgreementOld = async (req) => {
 
 // Marketplace both customer & admin
 exports.getAgreements = async (req) => {
-  // const searchString = req.query.search;
+  const searchString = req.query.search;
   // General response format
   let response = {
     error: null,
@@ -563,12 +563,14 @@ exports.getAgreements = async (req) => {
   };
 
   try {
+    //
+    let match = { sold_status: false };
+    if (searchString) {
+      match.farmer_name = { $regex: new RegExp(searchString, "i") };
+    }
+
     const result = await Agreement.aggregate([
-      {
-        $match: {
-          sold_status: false,
-        },
-      },
+      { $match: match },
       {
         $group: {
           _id: {
@@ -587,6 +589,9 @@ exports.getAgreements = async (req) => {
           agreement_nft_id: { $push: "$agreement_nft_id" },
           unit_available: { $sum: 1 },
         },
+      },
+      {
+        $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
       },
       {
         $sort: {
