@@ -96,7 +96,7 @@ const NFTPopup = ({
   togglePopup,
   dbData,
   requiredFields,
-  heading,
+  type,
 }) => {
   const [blockchainData, setBlockchainData] = useState(null);
 
@@ -121,7 +121,7 @@ const NFTPopup = ({
     <Container>
       <PopupBox>
         <CrossImage src={CrossIcon} alt="cross-icon" onClick={handleClose} />
-        <Heading style={{ textAlign: "center" }}>{heading}</Heading>
+        <Heading style={{ textAlign: "center" }}>{type} NFT</Heading>
         <TableContainer>
           <table>
             <tr>
@@ -134,14 +134,29 @@ const NFTPopup = ({
                 <tr>
                   <th>{row}</th>
                   <td>
-                    <TableData>
-                      {dbData[row] && dbData[row]?.toString()}{" "}
-                    </TableData>
+                    {dbData && dbData[row]?.toString()?.includes("https://") ? (
+                      <TableData>
+                        <a href={dbData[row]} target="_blank">
+                          {dbData && dbData[row]?.toString()}
+                        </a>
+                      </TableData>
+                    ) : (
+                      <TableData>{dbData && dbData[row]?.toString()}</TableData>
+                    )}
                   </td>
                   <td>
-                    <TableData>
-                      {blockchainData && blockchainData[row]?.toString()}
-                    </TableData>
+                    {blockchainData &&
+                    blockchainData[row]?.toString()?.includes("https://") ? (
+                      <TableData>
+                        <a href={blockchainData[row]} target="_blank">
+                          {blockchainData && blockchainData[row]?.toString()}
+                        </a>
+                      </TableData>
+                    ) : (
+                      <TableData>
+                        {blockchainData && blockchainData[row]?.toString()}
+                      </TableData>
+                    )}
                   </td>
                 </tr>
               );
@@ -149,8 +164,10 @@ const NFTPopup = ({
           </table>
         </TableContainer>
         <Heading2>Verify in Blockchain</Heading2>
-        <Link onClick={() => window.open(getUrl)}>Farm NFT metadata</Link>
-        <Link onClick={handleTxhash}>Farm NFT transaction</Link>
+        <Link onClick={() => window.open(getUrl)}>
+          {type} NFT metadata (IPFS)
+        </Link>
+        <Link onClick={handleTxhash}>{type} NFT transaction (Polygon)</Link>
       </PopupBox>
     </Container>
   );

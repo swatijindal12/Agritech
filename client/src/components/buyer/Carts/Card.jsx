@@ -89,7 +89,7 @@ const Card = ({ data, index }) => {
       {selectedNFTId &&
         data?.agreement_nft_id.map((nftId, index) => (
           <NFTPopup
-            heading="Contract NFT"
+            type="Contract"
             isOpen={selectedNFTId === nftId}
             togglePopup={togglePopup}
             tx_hash={data.tx_hash[index]}

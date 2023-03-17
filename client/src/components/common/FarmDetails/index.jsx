@@ -304,7 +304,7 @@ const FarmDetails = () => {
       </Container>
       {isPopupOpen && (
         <NFTPopup
-          heading="Farm NFT"
+          type="Farm"
           isOpen={isPopupOpen}
           togglePopup={togglePopup}
           tx_hash={farmDetails?.farm?.tx_hash}
