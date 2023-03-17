@@ -20,7 +20,6 @@ exports.createAgreement = async (req, res, next) => {
 
 // Route to      => api/v1/agreements
 exports.getAgreements = async (req, res, next) => {
-  console.log("Inside get agreement controllers");
   agreementServices
     .getAgreements(req)
     .then((response) => {

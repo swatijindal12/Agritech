@@ -5,6 +5,7 @@ const Order = require("../models/order");
 const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
+const Farm = require("../models/farms");
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -155,11 +156,18 @@ exports.paymentVerification = async (req) => {
             let single_agreement = await Agreement.findOne({
               _id: order_items[i].agreement_id,
             });
+
+            // // handling if it is already bought
+            // if (single_agreement.sold_status) {
+            //   response.error = "Sorry , agreement already bought";
+            //   response.httpStatus = 500;
+            //   return response;
+            // }
             const Agreement_nft_id = single_agreement.agreement_nft_id;
+            //Finding associated Farm
+            const farm = await Farm.findOne({ _id: single_agreement.farm_id });
 
             const {
-              _id,
-              farm_id,
               file_name,
               farmer_name,
               address,
@@ -168,8 +176,15 @@ exports.paymentVerification = async (req) => {
               farm_nft_id,
               price,
               ipfs_url,
+              createdAt,
+              updatedAt,
+              __v,
               ...rest
             } = single_agreement._doc;
+
+            rest.farm_id = farm._id;
+            rest.farmer_id = farm.farmer_id;
+            rest.location = farm.location;
 
             //Buyers detail Update in IPFS_URL
             // Create New Ipfs_url
@@ -184,10 +199,12 @@ exports.paymentVerification = async (req) => {
 
             // console.log("REST : ", rest);
 
-            const ipfsHash = await pinata.pinJSONToIPFS(
-              { ...rest, user_id: userId },
-              options
-            );
+            // const ipfsHash = await pinata.pinJSONToIPFS(
+            //   { ...rest, user_id: userId },
+            //   options
+            // );
+            //Remove user_id:UserId
+            const ipfsHash = await pinata.pinJSONToIPFS({ ...rest }, options);
             const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
 
             single_agreement.ipfs_url = ipfs_hash;
