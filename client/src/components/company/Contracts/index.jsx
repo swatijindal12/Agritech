@@ -3,10 +3,10 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
-import Title from "../../common/Title";
 import ActiveCard from "./ActiveCard";
 import ClosedCard from "./ClosedCard";
 import EmptyIcon from "../../../assets/empty-box.svg";
+import Button from "../../common/Button";
 
 const Container = styled.div`
   padding: 1rem;
@@ -47,18 +47,46 @@ const CardsContainer = styled.div`
   }
 `;
 
+const InputContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    width: 100vw;
+    padding: 0;
+    margin: 0 auto 1rem;
+  }
+`;
+
+const Input = styled.input`
+  padding: 1rem 2rem;
+  border: none;
+  width: 20rem;
+  border-radius: 24px;
+  background-color: #f5f5f5;
+
+  @media screen and (max-width: 990px) {
+    width: 100%;
+  }
+`;
+
 const Contracts = () => {
   const [currentPage, setCurrentpage] = useState("active");
   const [active, setActive] = useState([]);
   const [closed, setClosed] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
+    getList();
+    setSearchText("");
+  }, [currentPage]);
+
+  const getList = () => {
+    setLoading(true);
     axios
       .get(
         user?.data.role === "admin"
-          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement`
-          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement`,
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}`
+          : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement?search=${searchText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -66,16 +94,33 @@ const Contracts = () => {
         }
       )
       .then(res => {
+        setLoading(false);
         console.log("response is ", res);
         setActive(res.data.data.active);
         setClosed(res.data.data.close);
       })
-      .catch(err => console.log("Error in fetching dashboard data ", err));
-  }, []);
+      .catch(err => {
+        setLoading(false);
+        console.log("Error in fetching dashboard data ", err);
+      });
+  };
 
   return (
     <Container>
-      {/* <Title>Farming Contracts</Title> */}
+      <InputContainer margin="0 2rem">
+        <Input
+          type="text"
+          placeholder="Search by Name"
+          onChange={e => setSearchText(e.target.value)}
+          value={searchText}
+        />
+        <Button
+          text={loading ? "...LOADING" : "SEARCH"}
+          margin="0 1rem"
+          onClick={getList}
+          disabled={loading}
+        />
+      </InputContainer>
       <OptionContainer>
         <Option
           selected={currentPage === "active"}
