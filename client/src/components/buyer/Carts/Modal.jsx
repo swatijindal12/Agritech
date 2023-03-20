@@ -34,7 +34,7 @@ const Modal = () => {
   return (
     <Container>
       <InnerContianer>
-        <Message>Payment Successfull</Message>
+        <Message>Payment Successful</Message>
         <Lottie
           animationData={SuccessLottie}
           loop={false}

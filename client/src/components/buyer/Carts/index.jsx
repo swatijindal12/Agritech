@@ -48,10 +48,19 @@ const CardsContainer = styled(Flexbox)`
   justify-content: space-around;
 `;
 
+const Error = styled.p`
+  font-size: 1rem;
+  color: red;
+  text-align: center;
+  margin-bottom: 0.5rem;
+`;
+
 const Cart = () => {
   const [finalAmount, setFinalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [error, setError] = useState(false);
+
   const data = useSelector(store => store.cart.cart);
   const user = useSelector(store => store.auth.user);
   const dispatch = useDispatch();
@@ -100,16 +109,25 @@ const Cart = () => {
     if (data.length == 0) {
       return;
     }
-    const order = await axios.post(
-      `${process.env.REACT_APP_BASE_URL}/marketplace/checkout`,
-      checkoutData,
-      {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
+    let order;
+    try {
+      order = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/marketplace/checkout`,
+        checkoutData,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      );
+      console.log("order data", order.data)
+      if(order.data.error){
+        setError(order.data.error)
       }
-    );
-
+    } catch (err) {
+      console.log("error while buy contract", err);
+      setError(err.order.data.error);
+    }
     console.log("here the key is ", " data is ", order);
 
     const options = {
@@ -184,6 +202,7 @@ const Cart = () => {
           <FinalAmount>
             <span>Total </span> ₹ {finalAmount}
           </FinalAmount>
+          {error && <Error>Error : {error}</Error>}
 
           <Button
             text="CHECKOUT"
