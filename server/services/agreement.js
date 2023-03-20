@@ -116,6 +116,12 @@ exports.getAgreementsOfCustomer = async (req) => {
           },
         },
       },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
     ]);
 
     const closeContractsWithCustomerData = await Agreement.aggregate([
@@ -595,7 +601,8 @@ exports.getAgreements = async (req) => {
       },
       {
         $sort: {
-          "id.start_date": 1, //sort order
+          "_id.start_date": 1,
+          "_id.crop": 1,
         },
       },
     ]);

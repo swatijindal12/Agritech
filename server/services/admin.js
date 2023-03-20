@@ -118,8 +118,19 @@ exports.validate = async (req) => {
           }
         }
 
-        if (item.price && isNaN(item.price && item.price % 1 !== 0)) {
+        if (
+          !item.price ||
+          isNaN(item.price) ||
+          parseInt(item.price % 1 !== 0) ||
+          !Number.isInteger(parseFloat(item.price))
+        ) {
           errors.price = "Price should be a number";
+        }
+
+        if (!item.area || isNaN(item.area.split(" ")[0])) {
+          errors.area = "area is not a number";
+        } else if (!item.area.includes("Acres")) {
+          errors.area = "area should be in Acres like 1 Acres";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -531,177 +542,6 @@ exports.updateAgreement = async (req) => {
   return response;
 };
 
-exports.updateAgreementOld = async (req) => {
-  const userLogged = req.user;
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { id } = req.params;
-
-  // Checking Header for password
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
-
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    return response;
-  }
-  //Checking header reason for change
-  const reason = req.headers["reason"];
-
-  const updatedData = req.body;
-  try {
-    // First check agreement is their with id and not active
-    let agreement = await Agreement.findOne({ _id: id, sold_status: false });
-
-    if (agreement) {
-      // Update the Agreement data..
-      await Agreement.updateOne({ _id: id }, updatedData);
-
-      const old_values = {};
-      const new_values = {};
-      for (const key in updatedData) {
-        // only log fields that are actually changing
-        if (key in agreement && agreement[key] !== updatedData[key]) {
-          old_values[key] = agreement[key];
-          new_values[key] = updatedData[key];
-          agreement[key] = updatedData[key];
-        }
-      }
-
-      //New value contain createdAT and updated, _id
-      delete new_values.createdAt;
-      delete new_values.updatedAt;
-      delete old_values.createdAt;
-      delete old_values.updatedAt;
-      delete old_values._id;
-      delete new_values._id;
-
-      // Creatingg Log
-      await Audit.create({
-        table_name: "agreement",
-        record_id: agreement._id,
-        change_type: "update",
-        // old_value: JSON.stringify(old_values),
-        // new_value: JSON.stringify(new_values),
-        old_value: Object.keys(old_values).length
-          ? JSON.stringify(old_values)
-          : null,
-        new_value: Object.keys(new_values).length
-          ? JSON.stringify(new_values)
-          : null,
-        user_id: userLogged.id,
-        user_name: userLogged.name,
-        change_reason: reason,
-      });
-
-      agreement = await Agreement.findOne({ _id: id, sold_status: false });
-
-      const {
-        _id,
-        farm_id,
-        file_name,
-        farmer_name,
-        address,
-        agreement_nft_id,
-        tx_hash,
-        farm_nft_id,
-        price,
-        ipfs_url,
-        ...rest
-      } = agreement._doc;
-
-      const options = {
-        pinataMetadata: {
-          name: agreement.farm_nft_id.toString(),
-        },
-        pinataOptions: {
-          cidVersion: 0,
-        },
-      };
-
-      const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
-      const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
-      agreement.ipfs_url = ipfs_hash;
-      await agreement.save();
-
-      // -------------- IPFS --------------------
-
-      // BLOCKCHAIN TRANSACTION--------------------
-      const amount = req.body.price ? req.body.price : agreement.price;
-      const startDate = req.body.start_date
-        ? req.body.start_date
-        : agreement.start_date;
-      const endDate = req.body.start_date
-        ? req.body.end_date
-        : agreement.end_date;
-
-      const Tran = "https://mumbai.polygonscan.com/tx";
-      const agreement_nftId = agreement.agreement_nft_id;
-
-      const gasLimit = await marketplaceContract.methods
-        .updateAgreementData(
-          agreement_nftId,
-          amount,
-          epocTimeConv(startDate),
-          epocTimeConv(endDate),
-          ipfs_hash
-        )
-        .estimateGas({ from: adminAddr });
-
-      const bufferedGasLimit = Math.round(
-        Number(gasLimit) + Number(gasLimit) * Number(0.2)
-      );
-
-      const updateContract = marketplaceContract.methods
-        .updateAgreementData(
-          agreement_nftId,
-          amount,
-          epocTimeConv(startDate),
-          epocTimeConv(endDate),
-          ipfs_hash
-        )
-        .encodeABI();
-
-      const tx = {
-        gas: web3.utils.toHex(bufferedGasLimit),
-        to: marketplaceAddr,
-        value: "0x00",
-        data: updateContract,
-        from: adminAddr,
-      };
-
-      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
-
-      const transaction = await web3.eth.sendSignedTransaction(
-        signedTx.rawTransaction
-      );
-      agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
-
-      if (transaction.transactionHash) {
-        response.message = `Successfully updated `;
-        response.httpStatus = 200;
-      } else {
-        response.message = `Blockchain error `;
-        response.httpStatus = 500;
-      }
-    } else {
-      response.error = `agreement is active`;
-      response.httpStatus = 404;
-    }
-  } catch (error) {
-    response.error = `failed operation ${error}`;
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
 // Delete Agreement Service /:id
 exports.deleteAgreement = async (req) => {
   const userLogged = req.user;
@@ -773,7 +613,7 @@ exports.deleteAgreement = async (req) => {
   return response;
 };
 
-exports.validateFarmers = async (req) => {
+exports.validateFarmersOld = async (req) => {
   // General response format
   let response = {
     error: null,
@@ -846,7 +686,17 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
+          !item.rating ||
+          isNaN(item.rating) ||
+          item.rating < 1 ||
+          item.rating > 10
+        ) {
+          errors.rating = "rating should be a number between 1 and 10";
+        }
+
+        if (
           !item.phone ||
+          isNaN(item.phone) ||
           !/^\d+$/.test(item.phone) ||
           item.phone.length !== 10
         ) {
@@ -868,11 +718,12 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
-          !item.farmer_pdf &&
-          !item.farmer_pdf.startsWith("https://") &&
+          !item.farmer_pdf ||
+          !item.farmer_pdf.startsWith("https://") ||
           !item.farmer_pdf.endsWith(".pdf")
         ) {
-          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+          errors.farmer_pdf =
+            "Farmer PDF should start with 'https://' and end with .pdf";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -927,6 +778,196 @@ exports.validateFarmers = async (req) => {
         (response.httpStatus = 400),
           (response.error = errorLines),
           (response.data = data);
+      } else {
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+          response.data = data;
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+        }
+      }
+    }
+  }
+  return response;
+};
+
+exports.validateFarmers = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  if (!req.files || !req.files.file) {
+    response.error = "no file selected";
+    response.httpStatus = 400;
+  } else {
+    // Read the contents of the file
+    const file = req.files.file;
+    // Parse the JSON data
+    // const data = JSON.parse(fileContent); //JSON DATA
+    const data = await csvToJson(file);
+
+    // Check file type
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!farmerSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+    } else {
+      const errorLines = [];
+      // Creating List of errors.
+      const uniquePhones = new Set();
+      const uniqueEmails = new Set();
+
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        let errors = {
+          line: i,
+          name: "",
+          email: "",
+          phone: "",
+          pin: "",
+          rating: "",
+          education: "",
+          address: "",
+          image_url: "",
+          farmer_pdf: "",
+        };
+        item.phone = item.phone.trim();
+
+        if (uniquePhones.has(item.phone)) {
+          errors.phone = "Phone number already exists in the file";
+        } else {
+          uniquePhones.add(item.phone);
+        }
+
+        if (uniqueEmails.has(item.email)) {
+          errors.email = "Email already exists in the file";
+        } else {
+          uniqueEmails.add(item.email);
+        }
+
+        if (!item.name && item.name.length >= 3) {
+          errors.name = "Name should be 3 characters long";
+        }
+
+        if (
+          !item.email ||
+          !item.email.includes("@") ||
+          !item.email.endsWith(".com")
+        ) {
+          errors.email = "Email should contain '@' and end with '.com'";
+        }
+
+        let phoneError = false;
+        if (
+          !item.phone ||
+          !/^\d+$/.test(item.phone) ||
+          item.phone?.length < 10 ||
+          item.phone?.length > 10
+        ) {
+          phoneError = true;
+          errors.phone =
+            "Phone should be of length of 10 and only contain numeric value.";
+        }
+
+        if (!item.pin || !/^\d+$/.test(item.pin) || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 characters long";
+        }
+
+        if (
+          !item.rating ||
+          isNaN(item.rating) ||
+          item.rating < 1 ||
+          item.rating > 10
+        ) {
+          errors.rating = "Rating should be a number between 1 and 10";
+        }
+
+        if (!item.image_url || !item.image_url.startsWith("https://")) {
+          errors.image_url =
+            "Invalid image URL format. Must start with 'https://'";
+        }
+
+        if (!item.image_url || !/(jpeg|jpg|png)$/.test(item.image_url)) {
+          errors.image_url =
+            "Invalid image URL format. Must end with '.jpeg', '.jpg', or '.png'";
+        }
+
+        if (
+          !item.farmer_pdf &&
+          !item.farmer_pdf.startsWith("https://") &&
+          !item.farmer_pdf.endsWith(".pdf")
+        ) {
+          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "name",
+          "email",
+          "address",
+          "phone",
+          "pin",
+          "rating",
+          "education",
+          "address",
+          "image_url",
+          "farmer_pdf",
+        ];
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
+          }
+        }
+
+        // Check for duplicate phone and email in DB
+        let farmerInDbPhone = undefined;
+        if (!phoneError) {
+          farmerInDbPhone = await Farmer.findOne({ phone: item.phone });
+        }
+        const farmerInDbEmail = await Farmer.findOne({ email: item.email });
+
+        if (farmerInDbPhone && farmerInDbEmail) {
+          errors.phone = "Phone already exists";
+          errors.email = "Email already exists";
+        } else if (farmerInDbEmail) {
+          errors.email = "Email already exists";
+        } else if (farmerInDbPhone) {
+          console.log(phoneError, farmerInDbPhone);
+          errors.phone = "Phone already exists";
+        }
+
+        if (
+          errors.name ||
+          errors.email ||
+          errors.phone ||
+          errors.pin ||
+          errors.address ||
+          errors.rating ||
+          errors.education ||
+          errors.image_url ||
+          errors.farmer_pdf
+        ) {
+          errorLines.push(errors);
+        }
+      }
+
+      if (errorLines.length >= 1) {
+        // There are error some lines missing data
+        response.httpStatus = 400;
+        response.error = errorLines;
+        response.data = data;
       } else {
         // check if the empty file
         if (data.length == 0) {
@@ -1438,6 +1479,8 @@ exports.validateFarms = async (req) => {
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
     const data = await csvToJson(file);
+
+    console.log("data", data);
     // Check file type
     if (file.mimetype != "text/csv") {
       response.error = "select csv file";
@@ -1468,6 +1511,11 @@ exports.validateFarms = async (req) => {
           rating: "",
           image_url: "",
           video_url: "",
+          food_grains: "",
+          vegetables: "",
+          horticulture: "",
+          floriculture: "",
+          exotic_crops: "",
         };
         if (uniqueLocation.has(item.location)) {
           errors.location = "Unique Location already exists in the file";
@@ -1489,7 +1537,7 @@ exports.validateFarms = async (req) => {
         }
 
         if (
-          !item.rating ||
+          !item.farm_practice_rating ||
           isNaN(item.farm_practice_rating) ||
           item.farm_practice_rating < 1 ||
           item.farm_practice_rating > 10
@@ -1536,6 +1584,40 @@ exports.validateFarms = async (req) => {
         ) {
           errors.farm_practice_pdf =
             "Farm_practice_pdf should start with 'https://' and ends with '.pdf'";
+        }
+        if (
+          !/^[01]+$/.test(item.food_grains) ||
+          (item.food_grains && item.food_grains.length !== 1)
+        ) {
+          errors.food_grains = "Food_grain must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.vegetables) ||
+          (item.vegetables && item.vegetables.length != 1)
+        ) {
+          errors.vegetables = "vegetables must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.floriculture) ||
+          (item.floriculture && item.floriculture.length != 1)
+        ) {
+          errors.floriculture = "floriculture must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.horticulture) ||
+          (item.horticulture && item.horticulture.length != 1)
+        ) {
+          errors.horticulture = "horticulture must be of boolean type 0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.exotic_crops) ||
+          (item.exotic_crops && item.exotic_crops.length != 1)
+        ) {
+          errors.exotic_crops = "exotic_crops must be of boolean type  0 or 1";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -1597,7 +1679,12 @@ exports.validateFarms = async (req) => {
           errors.farm_practice_pdf ||
           errors.rating ||
           errors.image_url ||
-          errors.video_url
+          errors.video_url ||
+          errors.food_grains ||
+          errors.vegetables ||
+          errors.horticulture ||
+          errors.floriculture ||
+          errors.exotic_crops
         ) {
           errorLines.push(errors);
         }
@@ -1648,6 +1735,8 @@ exports.stagedFarms = async (req) => {
       } else {
         const data = await csvToJson(file);
         // Add the file name to each data object
+
+        console.log("data", data);
 
         // if Same file name do not exist
         const fileExist = await StageFarm.find({ file_name: file.name });
@@ -2481,6 +2570,12 @@ exports.getAgreementsForAdmin = async (req) => {
           customer_address: {
             $first: { $arrayElemAt: ["$customer_data.address", 0] },
           },
+        },
+      },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
         },
       },
     ]);
