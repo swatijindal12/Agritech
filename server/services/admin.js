@@ -12,6 +12,15 @@ const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 const mongoose = require("mongoose");
 
+const getEnvVariable = require("../config/privateketAWS");
+
+// Calling function to get the privateKey from aws params storage
+async function getPrivateKeyAWS(keyName) {
+  const privateKeyValue = await getEnvVariable(keyName);
+  // return
+  return privateKeyValue[`${keyName}`];
+}
+
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -364,6 +373,7 @@ exports.listAgreements = async (req) => {
 
 // Update Agreement Service ::
 exports.updateAgreement = async (req) => {
+  console.log("updateAgreement :- ", updateAgreement);
   const userLogged = req.user;
   // General response format
   let response = {
@@ -374,6 +384,8 @@ exports.updateAgreement = async (req) => {
   };
 
   const { id } = req.params;
+  // Getting private From aws params store
+  // const Private_Key = await getPrivateKeyAWS("agritect-private-key");
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -1743,8 +1755,19 @@ exports.stagedFarms = async (req) => {
 
         let updatedData;
         if (fileExist.length <= 0) {
+          // updatedData = data.map((eachdata) => {
+          //   return { ...eachdata, file_name: file.name };
+          // });
+
           updatedData = data.map((eachdata) => {
-            return { ...eachdata, file_name: file.name };
+            const { exotic_crops, vegetables, food_grains, ...rest } = eachdata;
+            return {
+              ...rest,
+              exotic_crop: exotic_crops,
+              vegetable: vegetables,
+              food_grain: food_grains,
+              file_name: file.name,
+            };
           });
           // Insert record into DB (stageFarmer)
           const stageFarm = await StageFarm.create(updatedData);
