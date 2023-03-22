@@ -116,6 +116,12 @@ exports.getAgreementsOfCustomer = async (req) => {
           },
         },
       },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
     ]);
 
     const closeContractsWithCustomerData = await Agreement.aggregate([
@@ -553,7 +559,7 @@ exports.createAgreementOld = async (req) => {
 
 // Marketplace both customer & admin
 exports.getAgreements = async (req) => {
-  // const searchString = req.query.search;
+  const searchString = req.query.search;
   // General response format
   let response = {
     error: null,
@@ -563,12 +569,14 @@ exports.getAgreements = async (req) => {
   };
 
   try {
+    //
+    let match = { sold_status: false };
+    if (searchString) {
+      match.farmer_name = { $regex: new RegExp(searchString, "i") };
+    }
+
     const result = await Agreement.aggregate([
-      {
-        $match: {
-          sold_status: false,
-        },
-      },
+      { $match: match },
       {
         $group: {
           _id: {
@@ -589,8 +597,12 @@ exports.getAgreements = async (req) => {
         },
       },
       {
+        $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+      },
+      {
         $sort: {
-          "id.start_date": 1, //sort order
+          "_id.start_date": 1,
+          "_id.crop": 1,
         },
       },
     ]);

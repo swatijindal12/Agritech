@@ -45,10 +45,13 @@ exports.createUser = async (req) => {
       response.error =
         "Name only contain alphabets & length must be greater than 3";
       return response;
-    } else if (!validator.isMobilePhone(phone)) {
+    } else if (
+      !validator.isMobilePhone(phone) ||
+      phone.length < 10 ||
+      phone.length > 10
+    ) {
       response.httpStatus = 400;
       response.error = "Phone should be of length of 10";
-
       return response;
     } else if (!validator.isEmail(email)) {
       response.httpStatus = 400;
@@ -172,6 +175,14 @@ exports.login = async (req) => {
     if (!phone) {
       response.httpStatus = 400;
       response.error = "Enter phone number";
+    } else if (
+      !validator.isMobilePhone(phone) ||
+      phone.length < 10 ||
+      phone.length > 10
+    ) {
+      response.httpStatus = 400;
+      response.error = "Phone number should be of length of 10";
+      return response;
     }
 
     // Finding user in database
@@ -181,6 +192,7 @@ exports.login = async (req) => {
     if (!user) {
       response.httpStatus = 404;
       response.error = "User not found";
+      return response;
     }
 
     // Twilio send OTP service
@@ -199,9 +211,11 @@ exports.login = async (req) => {
     //     (response.httpStatus = 400),
     //       (response.error = `failed operation ${error}`);
     //   });
-    (response.message = `OTP sent to your number`), (response.httpStatus = 200);
+    response.message = `OTP sent to your number`;
+    response.httpStatus = 200;
   } catch (error) {
-    (response.httpStatus = 404), (response.error = `User not found`);
+    response.httpStatus = 404;
+    response.error = `User not found`;
   }
 
   return response;

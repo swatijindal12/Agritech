@@ -49,28 +49,18 @@ const stageFarmSchema = new mongoose.Schema(
     },
     food_grain: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     vegetable: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     horticulture: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     floriculture: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     exotic_crop: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     farm_pdf: {
       type: String,

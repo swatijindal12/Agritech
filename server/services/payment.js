@@ -5,6 +5,9 @@ const Order = require("../models/order");
 const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
+const Farm = require("../models/farms");
+// const getEnvVariable = require("../config/privateketAWS");
+// getEnvVariable();
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -47,7 +50,6 @@ exports.getKeyId = async (req) => {
 
 // create service
 exports.createOrder = async (req) => {
-  console.log("CreateOrder services ");
   const agreements = req.body.agreements;
   const price = req.body.price;
   const length = agreements.length;
@@ -67,7 +69,7 @@ exports.createOrder = async (req) => {
     };
 
     const order = await instance.orders.create(options);
-    console.log("Order :- ", order);
+    // console.log("Order :- ", order);
 
     // Inserting orderDetail in Order table
     const orderCreated = await Order.create({
@@ -77,13 +79,23 @@ exports.createOrder = async (req) => {
       currency: "INR",
     });
     // const orderCreatedId = orderCreated.id;
-    console.log("orderCreatedId :- ", orderCreated);
+    // console.log("orderCreatedId :- ", orderCreated);
 
     // Inserting Data into OrderItem Table
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < agreements[i].agreement_ids.length; j++) {
         const unit_price = agreements[i].unit_price;
 
+        // find the agreement and check for sold_status
+        const agreement = await Agreement.findOne({
+          _id: agreements[i].agreement_ids[j],
+        });
+
+        if (agreement && agreement.sold_status) {
+          response.error = `Some contract are already bought, add contract again to cart by removing #${agreement.agreement_nft_id}`;
+          response.httpStatus = 500;
+          return response;
+        }
         // Insert the Data in orderItem Table.
         await OrderItem.create({
           order_id: orderCreated._id,
@@ -155,7 +167,10 @@ exports.paymentVerification = async (req) => {
             let single_agreement = await Agreement.findOne({
               _id: order_items[i].agreement_id,
             });
+
             const Agreement_nft_id = single_agreement.agreement_nft_id;
+            //Finding associated Farm
+            const farm = await Farm.findOne({ _id: single_agreement.farm_id });
 
             const farm = await Farm.findOne({ _id: single_agreement.farm_id })
 
@@ -177,6 +192,10 @@ exports.paymentVerification = async (req) => {
             rest.farmer_id = farm.farmer_id
             rest.location = farm.location
 
+            rest.farm_id = farm._id;
+            rest.farmer_id = farm.farmer_id;
+            rest.location = farm.location;
+
             //Buyers detail Update in IPFS_URL
             // Create New Ipfs_url
             const options = {
@@ -188,18 +207,12 @@ exports.paymentVerification = async (req) => {
               },
             };
 
-            // console.log("REST : ", rest);
-
-            const ipfsHash = await pinata.pinJSONToIPFS(
-              { ...rest, user_id: userId },
-              options
-            );
+            //Remove user_id:UserId
+            const ipfsHash = await pinata.pinJSONToIPFS({ ...rest }, options);
             const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
 
             single_agreement.ipfs_url = ipfs_hash;
             await single_agreement.save();
-
-            ///
 
             // Blockchain Transaction start ...
             const buyerAddr = process.env.BUYER_ADDR;

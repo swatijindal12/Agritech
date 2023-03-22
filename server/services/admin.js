@@ -12,6 +12,15 @@ const farmSchemaCheck = require('../utils/farmSchemaCheck')
 const agreementSchemaCheck = require('../utils/agreementSchemaCheck')
 const mongoose = require('mongoose')
 
+const getEnvVariable = require("../config/privateketAWS");
+
+// Calling function to get the privateKey from aws params storage
+async function getPrivateKeyAWS(keyName) {
+  const privateKeyValue = await getEnvVariable(keyName);
+  // return
+  return privateKeyValue[`${keyName}`];
+}
+
 // Importig PinataSDK For IPFS
 const pinataSDK = require('@pinata/sdk')
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN })
@@ -117,8 +126,24 @@ exports.validate = async (req) => {
           }
         }
 
+<<<<<<< HEAD
         if (item.price && isNaN(item.price && item.price % 1 !== 0)) {
           errors.price = 'Price should be a number'
+=======
+        if (
+          !item.price ||
+          isNaN(item.price) ||
+          parseInt(item.price % 1 !== 0) ||
+          !Number.isInteger(parseFloat(item.price))
+        ) {
+          errors.price = "Price should be a number";
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
+        }
+
+        if (!item.area || isNaN(item.area.split(" ")[0])) {
+          errors.area = "area is not a number";
+        } else if (!item.area.includes("Acres")) {
+          errors.area = "area should be in Acres like 1 Acres";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -352,7 +377,12 @@ exports.listAgreements = async (req) => {
 
 // Update Agreement Service ::
 exports.updateAgreement = async (req) => {
+<<<<<<< HEAD
   const userLogged = req.user
+=======
+  console.log("updateAgreement :- ", updateAgreement);
+  const userLogged = req.user;
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
   // General response format
   let response = {
     error: null,
@@ -361,7 +391,13 @@ exports.updateAgreement = async (req) => {
     data: null,
   }
 
+<<<<<<< HEAD
   const { id } = req.params
+=======
+  const { id } = req.params;
+  // Getting private From aws params store
+  // const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
 
   // Checking Header for password
   const password = req.headers['password']
@@ -530,6 +566,7 @@ exports.updateAgreement = async (req) => {
   return response
 }
 
+<<<<<<< HEAD
 exports.updateAgreementOld = async (req) => {
   const userLogged = req.user
   // General response format
@@ -701,6 +738,8 @@ exports.updateAgreementOld = async (req) => {
   return response
 }
 
+=======
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
 // Delete Agreement Service /:id
 exports.deleteAgreement = async (req) => {
   const userLogged = req.user
@@ -772,7 +811,7 @@ exports.deleteAgreement = async (req) => {
   return response
 }
 
-exports.validateFarmers = async (req) => {
+exports.validateFarmersOld = async (req) => {
   // General response format
   let response = {
     error: null,
@@ -845,7 +884,17 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
+          !item.rating ||
+          isNaN(item.rating) ||
+          item.rating < 1 ||
+          item.rating > 10
+        ) {
+          errors.rating = "rating should be a number between 1 and 10";
+        }
+
+        if (
           !item.phone ||
+          isNaN(item.phone) ||
           !/^\d+$/.test(item.phone) ||
           item.phone.length !== 10
         ) {
@@ -867,11 +916,20 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
+<<<<<<< HEAD
           !item.farmer_pdf &&
           !item.farmer_pdf.startsWith('https://') &&
           !item.farmer_pdf.endsWith('.pdf')
         ) {
           errors.farmer_pdf = "Farmer PDF should start with 'https://'"
+=======
+          !item.farmer_pdf ||
+          !item.farmer_pdf.startsWith("https://") ||
+          !item.farmer_pdf.endsWith(".pdf")
+        ) {
+          errors.farmer_pdf =
+            "Farmer PDF should start with 'https://' and end with .pdf";
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -944,9 +1002,8 @@ exports.validateFarmers = async (req) => {
   return response
 }
 
-exports.stagedFarmers = async (req) => {
+exports.validateFarmers = async (req) => {
   // General response format
-
   let response = {
     error: null,
     message: null,
@@ -958,6 +1015,7 @@ exports.stagedFarmers = async (req) => {
     response.error = 'no file selected'
     response.httpStatus = 400
   } else {
+<<<<<<< HEAD
     try {
       const file = req.files.file
       //console.log("file Name :- ", file);
@@ -969,9 +1027,29 @@ exports.stagedFarmers = async (req) => {
       } else {
         const data = await csvToJson(file)
         // Add the file name to each data object
+=======
+    // Read the contents of the file
+    const file = req.files.file;
+    // Parse the JSON data
+    // const data = JSON.parse(fileContent); //JSON DATA
+    const data = await csvToJson(file);
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
 
-        // if Same file name do not exist
+    // Check file type
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+    } else if (!farmerSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+    } else {
+      const errorLines = [];
+      // Creating List of errors.
+      const uniquePhones = new Set();
+      const uniqueEmails = new Set();
 
+<<<<<<< HEAD
         const fileExist = await StageFarmer.find({ file_name: file.name })
 
         let updatedData
@@ -989,6 +1067,210 @@ exports.stagedFarmers = async (req) => {
         } else {
           response.httpStatus = 400
           response.message = 'file name, already exist.'
+=======
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        let errors = {
+          line: i,
+          name: "",
+          email: "",
+          phone: "",
+          pin: "",
+          rating: "",
+          education: "",
+          address: "",
+          image_url: "",
+          farmer_pdf: "",
+        };
+        item.phone = item.phone.trim();
+
+        if (uniquePhones.has(item.phone)) {
+          errors.phone = "Phone number already exists in the file";
+        } else {
+          uniquePhones.add(item.phone);
+        }
+
+        if (uniqueEmails.has(item.email)) {
+          errors.email = "Email already exists in the file";
+        } else {
+          uniqueEmails.add(item.email);
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
+        }
+
+        if (!item.name && item.name.length >= 3) {
+          errors.name = "Name should be 3 characters long";
+        }
+
+        if (
+          !item.email ||
+          !item.email.includes("@") ||
+          !item.email.endsWith(".com")
+        ) {
+          errors.email = "Email should contain '@' and end with '.com'";
+        }
+
+        let phoneError = false;
+        if (
+          !item.phone ||
+          !/^\d+$/.test(item.phone) ||
+          item.phone?.length < 10 ||
+          item.phone?.length > 10
+        ) {
+          phoneError = true;
+          errors.phone =
+            "Phone should be of length of 10 and only contain numeric value.";
+        }
+
+        if (!item.pin || !/^\d+$/.test(item.pin) || item.pin.length !== 6) {
+          errors.pin = "PIN should be 6 characters long";
+        }
+
+        if (
+          !item.rating ||
+          isNaN(item.rating) ||
+          item.rating < 1 ||
+          item.rating > 10
+        ) {
+          errors.rating = "Rating should be a number between 1 and 10";
+        }
+
+        if (!item.image_url || !item.image_url.startsWith("https://")) {
+          errors.image_url =
+            "Invalid image URL format. Must start with 'https://'";
+        }
+
+        if (!item.image_url || !/(jpeg|jpg|png)$/.test(item.image_url)) {
+          errors.image_url =
+            "Invalid image URL format. Must end with '.jpeg', '.jpg', or '.png'";
+        }
+
+        if (
+          !item.farmer_pdf &&
+          !item.farmer_pdf.startsWith("https://") &&
+          !item.farmer_pdf.endsWith(".pdf")
+        ) {
+          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+        }
+
+        // Check for missing fields and add them to the errors object for this item
+        const requiredFields = [
+          "name",
+          "email",
+          "address",
+          "phone",
+          "pin",
+          "rating",
+          "education",
+          "address",
+          "image_url",
+          "farmer_pdf",
+        ];
+        for (const field of requiredFields) {
+          if (!item[field]) {
+            errors[field] = `Missing '${field}' field`;
+          }
+        }
+
+        // Check for duplicate phone and email in DB
+        let farmerInDbPhone = undefined;
+        if (!phoneError) {
+          farmerInDbPhone = await Farmer.findOne({ phone: item.phone });
+        }
+        const farmerInDbEmail = await Farmer.findOne({ email: item.email });
+
+        if (farmerInDbPhone && farmerInDbEmail) {
+          errors.phone = "Phone already exists";
+          errors.email = "Email already exists";
+        } else if (farmerInDbEmail) {
+          errors.email = "Email already exists";
+        } else if (farmerInDbPhone) {
+          console.log(phoneError, farmerInDbPhone);
+          errors.phone = "Phone already exists";
+        }
+
+        if (
+          errors.name ||
+          errors.email ||
+          errors.phone ||
+          errors.pin ||
+          errors.address ||
+          errors.rating ||
+          errors.education ||
+          errors.image_url ||
+          errors.farmer_pdf
+        ) {
+          errorLines.push(errors);
+        }
+      }
+
+      if (errorLines.length >= 1) {
+        // There are error some lines missing data
+        response.httpStatus = 400;
+        response.error = errorLines;
+        response.data = data;
+      } else {
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+          response.data = data;
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+        }
+      }
+    }
+  }
+  return response;
+};
+
+exports.stagedFarmers = async (req) => {
+  // General response format
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  if (!req.files || !req.files.file) {
+    response.error = "no file selected";
+    response.httpStatus = 400;
+  } else {
+    try {
+      const file = req.files.file;
+      //console.log("file Name :- ", file);
+
+      // Check file type
+      if (file.mimetype != "text/csv") {
+        response.error = "select csv file";
+        response.httpStatus = 400;
+      } else {
+        const data = await csvToJson(file);
+        // Add the file name to each data object
+
+        // if Same file name do not exist
+
+        const fileExist = await StageFarmer.find({ file_name: file.name });
+
+        let updatedData;
+        if (fileExist.length <= 0) {
+          updatedData = data.map((eachdata) => {
+            return { ...eachdata, file_name: file.name };
+          });
+          // Insert record into DB (stageFarmer)
+          // console.log("updatedData :- ", updatedData);
+          const stageFarmer = await StageFarmer.create(updatedData);
+
+          response.httpStatus = 200;
+          response.message = "Insertion succeesful";
+          response.data = stageFarmer;
+        } else {
+          response.httpStatus = 400;
+          response.message = "file name, already exist.";
         }
       }
     } catch (error) {
@@ -1436,7 +1718,13 @@ exports.validateFarms = async (req) => {
     const file = req.files.file
     // Parse the JSON data
     // const data = JSON.parse(fileContent); //JSON DATA
+<<<<<<< HEAD
     const data = await csvToJson(file)
+=======
+    const data = await csvToJson(file);
+
+    console.log("data", data);
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
     // Check file type
     if (file.mimetype != 'text/csv') {
       response.error = 'select csv file'
@@ -1455,6 +1743,7 @@ exports.validateFarms = async (req) => {
 
         let errors = {
           line: i,
+<<<<<<< HEAD
           farmer_id: '',
           name: '',
           address: '',
@@ -1468,6 +1757,26 @@ exports.validateFarms = async (req) => {
           image_url: '',
           video_url: '',
         }
+=======
+          farmer_id: "",
+          name: "",
+          address: "",
+          pin: "",
+          location: "",
+          farm_size: "",
+          farm_pdf: "",
+          farm_practice_rating: "",
+          farm_practice_pdf: "",
+          rating: "",
+          image_url: "",
+          video_url: "",
+          food_grains: "",
+          vegetables: "",
+          horticulture: "",
+          floriculture: "",
+          exotic_crops: "",
+        };
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
         if (uniqueLocation.has(item.location)) {
           errors.location = 'Unique Location already exists in the file'
         } else {
@@ -1488,7 +1797,7 @@ exports.validateFarms = async (req) => {
         }
 
         if (
-          !item.rating ||
+          !item.farm_practice_rating ||
           isNaN(item.farm_practice_rating) ||
           item.farm_practice_rating < 1 ||
           item.farm_practice_rating > 10
@@ -1534,6 +1843,40 @@ exports.validateFarms = async (req) => {
         ) {
           errors.farm_practice_pdf =
             "Farm_practice_pdf should start with 'https://' and ends with '.pdf'"
+        }
+        if (
+          !/^[01]+$/.test(item.food_grains) ||
+          (item.food_grains && item.food_grains.length !== 1)
+        ) {
+          errors.food_grains = "Food_grain must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.vegetables) ||
+          (item.vegetables && item.vegetables.length != 1)
+        ) {
+          errors.vegetables = "vegetables must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.floriculture) ||
+          (item.floriculture && item.floriculture.length != 1)
+        ) {
+          errors.floriculture = "floriculture must be of boolean type  0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.horticulture) ||
+          (item.horticulture && item.horticulture.length != 1)
+        ) {
+          errors.horticulture = "horticulture must be of boolean type 0 or 1";
+        }
+
+        if (
+          !/^[01]+$/.test(item.exotic_crops) ||
+          (item.exotic_crops && item.exotic_crops.length != 1)
+        ) {
+          errors.exotic_crops = "exotic_crops must be of boolean type  0 or 1";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -1595,7 +1938,12 @@ exports.validateFarms = async (req) => {
           errors.farm_practice_pdf ||
           errors.rating ||
           errors.image_url ||
-          errors.video_url
+          errors.video_url ||
+          errors.food_grains ||
+          errors.vegetables ||
+          errors.horticulture ||
+          errors.floriculture ||
+          errors.exotic_crops
         ) {
           errorLines.push(errors)
         }
@@ -1647,14 +1995,32 @@ exports.stagedFarms = async (req) => {
         const data = await csvToJson(file)
         // Add the file name to each data object
 
+        console.log("data", data);
+
         // if Same file name do not exist
         const fileExist = await StageFarm.find({ file_name: file.name })
 
         let updatedData
         if (fileExist.length <= 0) {
+          // updatedData = data.map((eachdata) => {
+          //   return { ...eachdata, file_name: file.name };
+          // });
+
           updatedData = data.map((eachdata) => {
+<<<<<<< HEAD
             return { ...eachdata, file_name: file.name }
           })
+=======
+            const { exotic_crops, vegetables, food_grains, ...rest } = eachdata;
+            return {
+              ...rest,
+              exotic_crop: exotic_crops,
+              vegetable: vegetables,
+              food_grain: food_grains,
+              file_name: file.name,
+            };
+          });
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
           // Insert record into DB (stageFarmer)
           const stageFarm = await StageFarm.create(updatedData)
 
@@ -1748,6 +2114,7 @@ exports.createFarm = async (req) => {
     data.map(async (farm, index) => {
       const {
         name,
+        farm_nft_id,
         farmer_id,
         file_name,
         address,
@@ -1757,6 +2124,7 @@ exports.createFarm = async (req) => {
         image_url,
         video_url,
         ...rest
+<<<<<<< HEAD
       } = farm
 
       const farmer = await Farmer.findOne({ _id: farm.farmer_id })
@@ -1764,6 +2132,15 @@ exports.createFarm = async (req) => {
       rest.farmer_rating = farmer.rating
       // console.log('rest', rest)
       farm.ipfs_url = ''
+=======
+      } = farm;
+      const farmer = await Farmer.findOne({ _id: farm.farmer_id });
+      // console.log('farmer', farmer)
+
+      rest.farmer_rating = farmer.rating;
+      console.log("rest", rest);
+      farm.ipfs_url = "";
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
 
       // -------------- IPFS --------------------
       const options = {
@@ -1882,7 +2259,10 @@ exports.createFarm = async (req) => {
   return response
 }
 
-exports.createFarmOld1 = async (req) => {
+exports.deleteFarm = async (req) => {
+  const userLogged = req.user;
+
+  // General response format
   let response = {
     error: null,
     message: null,
@@ -1890,7 +2270,12 @@ exports.createFarmOld1 = async (req) => {
     data: null,
   }
 
+<<<<<<< HEAD
   const { id } = req.params
+=======
+  const { id } = req.params;
+
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
   // Checking Header for password
   const password = req.headers['password']
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
@@ -1900,7 +2285,9 @@ exports.createFarmOld1 = async (req) => {
     response.httpStatus = 401
     return response
   }
+  const reason = req.headers["reason"];
 
+<<<<<<< HEAD
   const data = req.body
   const farmer = await Farmer.findOne({ farmer_id: data.farmer_id })
 
@@ -2247,11 +2634,40 @@ exports.deleteFarm = async (req) => {
           table_name: 'farm',
           record_id: farm.id,
           change_type: 'delete',
+=======
+  try {
+    // First check farmer is their with id
+    let farm = await Farm.findOne({ _id: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
+    if (farm) {
+      // delete the farm data..
+
+      // Check if this farm has some agreement
+      const agreements = await Agreement.find({ farm_id: farm._id });
+
+      if (agreements.length > 0) {
+        // const farmId = agreements[0].farm_id;
+        // await Agreement.deleteMany({ farm_id: farmId });
+        response.error = `reference exist you can not delete`;
+        response.httpStatus = 400;
+      } else {
+        console.log("Inside delete else");
+        const old_values = "No change";
+        await Farm.deleteOne({ _id: id });
+        const new_values = "No change";
+
+        await Audit.create({
+          table_name: "farm",
+          record_id: farm.id,
+          change_type: "delete",
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
           old_value: old_values,
           new_value: new_values,
           user_id: userLogged.id,
           user_name: userLogged.name,
           change_reason: reason,
+<<<<<<< HEAD
         })
 
         response.message = `Successfully deleted`
@@ -2546,6 +2962,13 @@ exports.updateFarmOld = async (req) => {
       await farm.save()
       response.message = `Successfully updated`
       response.httpStatus = 200
+=======
+        });
+
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+      }
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
     } else {
       response.error = `farm not found`
       response.httpStatus = 404
@@ -3083,7 +3506,17 @@ exports.getAgreementsForAdmin = async (req) => {
           },
         },
       },
+<<<<<<< HEAD
     ])
+=======
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
+    ]);
+>>>>>>> be3c1ed61df5d521c545e5587a1d369cbe7fb9e5
     const closeContractswithCustomerData = await Agreement.aggregate([
       {
         $match: {
