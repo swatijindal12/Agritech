@@ -4,7 +4,7 @@ import CrossIcon from "../../assets/cross.svg";
 import Button from "./Button";
 import { adminNavItems, buyerNavItems } from "../../metaData/navItems";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../../redux/actions";
+import { clearCart, logout } from "../../redux/actions";
 
 const Container = styled.div`
   display: ${props => (props.show ? "block" : "none")};
@@ -68,6 +68,7 @@ const Sidebar = ({ show, toggle }) => {
   };
 
   const handleLogout = () => {
+    dispatch(clearCart());
     dispatch(logout());
   };
 

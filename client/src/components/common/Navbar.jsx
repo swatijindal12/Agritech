@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { adminNavItems, buyerNavItems } from "../../metaData/navItems";
 import Flexbox from "./Flexbox";
 import Button from "./Button";
-import { logout } from "../../redux/actions";
+import { clearCart, logout } from "../../redux/actions";
 
 const WebContainer = styled.div`
   position: sticky;
@@ -136,6 +136,7 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   const handleLogout = () => {
+    dispatch(clearCart());
     dispatch(logout());
   };
 

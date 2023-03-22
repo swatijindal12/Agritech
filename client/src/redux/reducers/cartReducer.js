@@ -29,7 +29,6 @@ export default (state = INITIAL_STATE, action) => {
 
     case CLEAR_CART:
       return {
-        ...state,
         cart: [],
       };
 
