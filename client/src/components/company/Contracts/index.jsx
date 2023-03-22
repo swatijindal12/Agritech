@@ -107,7 +107,7 @@ const Contracts = () => {
 
   return (
     <Container>
-      <InputContainer margin="0 2rem">
+      {/* <InputContainer margin="0 2rem">
         <Input
           type="text"
           placeholder="Search by Name"
@@ -120,7 +120,7 @@ const Contracts = () => {
           onClick={getList}
           disabled={loading}
         />
-      </InputContainer>
+      </InputContainer> */}
       <OptionContainer>
         <Option
           selected={currentPage === "active"}
