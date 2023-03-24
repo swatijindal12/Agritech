@@ -10,6 +10,8 @@ const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 
+const nameRegex = /^[A-Za-z'-\s]+$/;
+
 // Create customer
 exports.createUser = async (req) => {
   // General response format
@@ -38,7 +40,7 @@ exports.createUser = async (req) => {
       response.error = "email already exist";
       return response;
     } else if (
-      !validator.isAlpha(name) ||
+      !validator.matches(name, nameRegex) ||
       !validator.isLength(name, { min: 3, max: 100 })
     ) {
       response.httpStatus = 400;
