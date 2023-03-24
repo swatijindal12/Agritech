@@ -34,7 +34,7 @@ const marketplaceContractABI = require("../web3/marketPlaceABI");
 
 // const mintFarm = require("../web3/mintFarm");
 
-const Private_Key = process.env.PRIVATE_KEY;
+// const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
@@ -104,26 +104,36 @@ exports.validate = async (req) => {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.start_date)) {
             errors.start_date =
-              "Start date should be in the format of dd/mm/yy";
+              "Start date should be in the format of dd/mm/yyyy";
           }
         }
 
         if (item.end_date) {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.end_date)) {
-            errors.end_date = "End date should be in the format of dd/mm/yy";
+            errors.end_date = "End date should be in the format of dd/mm/yyyy";
           }
         }
-        if (epocTimeConv(item.start_date) > epocTimeConv(item.end_date)) {
+        const date = new Date();
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const currentDate = `${day}/${month}/${year}`;
+
+        if (
+          epocTimeConv(item.start_date) > epocTimeConv(item.end_date) ||
+          epocTimeConv(item.end_date) <= epocTimeConv(currentDate)
+        ) {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (
             !dateRegex.test(item.end_date) ||
             !dateRegex.test(item.start_date)
           ) {
             errors.start_date =
-              "Start date & end date should be in the format of dd/mm/yy";
+              "Start date & end date should be in the format of dd/mm/yyyy";
           } else {
-            errors.end_date = "Start date should be less than end date";
+            errors.end_date =
+              "End date should be greater than current time & start date";
           }
         }
 
@@ -373,7 +383,6 @@ exports.listAgreements = async (req) => {
 
 // Update Agreement Service ::
 exports.updateAgreement = async (req) => {
-  console.log("updateAgreement :- ", updateAgreement);
   const userLogged = req.user;
   // General response format
   let response = {
@@ -385,7 +394,7 @@ exports.updateAgreement = async (req) => {
 
   const { id } = req.params;
   // Getting private From aws params store
-  // const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -625,189 +634,6 @@ exports.deleteAgreement = async (req) => {
   return response;
 };
 
-exports.validateFarmersOld = async (req) => {
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  if (!req.files || !req.files.file) {
-    response.error = "no file selected";
-    response.httpStatus = 400;
-  } else {
-    // Read the contents of the file
-    const file = req.files.file;
-    // Parse the JSON data
-    // const data = JSON.parse(fileContent); //JSON DATA
-    const data = await csvToJson(file);
-
-    // Check file type
-    if (file.mimetype != "text/csv") {
-      response.error = "select csv file";
-      response.httpStatus = 400;
-    } else if (!farmerSchemaCheck(data)) {
-      // Check schema of the file
-      response.error = "data format do not match, download sample";
-      response.httpStatus = 400;
-    } else {
-      const errorLines = [];
-      // Creating List of errors.
-      const uniquePhones = new Set();
-      const uniqueEmails = new Set();
-
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i];
-        let errors = {
-          line: i,
-          name: "",
-          email: "",
-          phone: "",
-          pin: "",
-          rating: "",
-          education: "",
-          address: "",
-          image_url: "",
-          farmer_pdf: "",
-        };
-
-        if (uniquePhones.has(item.phone)) {
-          errors.phone = "Phone number already exists in the file";
-        } else {
-          uniquePhones.add(item.phone);
-        }
-
-        if (uniqueEmails.has(item.email)) {
-          errors.email = "Email already exists in the file";
-        } else {
-          uniqueEmails.add(item.email);
-        }
-
-        if (!item.name && item.name.length >= 3) {
-          errors.name = "Name should be 3 characters long";
-        }
-
-        if (
-          !item.email ||
-          !item.email.includes("@") ||
-          !item.email.endsWith(".com")
-        ) {
-          errors.email = "Email should contain '@' and end with '.com'";
-        }
-
-        if (
-          !item.rating ||
-          isNaN(item.rating) ||
-          item.rating < 1 ||
-          item.rating > 10
-        ) {
-          errors.rating = "rating should be a number between 1 and 10";
-        }
-
-        if (
-          !item.phone ||
-          isNaN(item.phone) ||
-          !/^\d+$/.test(item.phone) ||
-          item.phone.length !== 10
-        ) {
-          errors.phone = "Phone should be of length of 10.";
-        }
-
-        if (!item.pin || !/^\d+$/.test(item.pin) || item.pin.length !== 6) {
-          errors.pin = "PIN should be 6 characters long";
-        }
-
-        if (!item.image_url || !item.image_url.startsWith("https://")) {
-          errors.image_url =
-            "Invalid image URL format. Must start with 'https://'";
-        }
-
-        if (!item.image_url || !/(jpeg|jpg|png)$/.test(item.image_url)) {
-          errors.image_url =
-            "Invalid image URL format. Must end with '.jpeg', '.jpg', or '.png'";
-        }
-
-        if (
-          !item.farmer_pdf ||
-          !item.farmer_pdf.startsWith("https://") ||
-          !item.farmer_pdf.endsWith(".pdf")
-        ) {
-          errors.farmer_pdf =
-            "Farmer PDF should start with 'https://' and end with .pdf";
-        }
-
-        // Check for missing fields and add them to the errors object for this item
-        const requiredFields = [
-          "name",
-          "email",
-          "address",
-          "phone",
-          "pin",
-          "rating",
-          "education",
-          "address",
-          "image_url",
-          "farmer_pdf",
-        ];
-        for (const field of requiredFields) {
-          if (!item[field]) {
-            errors[field] = `Missing '${field}' field`;
-          }
-        }
-
-        // Check for duplicate phone and email in DB
-        const farmerInDbPhone = await Farmer.find({ phone: item.phone });
-        const farmerInDbEmail = await Farmer.find({ email: item.email });
-
-        if (farmerInDbPhone.length !== 0 && farmerInDbEmail.length !== 0) {
-          errors.phone = "Phone already exists";
-          errors.email = "Email already exists";
-        } else if (farmerInDbEmail.length !== 0) {
-          errors.email = "Email already exists";
-        } else if (farmerInDbPhone.length !== 0) {
-          errors.phone = "Phone already exists";
-        }
-
-        if (
-          errors.name ||
-          errors.email ||
-          errors.phone ||
-          errors.pin ||
-          errors.address ||
-          errors.rating ||
-          errors.education ||
-          errors.image_url ||
-          errors.farmer_pdf
-        ) {
-          errorLines.push(errors);
-        }
-      }
-
-      if (errorLines.length >= 1) {
-        // There are error some lines missing data
-        (response.httpStatus = 400),
-          (response.error = errorLines),
-          (response.data = data);
-      } else {
-        // check if the empty file
-        if (data.length == 0) {
-          response.httpStatus = 400;
-          response.error = "Empty File";
-          response.data = data;
-        } else {
-          // No error
-          response.httpStatus = 200;
-          response.message = "validation successful";
-          response.data = data;
-        }
-      }
-    }
-  }
-  return response;
-};
-
 exports.validateFarmers = async (req) => {
   // General response format
   let response = {
@@ -917,11 +743,11 @@ exports.validateFarmers = async (req) => {
         }
 
         if (
-          !item.farmer_pdf &&
-          !item.farmer_pdf.startsWith("https://") &&
+          (!item.farmer_pdf && !item.farmer_pdf.startsWith("https://")) ||
           !item.farmer_pdf.endsWith(".pdf")
         ) {
-          errors.farmer_pdf = "Farmer PDF should start with 'https://'";
+          errors.farmer_pdf =
+            "Farmer PDF should start with 'https://' and end with '.pdf' ";
         }
 
         // Check for missing fields and add them to the errors object for this item
@@ -1842,6 +1668,9 @@ exports.createFarm = async (req) => {
   const password = req.headers["password"];
   const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+
   if (!password || password != envPassword) {
     response.error = `Invalid password`;
     response.httpStatus = 401;
@@ -2081,6 +1910,8 @@ exports.updateFarm = async (req) => {
   };
 
   const { id } = req.params;
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -2666,6 +2497,9 @@ exports.getAgreementsForAdmin = async (req) => {
 exports.closeAgreement = async (req) => {
   //console.log("Inside closeAgreement");
   const { id } = req.params; // Agreement Id agreement to Update
+
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
 
   // General response format
   let response = {

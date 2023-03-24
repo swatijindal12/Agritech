@@ -13,9 +13,17 @@ const csvToJson = require("../utils/csvToJson");
 const pinataSDK = require("@pinata/sdk");
 const stageAgreement = require("../models/stageAgreement");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+const getEnvVariable = require("../config/privateketAWS");
+
+// Calling function to get the privateKey from aws params storage
+async function getPrivateKeyAWS(keyName) {
+  const privateKeyValue = await getEnvVariable(keyName);
+  // return
+  return privateKeyValue[`${keyName}`];
+}
 
 // Importing for Blockchain
-const Private_Key = process.env.PRIVATE_KEY;
+// const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
@@ -198,6 +206,8 @@ exports.createAgreement = async (req) => {
   // Checking password header
   const password = req.headers["password"];
   const envPassword = process.env.MASTER_PASSWORD; // get the password
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
 
   if (!password || password != envPassword) {
     response.error = `Invalid password`;
@@ -238,181 +248,6 @@ exports.createAgreement = async (req) => {
         rest.customer_id = "null";
         rest.sold_status = "false";
         rest.agreementclose_status = "false";
-
-        await StageAgreement.updateOne(
-          { _id: contract._id },
-          { stage_status: false, approval_status: true }
-        );
-        contract.ipfs_url = "";
-
-        // -------------- IPFS --------------------
-        const options = {
-          pinataMetadata: {
-            name: contract.farm_nft_id.toString(),
-          },
-          pinataOptions: {
-            cidVersion: 0,
-          },
-        };
-
-        const ipfsHash = await pinata.pinJSONToIPFS(rest, options);
-        contract.ipfs_url = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
-        // -------------- IPFS --------------------
-        return { ...contract };
-      })
-    );
-
-    // Blockchain Integration
-    const mintPromises = [];
-    const Tran = "https://mumbai.polygonscan.com/tx";
-    for (let index = 0; index < updatedData.length; index++) {
-      const contract = updatedData[index];
-      contract.agreement_nft_id = "";
-      // console.log("Single contract: ", contract);
-      const farmerAddr = process.env.FARMER_ADDR;
-
-      const start_date = epocTimeConv(contract.start_date);
-      const end_date = epocTimeConv(contract.end_date);
-      const gasLimit = await marketplaceContract.methods
-        .putContractOnSell(
-          farmerAddr,
-          contract.farm_nft_id,
-          contract.price,
-          start_date,
-          end_date,
-          contract.ipfs_url
-        )
-        .estimateGas({ from: adminAddr });
-
-      // console.log(gasLimit);
-
-      const bufferedGasLimit = Math.round(
-        Number(gasLimit) + Number(gasLimit) * Number(0.2)
-      );
-
-      // console.log("bufferedGasLimit", bufferedGasLimit);
-      const sell = marketplaceContract.methods
-        .putContractOnSell(
-          farmerAddr,
-          contract.farm_nft_id,
-          contract.price,
-          start_date,
-          end_date,
-          contract.ipfs_url
-        )
-        .encodeABI();
-
-      const gasPrice = await web3.eth.getGasPrice();
-
-      const tx = {
-        gas: web3.utils.toHex(bufferedGasLimit),
-        to: marketplaceAddr,
-        value: "0x00",
-        data: sell,
-        from: adminAddr,
-      };
-
-      const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key);
-
-      const transaction = await web3.eth.sendSignedTransaction(
-        signedTx.rawTransaction
-      );
-
-      // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
-      contract.tx_hash = `${Tran}/${transaction.transactionHash}`;
-
-      // console.log(await web3.eth.getBlockNumber());
-      let agreement_nft_id = null;
-      const mintPromise = web3.eth
-        .getBlockNumber()
-        .then((latestBlock) => {
-          return new Promise((resolve, reject) => {
-            marketplaceContract.getPastEvents(
-              "Sell",
-              {
-                fromBlock: latestBlock,
-                toBlock: latestBlock,
-              },
-              function (error, events) {
-                if (error) {
-                  reject(error);
-                } else if (events.length > 0) {
-                  const result = events[0].returnValues;
-                  agreement_nft_id = result[2];
-                  contract.agreement_nft_id = result[2];
-                  resolve(contract);
-                } else {
-                  resolve(contract);
-                }
-              }
-            );
-          });
-        })
-        .catch((error) => {
-          response.error = `failed operation ${error}`;
-          response.httpStatus = 400;
-        });
-      mintPromises.push(mintPromise);
-    }
-    await Promise.all(mintPromises);
-
-    // BlockChain end
-
-    // updating in stage table and giving data to agreement collection to insert.
-
-    const agreements = await Agreement.create(updatedData, {
-      select: `-_id -stage_status -approval_status -file_name`,
-    });
-
-    // Removing from staging stable
-    const res = await StageAgreement.deleteMany({
-      _id: { $in: data.map((contr) => contr._id) },
-      stage_status: false,
-    });
-    console.log("res", res);
-
-    response.message = "Data Insertion successful";
-    response.httpStatus = 200;
-    response.data = agreements;
-  } catch (error) {
-    response.error = `operation failed  ${error}`;
-    response.httpStatus = 500;
-  }
-
-  return response;
-};
-
-// Creating Agreement Bulk Import.. On Upload.
-exports.createAgreementOld = async (req) => {
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  // Checking password header
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password
-
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    return response;
-  }
-
-  try {
-    const data = req.body;
-
-    /* NOTE:- first update in stagetable to  (stage_status:false, aprroval_status:true)
-     stage_status: false & approval_staus: false:- will not show in review list
-     stage_status: true & approval_status: false :- will show in rejected list */
-
-    // Read the req.body and add ipfs_url to json data
-    const updatedData = await Promise.all(
-      data.map(async (contract) => {
-        const { _id, farm_id, file_name, ...rest } = contract;
 
         await StageAgreement.updateOne(
           { _id: contract._id },
@@ -614,144 +449,5 @@ exports.getAgreements = async (req) => {
     response.httpStatus = 500;
   }
 
-  return response;
-};
-
-exports.addToCart = async (req) => {
-  console.log("Inside addToCart service");
-  const id = req.user._id.toString();
-  const agreementIds = req.body.agreementIds;
-  const unitPrice = req.body.unit_price;
-
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  // Logic for Creating Cart Start ...
-  try {
-    // Find the user's cart
-    const cart = await Cart.findOne({ userId: id });
-    if (!cart) {
-      // If the cart doesn't exist, create a new one
-      const newCart = new Cart({
-        userId: id,
-        items: [
-          {
-            agreementIds: agreementIds,
-            unit_price: unit_price,
-          },
-        ],
-      });
-
-      await newCart.save();
-      response.message = "Item added to cart";
-      response.httpStatus = 200;
-    } else {
-      // If the cart exists, check if the item is already in the cart
-      const itemIndex = cart.items.findIndex((item) => {
-        return item.productId === req.body.productId;
-      });
-
-      if (itemIndex === -1) {
-        // If the item is not in the cart, add it
-        cart.items.push({
-          productId: req.body.productId,
-        });
-        await cart.save();
-        response.message = "Item added to cart";
-        response.httpStatus = 200;
-      } else {
-        response.message = "Item is Already in cart";
-        response.httpStatus = 200;
-      }
-      // else {  // if quantity is included for contracts/product.
-      //   // If the item is already in the cart, update the quantity
-      //   cart.items[itemIndex].quantity += req.body.quantity;
-      //   await cart.save();
-      //   res.json({ message: "Item quantity updated" });
-      // }
-    }
-  } catch (err) {
-    response.message = err.message;
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
-exports.removeFromCart = async (req) => {
-  console.log("Inside removeFromCart service");
-  const id = req.user._id.toString();
-  console.log("user.id modifies :- ", id);
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  try {
-    // Find the user's cart
-    const cart = await Cart.findOne({ userId: req.body.userId });
-    if (!cart) {
-      (response.message = "Cart not found"), (response.httpStatus = 200);
-    } else {
-      // Find the item in the cart
-      const itemIndex = cart.items.findIndex(
-        (item) => item.productId === req.body.productId
-      );
-      if (itemIndex === -1) {
-        (response.message = "Item not found in cart"),
-          (response.httpStatus = 200);
-      } else {
-        // Remove the item from the cart
-        cart.items.splice(itemIndex, 1);
-        await cart.save();
-        (response.message = "Item removed from cart"),
-          (response.httpStatus = 200);
-      }
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-
-  (response.message = "RemoveFromCart Working ... "),
-    (response.httpStatus = 200);
-  return response;
-};
-
-exports.getCart = async (req) => {
-  console.log("Inside getCart service");
-  const id = req.user._id.toString();
-  console.log("user.id modifies :- ", id);
-
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  try {
-    // Find the user's cart
-    const cart = await Cart.findOne({ userId: req.user._id });
-    if (!cart) {
-      response.message = "Cart not found";
-      response.httpStatus = 404;
-    } else {
-      response.httpStatus = 200;
-      response.data = cart;
-    }
-  } catch (err) {
-    response.httpStatus = 500;
-    response.message = err.message;
-  }
-
-  (response.message = "getCart Working ... "), (response.httpStatus = 200);
   return response;
 };
