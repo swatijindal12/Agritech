@@ -9,11 +9,16 @@ const {
   getStagedFarms,
   validateFarms,
   createFarmer,
+  updateFarmer,
+  deleteFarmer,
   getFarmers,
+  validateFarmers,
+  stagedFarmers,
+  getStagedFarmers,
   createCustomer,
-  getFarms,
   deleteFarm,
   updateFarm,
+  getFarms,
   getCustomers,
   getdashBoard,
   getAgreementsForAdmin,
@@ -21,11 +26,6 @@ const {
   stagedAgreements,
   getStagedAgreements,
   deleteAgreements,
-  validateFarmers,
-  stagedFarmers,
-  getStagedFarmers,
-  updateFarmer,
-  deleteFarmer,
   listAgreements,
   updateAgreement,
   getAudit,
@@ -60,6 +60,11 @@ router
 router
   .route("/agreement/:id")
   .put(isAuthenticatedUser, authorizeRoles("admin"), updateAgreement);
+
+// Get List of Agreement for Admin to edit,delete
+router
+  .route("/listagreements")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), listAgreements);
 
 // Insert farm data into DB.
 router
@@ -96,7 +101,7 @@ router
   .route("/farms")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getFarms);
 
-// Get all agreement of all the customer
+// Get all agreement of customer
 router
   .route("/agreement")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getAgreementsForAdmin);
@@ -104,7 +109,16 @@ router
 // Close particular agreement of customer
 router
   .route("/agreement/closed/:id")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), closeAgreement);
+  .get(
+    isAuthenticatedUser,
+    authorizeRoles("admin", "customer"),
+    closeAgreement
+  );
+
+// Insert farmer data into DB.
+router
+  .route("/farmer")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createFarmer);
 
 // Validate Farmer.
 router
@@ -123,11 +137,6 @@ router
 
 // Insert farmer data into DB.
 router
-  .route("/farmer")
-  .post(isAuthenticatedUser, authorizeRoles("admin"), createFarmer);
-
-// Update farmer data into DB.
-router
   .route("/farmer/:id")
   .put(isAuthenticatedUser, authorizeRoles("admin"), updateFarmer);
 
@@ -140,11 +149,6 @@ router
 router
   .route("/farmers")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getFarmers);
-
-// Get List of Agreement for Admin to edit,delete
-router
-  .route("/listagreements")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), listAgreements);
 
 // Insert customer data into DB.
 router
@@ -160,7 +164,6 @@ router
 router
   .route("/dashboard")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getdashBoard);
-
 // Get audit
 router
   .route("/audit/:table")
