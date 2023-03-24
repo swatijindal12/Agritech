@@ -6,8 +6,14 @@ const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 const Farm = require("../models/farms");
-// const getEnvVariable = require("../config/privateketAWS");
-// getEnvVariable();
+const getEnvVariable = require("../config/privateketAWS");
+
+// Calling function to get the privateKey from aws params storage
+async function getPrivateKeyAWS(keyName) {
+  const privateKeyValue = await getEnvVariable(keyName);
+  // return
+  return privateKeyValue[`${keyName}`];
+}
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -16,7 +22,7 @@ const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 //Import Blockchain
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
-const private_key = process.env.PRIVATE_KEY;
+// const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 
 const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
@@ -126,6 +132,8 @@ exports.paymentVerification = async (req) => {
     return user.user_id === userId.toString();
   });
   // console.log("filterUser", filterUser);
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
 
   // General response format
   let response = {
@@ -240,7 +248,7 @@ exports.paymentVerification = async (req) => {
 
             const signedTx = await web3.eth.accounts.signTransaction(
               tx,
-              private_key
+              Private_Key
             );
 
             const transaction = await web3.eth.sendSignedTransaction(
