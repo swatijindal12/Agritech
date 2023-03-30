@@ -5,10 +5,26 @@ const Order = require("../models/order");
 const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
+const Farm = require("../models/farms");
+const getEnvVariable = require("../config/privateketAWS");
+const emailTransporter = require("../utils/emailTransporter");
+
+// Calling function to get the privateKey from aws params storage
+async function getPrivateKeyAWS(keyName) {
+  const privateKeyValue = await getEnvVariable(keyName);
+  // return
+  return privateKeyValue[`${keyName}`];
+}
+
+// Importig PinataSDK For IPFS
+const pinataSDK = require("@pinata/sdk");
+const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 
 //Import Blockchain
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
+// const Private_Key = process.env.PRIVATE_KEY;
+const adminAddr = process.env.ADMIN_ADDR;
 
 const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 const web3 = new Web3(provider);
@@ -41,7 +57,6 @@ exports.getKeyId = async (req) => {
 
 // create service
 exports.createOrder = async (req) => {
-  console.log("CreateOrder services ");
   const agreements = req.body.agreements;
   const price = req.body.price;
   const length = agreements.length;
@@ -61,7 +76,7 @@ exports.createOrder = async (req) => {
     };
 
     const order = await instance.orders.create(options);
-    console.log("Order :- ", order);
+    // console.log("Order :- ", order);
 
     // Inserting orderDetail in Order table
     const orderCreated = await Order.create({
@@ -71,13 +86,23 @@ exports.createOrder = async (req) => {
       currency: "INR",
     });
     // const orderCreatedId = orderCreated.id;
-    console.log("orderCreatedId :- ", orderCreated);
+    // console.log("orderCreatedId :- ", orderCreated);
 
     // Inserting Data into OrderItem Table
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < agreements[i].agreement_ids.length; j++) {
         const unit_price = agreements[i].unit_price;
 
+        // find the agreement and check for sold_status
+        const agreement = await Agreement.findOne({
+          _id: agreements[i].agreement_ids[j],
+        });
+
+        if (agreement && agreement.sold_status) {
+          response.error = `Some contract are already bought, add contract again to cart by removing #${agreement.agreement_nft_id}`;
+          response.httpStatus = 500;
+          return response;
+        }
         // Insert the Data in orderItem Table.
         await OrderItem.create({
           order_id: orderCreated._id,
@@ -101,14 +126,15 @@ exports.createOrder = async (req) => {
 
 // Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
-  console.log("Inside Payment Verification");
   const userId = req.user._id;
   const keyDetails = process.env.KEY_DETAILS;
 
   let filterUser = JSON.parse(keyDetails).filter(function (user) {
     return user.user_id === userId.toString();
   });
-  console.log("filterUser", filterUser);
+  // console.log("filterUser", filterUser);
+  // Getting private From aws params store
+  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
 
   // General response format
   let response = {
@@ -147,39 +173,83 @@ exports.paymentVerification = async (req) => {
               { _id: order_items[i].agreement_id },
               { sold_status: true, customer_id: userId } // change Made
             );
-            const single_agreement = await Agreement.findOne({
+            let single_agreement = await Agreement.findOne({
               _id: order_items[i].agreement_id,
             });
+
             const Agreement_nft_id = single_agreement.agreement_nft_id;
+            //Finding associated Farm
+            const farm = await Farm.findOne({ _id: single_agreement.farm_id });
+
+            const {
+              file_name,
+              farmer_name,
+              address,
+              agreement_nft_id,
+              tx_hash,
+              farm_nft_id,
+              price,
+              ipfs_url,
+              createdAt,
+              updatedAt,
+              __v,
+              ...rest
+            } = single_agreement._doc;
+
+            rest.farm_id = farm._id;
+            rest.farmer_id = farm.farmer_id;
+            rest.location = farm.location;
+
+            //Buyers detail Update in IPFS_URL
+            // Create New Ipfs_url
+            const options = {
+              pinataMetadata: {
+                name: single_agreement.farm_id.toString(),
+              },
+              pinataOptions: {
+                cidVersion: 0,
+              },
+            };
+
+            //Remove user_id:UserId
+            const ipfsHash = await pinata.pinJSONToIPFS({ ...rest }, options);
+            const ipfs_hash = `https://ipfs.io/ipfs/${ipfsHash.IpfsHash}`;
+
+            single_agreement.ipfs_url = ipfs_hash;
+            await single_agreement.save();
 
             // Blockchain Transaction start ...
-            const buyerAddr = filterUser[0].public_key;
-            const privateKeyBuyer = filterUser[0].private_key;
+            const buyerAddr = process.env.BUYER_ADDR;
+            // const privateKeyBuyer = filterUser[0].private_key;
             const gasLimit = await marketplaceContract.methods
-              .buyContract([Agreement_nft_id], [razorpay_payment_id])
-              .estimateGas({ from: buyerAddr });
+              .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
+                ipfs_hash,
+              ])
+              .estimateGas({ from: adminAddr });
 
             const bufferedGasLimit = Math.round(
               Number(gasLimit) + Number(gasLimit) * Number(0.2)
             );
 
-            const sell = marketplaceContract.methods
-              .buyContract([Agreement_nft_id], [razorpay_payment_id])
+            const sell = await marketplaceContract.methods
+              .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
+                ipfs_hash,
+              ])
               .encodeABI();
 
-            const gasPrice = await web3.eth.getGasPrice();
+            // const gasPrice = await web3.eth.getGasPrice();
 
             const tx = {
               gas: web3.utils.toHex(bufferedGasLimit),
               to: marketplaceAddr,
               value: "0x00",
               data: sell,
-              from: buyerAddr,
+              from: adminAddr,
             };
 
             const signedTx = await web3.eth.accounts.signTransaction(
               tx,
-              privateKeyBuyer
+              Private_Key
             );
 
             const transaction = await web3.eth.sendSignedTransaction(
@@ -195,7 +265,10 @@ exports.paymentVerification = async (req) => {
                   toBlock: latestBlock,
                 },
                 function (error, events) {
-                  console.log(events[0]);
+                  // console.log(events[0]);
+                  if (error) {
+                    console.log("BlockchainError", error);
+                  }
                 }
               );
             });
@@ -209,22 +282,43 @@ exports.paymentVerification = async (req) => {
             razorpay_payment_signature: razorpay_signature,
             payment_status: true,
           });
+
+          //Email notification on new order
+          //creating a message
+          const message = {
+            from: process.env.EMAIL_ID,
+            to: process.env.ADMIN_EMAIL,
+            subject: "A new Order Placed",
+            text: `A payment is made for contract by  "${req.user.name}"  with email  ${req.user.email} and order_id is ${id}`,
+          };
+
+          //sending email.
+          emailTransporter.sendMail(message, (error, info) => {
+            if (error) {
+              console.log("Nodemailer error : ", error);
+            } else {
+              console.log("Email sent: " + info.response);
+            }
+          });
         } else {
           response.error = "No order found";
           response.httpStatus = 404;
+          return response;
         }
       })
       .catch((err) => {
-        console.log(`error : ${err}`);
-        response.message = "failed operation";
+        response.message = `failed operation ${err}`;
         response.httpStatus = 500;
+        return response;
       });
+
     response.message = `Payment Successful`;
     response.httpStatus = 200;
     response.data = razorpay_payment_id;
   } else {
     response.error = "Payment failed";
     response.httpStatus = 500;
+    return response;
   }
 
   return response;

@@ -1,14 +1,11 @@
 const mongoose = require("mongoose");
 
-// Validate Email.
-const validateEmail = function (email) {
-  var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return re.test(email);
-};
-
 // Farmer Model
-const farmerSchema = new mongoose.Schema(
+const stageFarmerSchema = new mongoose.Schema(
   {
+    file_name: {
+      type: String,
+    },
     name: {
       type: String,
       required: true,
@@ -43,7 +40,6 @@ const farmerSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       required: "Email address is required",
-      validate: [validateEmail, "Please fill a valid email address"],
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         "Please fill a valid email address",
@@ -64,11 +60,17 @@ const farmerSchema = new mongoose.Schema(
     farmer_pdf: {
       type: String,
     },
+    stage_status: {
+      type: Boolean,
+      default: true,
+    },
+    approval_status: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
 );
 
-// Pre hook to convert the date to a localized string before saving
-
-// Exporting farmerSchema as Farmer
-module.exports = mongoose.model("Farmer", farmerSchema);
+// Exporting userSchema as User
+module.exports = mongoose.model("StageFarmer", stageFarmerSchema);

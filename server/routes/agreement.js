@@ -25,9 +25,7 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 // Route => /api/v1/marketplace/agreement
 // Create agreement (ready for sale)
 router.route("/agreement").post(createAgreement);
-//isAuthenticatedUser, authorizeRoles("admin", "customer"),
 
-// Route => /api/v1/marketplace/farm/:id ,  comes from agreements of marketplace.
 router
   .route("/farm/:id")
   .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getFarmById);
@@ -37,13 +35,12 @@ router
   .route("/agreement")
   .get(
     isAuthenticatedUser,
-    authorizeRoles("admin", "customer"),
+    authorizeRoles("customer"),
     getAgreementsOfCustomer
   );
-//isAuthenticatedUser, authorizeRoles("admin", "customer"),
 
 // Route => /api/v1/marketplace/agreements
-// Get agreements list for MarketPlaces Admin as well as Customer
+// Get agreements list for MarketPlaces
 router
   .route("/agreements")
   .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getAgreements);
@@ -52,44 +49,18 @@ router
 // Key for razorpay
 router
   .route("/key")
-  .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getKeyId);
+  .get(isAuthenticatedUser, authorizeRoles("customer"), getKeyId);
 
 // Route => /api/v1/marketplace/checkout
 // Create Order RazorPay
 router
   .route("/checkout")
-  .post(isAuthenticatedUser, authorizeRoles("admin", "customer"), createOrder);
+  .post(isAuthenticatedUser, authorizeRoles("customer"), createOrder);
 
 // Route => /api/v1/marketplace/paymentVerification
 // Payment Verification RazorPay
 router
   .route("/paymentverification")
-  .post(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "customer"),
-    paymentVerification
-  );
-
-// Route => /api/v1/marketplace/cart
-// Add to cart
-router
-  .route("/cart")
-  .post(isAuthenticatedUser, authorizeRoles("admin", "customer"), addToCart);
-
-// Route => /api/v1/marketplace/cart
-// Get cart
-router
-  .route("/cart")
-  .get(isAuthenticatedUser, authorizeRoles("admin", "customer"), getCart);
-
-// Route => /api/v1/marketplace/remove
-// Remove cart
-router
-  .route("/remove")
-  .delete(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "customer"),
-    removeFromCart
-  );
+  .post(isAuthenticatedUser, authorizeRoles("customer"), paymentVerification);
 
 module.exports = router;

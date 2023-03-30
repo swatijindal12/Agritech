@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "./ERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
-    using Counters for Counters.Counter;
+contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeable {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    Counters.Counter private agreementTokenId;
+    CountersUpgradeable.Counter private agreementTokenId;
 
     event CreateAgreement(
         address indexed CreateAgreementerAddr,
@@ -17,11 +17,11 @@ contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
     );
     
     
-    constructor(
-        string memory name_,
-        string memory symbol_
-    ) ERC721(name_, symbol_) {}
-
+    function initialize() initializer external {
+        __ERC721_init("AgreementNFTToken", "ATK");
+        __ERC721Enumerable_init();
+        __ERC721URIStorage_init();
+    }
     /**
     @dev mint farm NFT & set token URI.
     @param _farmerAddr address of farmer
@@ -42,30 +42,41 @@ contract AgreementNFT is ERC721URIStorage, ERC721Enumerable {
         return agreementId;
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override(ERC721, ERC721Enumerable) {
+    function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external{
+        _setTokenURI(agreementNFTId, updateTokenURI);
+    }
+
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function _burn(
-        uint256 tokenId
-    ) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 tokenId)
+        internal
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+    {
         super._burn(tokenId);
     }
 
-    function tokenURI(
-        uint256 tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (string memory)
+    {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC721, ERC721Enumerable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 }
+

@@ -1,11 +1,9 @@
 const mongoose = require("mongoose");
 // User Model
-const agreementSchema = new mongoose.Schema(
+const stageAgreementSchema = new mongoose.Schema(
   {
-    customer_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null,
-      ref: "User",
+    file_name: {
+      type: String,
     },
     farmer_name: {
       type: String,
@@ -24,12 +22,6 @@ const agreementSchema = new mongoose.Schema(
       type: String,
       default: Date.now,
     },
-    agreement_nft_id: {
-      type: String,
-    },
-    tx_hash: {
-      type: String,
-    },
     crop: {
       type: String,
     },
@@ -40,18 +32,14 @@ const agreementSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Enter amount"],
     },
-    ipfs_url: {
-      type: String,
-      required: [true, "Please select ipfs url"],
-    },
     farm_nft_id: {
       type: String,
     },
-    sold_status: {
+    stage_status: {
       type: Boolean,
-      default: false,
+      default: true,
     },
-    agreementclose_status: {
+    approval_status: {
       type: Boolean,
       default: false,
     },
@@ -60,4 +48,4 @@ const agreementSchema = new mongoose.Schema(
 );
 
 // Exporting userSchema as User
-module.exports = mongoose.model("Agreement", agreementSchema);
+module.exports = mongoose.model("StageAgreement", stageAgreementSchema);

@@ -1,4 +1,4 @@
 module.exports = [
-    "FarmNFT", //NFT Name
-    "FT", //Symbol
-  ];
+	'FarmNFTToken', //NFT Name
+	'FTK', //Symbol
+]
