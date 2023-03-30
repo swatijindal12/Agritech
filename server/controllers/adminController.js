@@ -167,7 +167,7 @@ exports.createFarmer = async (req, res, next) => {
     })
     .catch((error) => {
       res.status(400).json({
-        error: `failed operation 2 ${error}`,
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -453,6 +453,24 @@ exports.getAudit = async (req, res, next) => {
     .catch((error) => {
       res.status(400).json({
         error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to => api/v1/admin/order
+exports.getOrder = async (req, res, next) => {
+  console.log("Inside Log Controller");
+  adminService
+    .getOrder(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
