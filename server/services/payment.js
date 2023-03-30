@@ -7,6 +7,7 @@ const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 const Farm = require("../models/farms");
 const getEnvVariable = require("../config/privateketAWS");
+const emailTransporter = require("../utils/emailTransporter");
 
 // Calling function to get the privateKey from aws params storage
 async function getPrivateKeyAWS(keyName) {
@@ -281,6 +282,24 @@ exports.paymentVerification = async (req) => {
             razorpay_payment_signature: razorpay_signature,
             payment_status: true,
           });
+
+          //Email notification on new order
+          //creating a message
+          const message = {
+            from: process.env.EMAIL_ID,
+            to: process.env.ADMIN_EMAIL,
+            subject: "A new Order Placed",
+            text: `A payment is made for contract by  "${req.user.name}"  with email  ${req.user.email} and order_id is ${id}`,
+          };
+
+          //sending email.
+          emailTransporter.sendMail(message, (error, info) => {
+            if (error) {
+              console.log("Nodemailer error : ", error);
+            } else {
+              console.log("Email sent: " + info.response);
+            }
+          });
         } else {
           response.error = "No order found";
           response.httpStatus = 404;
@@ -292,6 +311,7 @@ exports.paymentVerification = async (req) => {
         response.httpStatus = 500;
         return response;
       });
+
     response.message = `Payment Successful`;
     response.httpStatus = 200;
     response.data = razorpay_payment_id;
