@@ -29,6 +29,7 @@ const {
   listAgreements,
   updateAgreement,
   getAudit,
+  getOrder,
 } = require("../controllers/adminController");
 
 // Importing middleware to check authentication of routes
@@ -164,9 +165,15 @@ router
 router
   .route("/dashboard")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getdashBoard);
+
 // Get audit
 router
   .route("/audit/:table")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getAudit);
 
+// Get Order List
+router
+  .route("/order")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getOrder);
+//isAuthenticatedUser, authorizeRoles("admin")
 module.exports = router;
