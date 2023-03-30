@@ -104,12 +104,11 @@ const OrderList = () => {
   useEffect(() => {
     getOrderList(currentPage);
   }, [currentPage]);
-
   const getOrderList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/${selectedType?.get_list}?page=${page}&limit=5&search=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/admin/order?page=${page}&limit=8&orderId=${searchText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -144,7 +143,7 @@ const OrderList = () => {
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder= "Search by customer name" //{selectedType.search_text}
+              placeholder="Search by order id"
               onChange={e => setSearchText(e.target.value)}
             />
             <Button
@@ -175,14 +174,11 @@ const OrderList = () => {
               {list?.map(row => {
                 return (
                   <tr>
-                    {tableHeading?.map((item) => {
+                    {tableHeading?.map(item => {
+                      if (item === "orderItemsList") {
+                        return <td>{row[item].join(", ")}</td>;
+                      }
                       if (row[item] === true) return <td>1</td>;
-                      if (row[item]?.toString()?.includes("http"))
-                        return (
-                          <UrlTd onClick={() => window.open(row[item])}>
-                            {item}
-                          </UrlTd>
-                        );
                       else return <td>{row[item] || 0}</td>;
                     })}
                   </tr>

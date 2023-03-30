@@ -24,7 +24,7 @@ export const adminNavItems = [
     url: "/admin",
   },
   {
-    title: "Order List",
+    title: "Orders",
     url: "/orderList",
   },
 ];
