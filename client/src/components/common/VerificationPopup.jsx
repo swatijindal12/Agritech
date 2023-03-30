@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Button from "./Button";
 import Flexbox from "./Flexbox";
+import Lottie from "lottie-react";
+import LoadingLottie from "../../assets/lottie/loader.json";
 
 const Container = styled.div`
   position: fixed;
@@ -27,20 +29,6 @@ const InnerContianer = styled.div`
   @media screen and (max-width: 990px) {
     min-width: unset;
     width: 90%;
-  }
-`;
-
-const PopupBox = styled.div`
-  position: fixed;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  width: 20%;
-  height: 23%;
-  @media screen and (max-width: 1280px) {
-    width: 40%;
-    height: 27%;
   }
 `;
 
@@ -77,6 +65,13 @@ const Error = styled.p`
   margin: 1rem 0;
 `;
 
+const Message = styled.p`
+  color: #a98467;
+  font-size: 1rem;
+  margin: 1rem 0;
+  align-content: center;
+`;
+
 const VerificationPopup = ({
   togglePopup,
   onSubmit,
@@ -87,53 +82,75 @@ const VerificationPopup = ({
 }) => {
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
-  const selectedType = JSON.parse(
-    localStorage.getItem("current-new-upload-data")
-  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    await onSubmit(password, reason);
+    setIsSubmitting(true);
+  };
 
   return (
     <Container>
       <InnerContianer>
-        <Heading style={{ textAlign: "center" }}>Master Admin</Heading>
-        <Title>Password</Title>
-        <Input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        {error && <Error>Error: {error}</Error>}
-        {getReason && (
+        {isSubmitting ? (
           <>
-            <Title>Specify reason of update</Title>
+            {" "}
+            <Lottie
+              animationData={LoadingLottie}
+              loop={true}
+              style={{ height: "100px" }}
+            />
+            <Message>
+              Blockchain transactions usually take time (may be more than a
+              minute). So please wait while the transaction succeeds.
+            </Message>
+          </>
+        ) : (
+          <>
+            <Heading style={{ textAlign: "center" }}>Master Admin</Heading>
+            <Title>Password</Title>
             <Input
-              type="text"
-              placeholder="Reason"
-              value={reason}
-              onChange={e => setReason(e.target.value)}
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               required
             />
+            {error && <Error>Error: {error}</Error>}
+            {getReason && (
+              <>
+                <Title>Specify reason of update</Title>
+                <Input
+                  type="text"
+                  placeholder="Reason"
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                  required
+                />
+              </>
+            )}
+            <Error>{warning}</Error>
+            <Flexbox justify="center">
+              <Button
+                onClick={handleSubmit}
+                text={"Submit"}
+                margin="0.3rem 1rem"
+                disabled={
+                  (getReason && reason.length === 0) || password.length === 0
+                }
+              ></Button>
+              <Button
+                onClick={() => {
+                  if (setError) setError(false);
+                  togglePopup();
+                }}
+                text={"Close"}
+                margin="0rem 0rem"
+                color="#FCBF49"
+              ></Button>
+            </Flexbox>
           </>
         )}
-        <Error>{warning}</Error>
-        <Flexbox justify="center">
-          <Button
-            onClick={() => onSubmit(password, reason)}
-            text={"Submit"}
-            margin="0.3rem 1rem"
-            disabled={(getReason && reason.length == 0) || password.length == 0}
-          ></Button>
-          <Button
-            onClick={() => {
-              if (setError) setError(false);
-              togglePopup();
-            }}
-            text={"Close"}
-            margin="0rem 0rem"
-            color="#FCBF49"
-          ></Button>
-        </Flexbox>
       </InnerContianer>
     </Container>
   );
