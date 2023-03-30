@@ -2790,6 +2790,7 @@ exports.getOrder = async (req) => {
 
     // Find all Payment Done that match the search query and apply pagination
     const payments = await Payment.find(searchQuery)
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -2821,7 +2822,8 @@ exports.getOrder = async (req) => {
 
         const order = await Order.findOne({ razorpay_order_id: order_id });
 
-        const orderId = order?._id;
+        // const orderId = order?._id;
+        const orderId = order ? order._id : null;
         const orderItems = await OrderItem.find({ order_id: orderId }).populate(
           {
             path: "agreement_id",
@@ -2831,7 +2833,10 @@ exports.getOrder = async (req) => {
 
         let orderItemsList = [];
         orderItems.forEach((item, index) => {
-          orderItemsList.push(item.agreement_id?.agreement_nft_id);
+          if (item.agreement_id) {
+            orderItemsList.push(item.agreement_id.agreement_nft_id);
+          }
+          // orderItemsList.push(item.agreement_id?.agreement_nft_id);
         });
 
         orderList.push({
