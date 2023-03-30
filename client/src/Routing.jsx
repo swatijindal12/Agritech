@@ -22,6 +22,7 @@ import Register from "./components/auth/Login/register";
 import ModifyData from "./components/company/ModifyData";
 import styled from "styled-components";
 import AdminContracts from "./components/company/AdminContracts";
+import OrderList from "./components/company/OrderList";
 
 const Container = styled.div`
   background-color: ${props => props.backgroundColor && props.backgroundColor};
@@ -79,6 +80,7 @@ const Routing = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/admin/modify" element={<ModifyData />} />
             <Route path="/contracts-admin" element={<AdminContracts />} />
+            <Route path="/orderList" element={<OrderList />} />
           </Routes>
         </InnerContainer>
       </Router>

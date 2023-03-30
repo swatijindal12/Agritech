@@ -23,6 +23,10 @@ export const adminNavItems = [
     title: "Admin",
     url: "/admin",
   },
+  {
+    title: "Orders",
+    url: "/orderList",
+  },
 ];
 
 export const buyerNavItems = [
