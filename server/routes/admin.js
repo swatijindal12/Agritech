@@ -175,5 +175,5 @@ router
 router
   .route("/order")
   .get(isAuthenticatedUser, authorizeRoles("admin"), getOrder);
-//isAuthenticatedUser, authorizeRoles("admin")
+
 module.exports = router;
