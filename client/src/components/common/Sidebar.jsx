@@ -38,6 +38,8 @@ const NavItem = styled.div`
   color: #6c584c;
   color: ${props => (props.highlight ? "#ADC178" : "#6c584c")};
   margin: 2.5rem 0;
+  pointer-events: ${props => (props.disabled ? "none" : "auto")};
+
   /* text-decoration: ${props => (props.highlight ? "underline" : "none")};
   text-underline-offset: 0.5rem; */
 `;
@@ -57,10 +59,16 @@ const Sidebar = ({ show, toggle }) => {
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    setCurrentNavItem(
-      user?.data?.role === "customer" ? buyerNavItems : adminNavItems
+    console.log(
+      "Admin title",
+      adminNavItems.filter(item => item.title)
     );
-  }, []);
+    const NavItems =
+      user?.data?.role === "customer"
+        ? buyerNavItems
+        : adminNavItems.filter(item => item.title !== "Admin");
+    setCurrentNavItem(NavItems);
+  }, [user]);
 
   const handleNavClick = item => {
     toggle();
@@ -82,6 +90,7 @@ const Sidebar = ({ show, toggle }) => {
               onClick={() => handleNavClick(navItem)}
               key={navItem.title}
               highlight={window.location.pathname === navItem.url}
+              disabled={navItem.title === "Admin"}
             >
               {navItem.title}
             </NavItem>

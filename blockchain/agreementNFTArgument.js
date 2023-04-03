@@ -1,4 +1,4 @@
 module.exports = [
-    "Agreement NFT", //NFT Name
-    "ANFT", //Symbol
-  ];
+	'AgreementNFTToken', //NFT Name
+	'ATK', //Symbol
+]

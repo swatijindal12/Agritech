@@ -1,15 +1,14 @@
 require('@nomicfoundation/hardhat-toolbox')
+require('@openzeppelin/hardhat-upgrades')
 require('dotenv').config()
+const private_key = require('./awsKey')
 
-/** @type import('hardhat/config').HardhatUserConfig */
-const MATIC_KEY = process.env.MATIC_PRIVATE_KEY
-// console.log(MATIC_KEY)
-module.exports = {
+const config = {
 	solidity: '0.8.17',
 	networks: {
 		matic: {
 			url: process.env.MUMBAI_RPC_URL,
-			accounts: [`0x${MATIC_KEY}`],
+			accounts: [],
 			chainId: 80001,
 		},
 	},
@@ -17,10 +16,23 @@ module.exports = {
 		apiKey: process.env.MATIC_API_KEY, //for polygonscan (mumbai)
 	},
 	gasReporter: {
-		enabled: true
-	  }
+		enabled: true,
+	},
 }
 
-//Farm NFT deployed to 0xb2114c3Bf73A88A75a13d02bA3AEFFb8b68F7757
-// Agreement NFT deployed to 0x96531521cb47760d064bc2069b170A0B8CA2E614
-// Marketplace NFT deployed to 0xa62d7d8b9F504452EE72FAd7B4F65D4381D05f3D
+async function getPrivateKey() {
+	try {
+		const privateKeyValue = await private_key.getEnvVariable()
+		const MATIC_KEY = `0x${privateKeyValue['agritect-private-key']}`
+		// console.log('MATIC KEY', MATIC_KEY)
+		config.networks.matic.accounts = [MATIC_KEY]
+
+		// config.networks.matic.accounts.push(MATIC_KEY)
+		// console.log('account address', config.networks.matic.accounts)
+	} catch (err) {
+		console.log(err)
+	}
+}
+module.exports = { getPrivateKey }
+
+module.exports.default = config

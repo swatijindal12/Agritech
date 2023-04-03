@@ -17,6 +17,7 @@ coverage.json
 typechain
 typechain-types
 .prettierrc
+.openzeppelin
 
 # Hardhat files
 cache

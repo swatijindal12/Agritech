@@ -1,13 +1,5 @@
 const marketplaceContractABI = [
   {
-    inputs: [
-      { internalType: "address", name: "farmNFT_", type: "address" },
-      { internalType: "address", name: "agreementNFT_", type: "address" },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -28,6 +20,12 @@ const marketplaceContractABI = [
         name: "agreementNFTId",
         type: "uint256",
       },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "updateTokenURI",
+        type: "string",
+      },
     ],
     name: "Buy",
     type: "event",
@@ -43,6 +41,14 @@ const marketplaceContractABI = [
       },
     ],
     name: "ClosedContractNFT",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: "uint8", name: "version", type: "uint8" },
+    ],
+    name: "Initialized",
     type: "event",
   },
   {
@@ -90,6 +96,31 @@ const marketplaceContractABI = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "agreementNFTId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "updatedIPFSUrl",
+        type: "string",
+      },
+    ],
+    name: "UpdateAgreementData",
+    type: "event",
+  },
+  {
     inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     name: "agreementDetails",
     outputs: [
@@ -108,10 +139,21 @@ const marketplaceContractABI = [
   },
   {
     inputs: [
+      { internalType: "address", name: "buyerAddr", type: "address" },
       { internalType: "uint256[]", name: "agreementNftId_", type: "uint256[]" },
-      { internalType: "string[]", name: "transactionId", type: "string[]" },
+      { internalType: "string", name: "transactionId", type: "string" },
+      { internalType: "string[]", name: "updateTokenURI", type: "string[]" },
     ],
     name: "buyContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "agreementNftId_", type: "uint256" },
+    ],
+    name: "closeContractNFT",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -150,6 +192,16 @@ const marketplaceContractABI = [
     type: "function",
   },
   {
+    inputs: [
+      { internalType: "address", name: "farmNFT_", type: "address" },
+      { internalType: "address", name: "agreementNFT_", type: "address" },
+    ],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "owner",
     outputs: [{ internalType: "address", name: "", type: "address" }],
@@ -178,21 +230,24 @@ const marketplaceContractABI = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "agreementNftId_", type: "uint256" },
-    ],
-    name: "soldContractNFT",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      { internalType: "uint256", name: "agreementNftId", type: "uint256" },
+      { internalType: "uint256", name: "price_", type: "uint256" },
+      { internalType: "uint256", name: "startDate_", type: "uint256" },
+      { internalType: "uint256", name: "endDate_", type: "uint256" },
+      { internalType: "string", name: "updateTokenURI", type: "string" },
+    ],
+    name: "updateAgreementData",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
-
 module.exports = marketplaceContractABI;

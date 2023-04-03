@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
-
-// farmer Model
-const farmSchema = new mongoose.Schema(
+// User Model
+const stageFarmSchema = new mongoose.Schema(
   {
+    file_name: {
+      type: String,
+    },
     farmer_id: {
       type: String,
       required: true,
@@ -28,23 +30,8 @@ const farmSchema = new mongoose.Schema(
       minlength: [6, "Please enter 6 digit Pin."],
       maxlength: [6, "Please enter 6 digit Pin."],
     },
-    farm_nft_id: {
-      type: String,
-      unique: [true, "Already used."],
-    },
     rating: {
-      type: Number, //Update after inserting..data in DB
-      required: [true, "Farm rating"],
-    },
-    tx_hash: {
-      type: String,
-      unique: [true, "Already used."],
-    },
-    ipfs_url: {
-      type: String,
-      required: [true, "Please check IPFS store."],
-      trim: true,
-      unique: [true, "Already used."],
+      type: Number,
     },
     image_url: {
       type: String,
@@ -62,28 +49,18 @@ const farmSchema = new mongoose.Schema(
     },
     food_grain: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     vegetable: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     horticulture: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     floriculture: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     exotic_crop: {
       type: Boolean,
-      default: false,
-      required: true,
     },
     farm_pdf: {
       type: String,
@@ -94,11 +71,17 @@ const farmSchema = new mongoose.Schema(
     farm_practice_rating: {
       type: Number,
     },
+    stage_status: {
+      type: Boolean,
+      default: true,
+    },
+    approval_status: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }
 );
 
-// Return JSON Web Token
-
 // Exporting userSchema as User
-module.exports = mongoose.model("Farm", farmSchema);
+module.exports = mongoose.model("stageFarm", stageFarmSchema);

@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema(
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         "Please fill a valid email address",
       ],
+      unique: [true, "Unique email Id"],
     },
     food_grain: {
       type: Boolean,
@@ -81,6 +82,11 @@ const userSchema = new mongoose.Schema(
         values: ["admin", "customer"],
         message: "Please select correct options for role.",
       },
+      default: "customer",
+    },
+    is_verified: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true, createdAt: "created_at", updatedAt: "updated_at" }

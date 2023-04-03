@@ -11,7 +11,7 @@ const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 // Importing polygon credentials and web3
 const Web3 = require("web3");
 const Provider = require("@truffle/hdwallet-provider");
-const rpcURL = process.env.RPC_URL
+const rpcURL = process.env.RPC_URL;
 const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const AdminContractAddr = process.env.ADMIN_CONTRACT_ADDR;
@@ -155,12 +155,8 @@ const contractABI = [
   },
 ];
 
-// Route to      => api/v1/register/user
-exports.createUser = async (
-  req,
-  res,
-  next
-) => {
+// Route to      => api/v1/register/user NOT USED
+exports.createUser = async (req, res, next) => {
   // Role && mobile number saved to DB
   const {
     full_name,
@@ -218,17 +214,17 @@ exports.createUser = async (
   // console.log("Transaction successful", role);
 
   if (role === "Farmer" || role === "farmer") {
-    // Blochchain transaction 
+    // Blochchain transaction
     await adminContract.methods.addUser(wallet.address, 0, ipfs_hash).send({
       from: adminAddr,
     });
   } else if (role === "Buyer" || role === "buyer") {
-    // Blochchain transaction 
+    // Blochchain transaction
     await adminContract.methods.addUser(wallet.address, 1, ipfs_hash).send({
       from: adminAddr,
     });
   } else if (role === "Validator" || role === "validator") {
-    // Blochchain transaction 
+    // Blochchain transaction
     await adminContract.methods.addUser(wallet.address, 2, ipfs_hash).send({
       from: adminAddr,
     });
