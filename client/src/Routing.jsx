@@ -8,7 +8,6 @@ import Sidebar from "./components/common/Sidebar";
 import Buyers from "./components/company/Buyers";
 import Profile from "./components/company/Buyers/Profile";
 import Contracts from "./components/company/Contracts";
-import CreateContract from "./components/company/CreateContract";
 import Dashboard from "./components/company/Dashboard";
 import Farmers from "./components/company/Farmers";
 import Farms from "./components/company/Farms";
@@ -23,6 +22,11 @@ import ModifyData from "./components/company/ModifyData";
 import styled from "styled-components";
 import AdminContracts from "./components/company/AdminContracts";
 import OrderList from "./components/company/OrderList";
+import Footer from "./components/common/Footer";
+import TermsConditions from "./components/common/Aboutus/termsAndCondition";
+import PrivacyPolicy from "./components/common/Aboutus/privacyPolicy";
+import ContactUs from "./components/common/Aboutus/contactUs";
+import RefundPolicy from "./components/common/Aboutus/RefundPolicy";
 
 const Container = styled.div`
   background-color: ${props => props.backgroundColor && props.backgroundColor};
@@ -62,7 +66,6 @@ const Routing = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/farms" element={<Farms />} />
-            <Route path="/create-contract" element={<CreateContract />} />
             <Route path="/farmers" element={<Farmers />} />
             <Route path="/buyers" element={<Buyers />} />
             <Route path="/buyers/:slug" element={<Profile />} />
@@ -81,9 +84,14 @@ const Routing = () => {
             <Route path="/admin/modify" element={<ModifyData />} />
             <Route path="/contracts-admin" element={<AdminContracts />} />
             <Route path="/orderList" element={<OrderList />} />
+            <Route path="/terms-condition" element={<TermsConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/return-policy" element={<RefundPolicy />} />
           </Routes>
         </InnerContainer>
       </Router>
+      <Footer />
     </Container>
   );
 };
