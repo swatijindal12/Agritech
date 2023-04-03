@@ -9,9 +9,9 @@ const FooterContainer = styled.footer`
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
   bottom: 0;
   width: 100%;
+  overflow-x: hidden;
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;

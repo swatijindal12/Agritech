@@ -35,6 +35,7 @@ const Container = styled.div`
 const InnerContainer = styled.div`
   max-width: 1280px;
   margin: auto;
+  min-height: 86vh;
 `;
 
 const Routing = () => {
