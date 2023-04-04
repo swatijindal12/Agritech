@@ -32,7 +32,7 @@ const Aboutus = () => {
         order to improve soil quality, and plant nutrition resulting in
         disease-resistant growth and development of all kinds of crops. Our
         mission is to double the income of farmers in 36 months or less. To know
-        more about us, please visit our website at https://www.soullyf.com/.
+        more about us, please visit our website at https://www.soulbiofarms.com/.
       </Description>
     </Container>
   );

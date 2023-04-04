@@ -23,27 +23,27 @@ const TermsAndConditions = () => {
       <Description>
         These terms and conditions outline the rules and regulations for the use
         of SOUL Society for Organic Farming Research & Education's Website,
-        located at esoullyf.com. By accessing this website we assume you accept
-        these terms and conditions. Do not continue to use esoullyf.com if you
-        do not agree to take all of the terms and conditions stated on this
-        page. The following terminology applies to these Terms and Conditions,
-        Privacy Statement and Disclaimer Notice and all Agreements: "Client",
-        "You" and "Your" refers to you, the person log on this website and
-        compliant to the Company’s terms and conditions. "The Company",
-        "Ourselves", "We", "Our" and "Us", refers to our Company. "Party",
-        "Parties", or "Us", refers to both the Client and ourselves. All terms
-        refer to the offer, acceptance and consideration of payment necessary to
-        undertake the process of our assistance to the Client in the most
-        appropriate manner for the express purpose of meeting the Client’s needs
-        in respect of provision of the Company’s stated services, in accordance
-        with and subject to, prevailing law of Netherlands. Any use of the above
-        terminology or other words in the singular, plural, capitalization
-        and/or he/she or they, are taken as interchangeable and therefore as
-        referring to same.
+        located at www.soulbiofarms.com. By accessing this website we assume you
+        accept these terms and conditions. Do not continue to use
+        www.soulbiofarms.com if you do not agree to take all of the terms and
+        conditions stated on this page. The following terminology applies to
+        these Terms and Conditions, Privacy Statement and Disclaimer Notice and
+        all Agreements: "Client", "You" and "Your" refers to you, the person log
+        on this website and compliant to the Company’s terms and conditions.
+        "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company.
+        "Party", "Parties", or "Us", refers to both the Client and ourselves.
+        All terms refer to the offer, acceptance and consideration of payment
+        necessary to undertake the process of our assistance to the Client in
+        the most appropriate manner for the express purpose of meeting the
+        Client’s needs in respect of provision of the Company’s stated services,
+        in accordance with and subject to, prevailing law of Netherlands. Any
+        use of the above terminology or other words in the singular, plural,
+        capitalization and/or he/she or they, are taken as interchangeable and
+        therefore as referring to same.
         <Heading>Cookies</Heading>
-        We employ the use of cookies. By accessing esoullyf.com, you agreed to
-        use cookies in agreement with the SOUL Society for Organic Farming
-        Research & Education's Privacy Policy.
+        We employ the use of cookies. By accessing www.soulbiofarms.com, you
+        agreed to use cookies in agreement with the SOUL Society for Organic
+        Farming Research & Education's Privacy Policy.
         <br />
         <br />
         Most interactive websites use cookies to let us retrieve the user’s
@@ -54,22 +54,23 @@ const TermsAndConditions = () => {
         <Heading>License</Heading>
         Unless otherwise stated, SOUL Society for Organic Farming Research &
         Education and/or its licensors own the intellectual property rights for
-        all material on esoullyf.com. All intellectual property rights are
-        reserved. You may access this from esoullyf.com for your own personal
-        use subjected to restrictions set in these terms and conditions.
+        all material on www.soulbiofarms.com. All intellectual property rights
+        are reserved. You may access this from www.soulbiofarms.com for your own
+        personal use subjected to restrictions set in these terms and
+        conditions.
         <br />
         <br />
         You must not:
         <br />
         <br />
-        Republish material from esoullyf.com <br />
+        Republish material from www.soulbiofarms.com <br />
         <br />
-        Sell, rent or sub-license material from esoullyf.com <br />
+        Sell, rent or sub-license material from www.soulbiofarms.com <br />
         <br />
-        Reproduce, duplicate or copy material from esoullyf.com
+        Reproduce, duplicate or copy material from www.soulbiofarms.com
         <br />
         <br />
-        Redistribute content from esoullyf.com <br />
+        Redistribute content from www.soulbiofarms.com <br />
         <br />
         Parts of this website offer an opportunity for users to post and
         exchange opinions and information in certain areas of the website. SOUL

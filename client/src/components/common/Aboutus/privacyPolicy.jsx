@@ -39,7 +39,7 @@ const PrivacyPolicy = () => {
         <br />
         Company (referred to as either 'the Company', 'We', 'Us' or 'Our' in
         this Agreement) refers to SOUL Society for Organic Farming Research &
-        Education, Coral Woods, Coral Woods, Hoshangabad Rd, Misrod, Bhopal,
+        Education, Coral Woods, Hoshangabad Rd, Misrod, Bhopal,
         Madhya Pardesh 462047, India.
         <br />
         <br />
@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
         example, the duration of a page visit).
         <br /> <br />
         Website refers to SOUL Society for Organic Farming Research & Education,
-        accessible from esoullyf.com
+        accessible from www.soulbiofarms.com
         <br /> <br />
         You means the individual accessing or using the Service, or the company,
         or other legal entity on behalf of which such individual is accessing or
@@ -88,11 +88,11 @@ const PrivacyPolicy = () => {
         <br /> <br />
         Email address
         <br /> <br />
-        First name and last name
+        Name
         <br /> <br />
         Phone number
         <br /> <br />
-        Address, State, Province, ZIP/Postal code, City
+        Address, State, ZIP/Postal code, City
         <br /> <br />
         <h3> Usage Data</h3>
         Usage Data is collected automatically when using the Service.
@@ -120,12 +120,13 @@ const PrivacyPolicy = () => {
         are beacons, tags, and scripts to collect and track information and to
         improve and analyze Our Service. The technologies We use may include:
         <br /> <br />
-        Cookies or Browser Cookies. A cookie is a small file placed on Your
+        Cookies or Browser Cookies: A cookie is a small file placed on Your
         Device. You can instruct Your browser to refuse all Cookies or to
         indicate when a Cookie is being sent. However, if You do not accept
         Cookies, You may not be able to use some parts of our Service. Unless
         you have adjusted Your browser setting so that it will refuse Cookies,
-        our Service may use Cookies. Flash Cookies. Certain features of our
+        our Service may use Cookies. 
+        <br/>Flash Cookies: Certain features of our
         Service may use local stored objects (or Flash Cookies) to collect and
         store information about Your preferences or Your activity on our
         Service. Flash Cookies are not managed by the same browser settings as
@@ -350,9 +351,6 @@ const PrivacyPolicy = () => {
         changes. Changes to this Privacy Policy are effective when they are
         posted on this page.
         <br />
-        <h3>Contact Us</h3>
-        If you have any questions about this Privacy Policy, You can contact us:
-        By email: sb@soullyf.com
       </Description>
     </Container>
   );

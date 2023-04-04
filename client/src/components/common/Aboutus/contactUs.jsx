@@ -19,10 +19,10 @@ const ContactUs = () => {
       <Description>
         <br />
         Address : Bhopal: A2 402, Coral woods, Hoshangabad Road, Bhopal (MP)
-        <br />
+        <br /> <br />
         Mobile:+91-6284274669
         <br />
-        Email: sb@soullyf.com
+        {/* Email: sb@soullyf.com */}
       </Description>
     </Container>
   );
