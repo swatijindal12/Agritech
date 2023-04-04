@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/auth/Login/index";
@@ -43,11 +43,20 @@ const Routing = () => {
   const [backgroundColor, setBackgroundColor] = useState("");
   const user = useSelector(store => store.auth.user);
 
-  // useEffect(() => {
-  //   if (!user && window.location.href.indexOf("login") === -1) {
-  //     window.location.href = "/login";
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (!user && window.location.pathname === "/privacy") {
+      console.log("inside if loop", window.location.pathname);
+      return;
+    } else if (!user && window.location.pathname === "/terms-condition") {
+      return;
+    } else if (!user && window.location.pathname === "/contact-us") {
+      return;
+    } else if (!user && window.location.pathname === "/return-policy") {
+      return;
+    } else if (!user && window.location.href.indexOf("login") === -1) {
+      window.location.href = "/login";
+    }
+  }, []);
 
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
