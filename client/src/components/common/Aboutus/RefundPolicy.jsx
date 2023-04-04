@@ -17,16 +17,13 @@ const ContactUs = () => {
     <Container>
       <Title>Returns & Refund Policy</Title>
       <Description>
-        Our Return and Refund Policy was last updated 16 June 2022
-        <br />
-        <br />
-        Thank you for shopping at esoullyf.com. If for any reason, you are not
-        completely satisfied with a purchase, we invite you to review our policy
-        on refunds and returns. The following terms are applicable for any
-        products that you’ve purchased from us.
+        Thank you for shopping at www.soulbiofarms.com. If for any reason, you
+        are not completely satisfied with a purchase, we invite you to review
+        our policy on refunds and returns. The following terms are applicable
+        for any products that you’ve purchased from us.
         <h2>Interpretation and Definitions</h2>
         <h3>Interpretation</h3>
-        The words in which the initial letter is capitalised have meanings
+        The words in which the initial letter is capitalized have meanings
         defined under the following conditions. The following definitions shall
         have the same meaning regardless of whether they appear in singular or
         in the plural.
@@ -42,7 +39,8 @@ const ContactUs = () => {
         <br />
         “Orders” means a request by you to purchase goods from us.
         <br />
-        “Website” refers to esoullyf.com, accessible from https://esoullyf.com
+        “Website” refers to www.soulbiofarms.com, accessible from
+        https://www.soulbiofarms.com
         <br />
         “You” means the individual accessing or using the service, or the
         company, or other legal entity on behalf of which such individual is
@@ -57,10 +55,7 @@ const ContactUs = () => {
         is not the carrier, takes possession of the product delivered.
         <br />
         In order to exercise your right of cancellation, you must inform us of
-        your decision by means of a clear statement. You can inform us of your
-        decision by:
-        <br />
-        By sending us an email: sb@soullyf.com
+        your decision by means of a clear statement.
         <br />
         We will reimburse you no later than 14 days from the day on which we
         receive the returned Goods. We will use the same means of payment as you

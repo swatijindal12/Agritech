@@ -28,7 +28,7 @@ const WebInnerContainer = styled.div`
 `;
 
 const FooterItem = styled.div`
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 500;
   color: #6c584c;
   margin: 0 0.5rem;
@@ -67,7 +67,7 @@ const Footer = ({}) => {
     if (user) {
       setShowFooter(true);
     }
-  }, [showFooter]);
+  }, [user]);
 
   useEffect(() => {
     setCurrentFooterItem(footerItems);
