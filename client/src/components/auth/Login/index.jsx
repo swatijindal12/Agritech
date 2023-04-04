@@ -225,6 +225,7 @@ const Login = () => {
           {}
         </RightContainer>
       </Container>
+      {/* <Footer /> */}
     </>
   );
 };

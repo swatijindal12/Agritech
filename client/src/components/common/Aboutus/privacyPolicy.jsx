@@ -11,6 +11,7 @@ const Description = styled.p`
   font-size: 1rem;
   color: #6c584c;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
 `;
 
 const PrivacyPolicy = () => {
