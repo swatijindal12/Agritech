@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import CrossIcon from "../../../assets/green-cross.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart } from "../../../redux/actions/cartActions";
+import NFTPopup from "../../common/NFTPopup";
 
 const Cross = styled.img`
   position: absolute;
@@ -17,7 +18,11 @@ const DetailCard = styled.div`
   padding: 0.5rem;
   border-radius: 8px;
   margin: 1rem 0;
-  width: 95%;
+  width: 45%;
+
+  @media screen and (max-width: 990px) {
+    width: 95%;
+  }
 `;
 
 const NameConatiner = styled.div`
@@ -47,35 +52,87 @@ const Area = styled.p`
   font-weight: 600;
 `;
 
+const Id = styled.p`
+  font-size: 1rem;
+  opacity: 60%;
+  font-weight: 700;
+`;
+
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    scroll-margin-top: 1rem;
+    max-width: 20rem;
+    overflow-x: scroll;
+  }
+`;
+
 const Card = ({ data, index }) => {
+  const [selectedNFTId, setSelectedNFTId] = useState("");
+
   const dispatch = useDispatch();
-  const cart = useSelector(store => store.cart.cart);
 
   const removeItemFromCart = () => {
-    dispatch(removeFromCart(index));
+    dispatch(removeFromCart(data.agreements[0]));
+  };
+
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
   };
 
   return (
-    <DetailCard>
-      <Cross src={CrossIcon} onClick={removeItemFromCart} />
-      <Flexbox justify="space-between" margin="0.5rem">
-        <NameConatiner margin-left="20%">
-          <Name>{data?.farmer_name}</Name>
-        </NameConatiner>
-        <p>#{data?._id.farm_id}</p>
-      </Flexbox>
-      <Flexbox justify="space-between">
-        <div>
-          <Date>from {data?._id.start_date}</Date>
-          <Date>to {data?._id.end_date}</Date>
-        </div>
-        <Area>Selected Unit: {data.selected_quantity}</Area>
-      </Flexbox>
-      <Flexbox justify="space-between">
-        <p margin="1rem">{data?._id.crop}</p>
-        <Amount>₹ {data?._id.price * data.selected_quantity}</Amount>
-      </Flexbox>
-    </DetailCard>
+    <>
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            type="Contract"
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+            getUrl={data?.ipfs_url[index]}
+            dbData={data._id}
+            requiredFields={["start_date", "end_date", "crop", "area"]}
+          />
+        ))}
+      <DetailCard>
+        <Cross src={CrossIcon} onClick={removeItemFromCart} />
+        <Flexbox justify="space-between" margin="0.5rem">
+          <NameConatiner margin-left="20%">
+            <Name>{data?.farmer_name}</Name>
+          </NameConatiner>
+          <Id>
+            {data?.agreement_nft_id.map((nftId, index) => {
+              if (data?.selected_quantity > index) {
+                return (
+                  <a
+                    style={{ color: "blue" }}
+                    onClick={() => togglePopup(nftId)}
+                  >
+                    #{nftId}
+                  </a>
+                );
+              }
+            })}
+          </Id>
+        </Flexbox>
+        <Flexbox justify="space-between">
+          <div>
+            <Date>from {data?._id.start_date}</Date>
+            <Date>to {data?._id.end_date}</Date>
+          </div>
+          <Area>Selected Unit: {data.selected_quantity}</Area>
+        </Flexbox>
+        <Flexbox justify="space-between">
+          <p margin="1rem">{data?._id.crop}</p>
+          <Amount>₹ {data?._id.price * data.selected_quantity}</Amount>
+        </Flexbox>
+      </DetailCard>
+    </>
   );
 };
 

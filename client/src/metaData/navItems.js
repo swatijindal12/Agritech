@@ -12,22 +12,34 @@ export const adminNavItems = [
     url: "/buyers",
   },
   {
-    title: "Marketplace",
-    url: "/marketplace",
+    title: "Contracts",
+    url: "/contracts-admin",
   },
   {
-    title: "Contracts",
-    url: "/contracts",
+    title: "About Us",
+    url: "/about-us",
+  },
+  {
+    title: "Admin",
+    url: "/admin",
+  },
+  {
+    title: "Orders",
+    url: "/orderList",
   },
 ];
 
 export const buyerNavItems = [
   {
-    title: "Marketplace",
+    title: "Buy Contracts",
     url: "/marketplace",
   },
   {
-    title: "Contracts",
+    title: "My Contracts",
     url: "/contracts",
+  },
+  {
+    title: "About Us",
+    url: "/about-us",
   },
 ];

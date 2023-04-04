@@ -1,16 +1,23 @@
 import React from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
-import stars from "../../common/stars";
-import Star from "../../../assets/farms/star.svg";
+import Star from "../../../assets/farms/starBlue.svg";
+import NewIcon from "../../../assets/new.svg";
 
 const Container = styled.div`
+  position: relative;
   box-sizing: border-box;
   padding: 1rem 1.5rem;
   background-color: #f0ead24d;
   border-radius: 8px;
-  width: 100%;
+  width: 32%;
   margin: 1rem 0;
+  /* box-shadow: ${props => props.highlight && "5px 3px 3px #A9846733"}; */
+  border: ${props => props.highlight && "2px solid #A9846733"};
+
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const NameContainer = styled.div`
@@ -34,12 +41,20 @@ const ViewMore = styled.p`
   margin: 1rem 0;
 `;
 
-const Card = ({ data }) => {
+const New = styled.img`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  height: 1rem;
+`;
+
+const Card = ({ data, highlight }) => {
   return (
-    <Container>
+    <Container highlight={highlight}>
+      {highlight && <New src={NewIcon} alt="new-tag" />}
       <Flexbox justify="unset" margin="0 0 1rem">
         <Flexbox justify="space-between">
-          <img src={Star} width="80%"/>
+          <img src={Star} width="80%" />
           <Number>{data.rating}</Number>
         </Flexbox>
         <NameContainer>
@@ -49,7 +64,7 @@ const Card = ({ data }) => {
       </Flexbox>
       <Number style={{ opacity: "1" }}>{data.address}</Number>
       <ViewMore onClick={() => window.open(data.farmer_pdf)}>
-        view more
+        Read more
       </ViewMore>
     </Container>
   );

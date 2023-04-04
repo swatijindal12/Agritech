@@ -11,9 +11,10 @@ export const loginUser = userData => {
       .then(response => {
         let user = response.data;
         dispatch({ type: LOGIN, payload: user });
+        dispatch({ type: AUTH_ERROR, payload: "" });
       })
       .catch(error => {
-        dispatch({ type: AUTH_ERROR, payload: error });
+        dispatch({ type: AUTH_ERROR, payload: error?.response?.data?.error });
         dispatch({ type: AUTH_LOADING, payload: false });
       });
   };

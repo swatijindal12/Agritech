@@ -1,20 +1,24 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
+import NFTPopup from "../../common/NFTPopup";
 
 const Container = styled.div`
   box-sizing: border-box;
-  width: 100%;
-  background-color: #dde5b699;
+  width: 48%;
+  background-color: #f0ead254;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Id = styled.p`
   font-size: 0.8rem;
   opacity: 60%;
+  margin-left: 0rem;
 `;
 
 const Name = styled.p`
@@ -36,7 +40,7 @@ const Address = styled.p`
   margin: 0.5rem 0;
 `;
 
-const TypeBox = styled.div`
+const TypeBox = styled(Flexbox)`
   margin: 1rem 0;
   padding: 1rem;
   background-color: #dde5b6;
@@ -48,39 +52,85 @@ const Amount = styled.p`
   font-weight: 400;
 `;
 
+const Area = styled.p`
+  font-size: 1rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+`;
+const Number = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  margin-top: 0rem;
+`;
+
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    scroll-margin-top: 1rem;
+    max-width: 20rem;
+    overflow-x: scroll;
+  }
+`;
+
 const ClosedCard = ({ data }) => {
-  const user = useSelector(store => store.auth.user);
+  const [selectedNFTId, setSelectedNFTId] = useState("");
+
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
+  };
 
   return (
-    <Container>
-      <Id onClick={() => window.open(data.tx_hash)}>
-        Contract NFT ID{" "}
-        {data.agreement_nft_id.map((nftId, index) => (
-          <React.Fragment key={index}>
-            <a href={data.tx_hash[index]} target="_blank">
-              #{nftId}
-            </a>{" "}
-          </React.Fragment>
+    <>
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            type="Contract"
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            width={100}
+            getUrl={data?.ipfs_url[index]}
+            dbData={data._id}
+            requiredFields={["start_date", "end_date", "crop", "area"]}
+          />
         ))}
-      </Id>
-      <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data.farmer_name}</Name>
-        <div>
-          <Date>{data.start_date}</Date>
-          <Date>{data.end_date}</Date>
-        </div>
-      </Flexbox>
-      <Address>{data.address}</Address>
-
-      {user.data.role === "admin" && (
+      <Container>
+        <Id onClick={() => window.open(data?.tx_hash)}>
+          Contract NFT ID{" "}
+          {data.agreement_nft_id.map((nftId, index) => (
+            <React.Fragment key={index}>
+              <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
+                #{nftId}{" "}
+              </a>
+            </React.Fragment>
+          ))}
+        </Id>
+        <Flexbox justify="space-between" margin="0.3rem 0">
+          <Name>{data?.farmer_name}</Name>
+          <div>
+            <Date>{data?._id.start_date}</Date>
+            <Date>{data?._id.end_date}</Date>
+          </div>
+        </Flexbox>
+        <Address>{data.address}</Address>
         <TypeBox>
-          <Name>{data?.buyer?.name || "Buyer Name"}</Name>
-          <Address>{data?.buyer?.address || "Buyer Address"}</Address>
+          <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
+          <Area>Quantity: {data?.unit_bought}</Area>
+          <Area>{data?._id.area}</Area>
         </TypeBox>
-      )}
-
-      <Amount>₹{data.price}</Amount>
-    </Container>
+        <TypeBox style={{ display: "block" }}>
+          <Name>{data?.customer_name || "Buyer Name"}</Name>
+          <Number>{data?.customer_phone}</Number>
+          <Address>{data?.customer_address || "Buyer Address"}</Address>
+        </TypeBox>
+        <Amount>₹{data?._id.price}</Amount>
+      </Container>
+    </>
   );
 };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-// import Button from "../../common/Button";
 import Title from "../../common/Title";
 import Flexbox from "../../common/Flexbox";
 import FilterIcon from "../../../assets/filter.svg";
@@ -18,26 +17,43 @@ const FilterContainer = styled.div`
 `;
 
 const CardsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
   margin: 2rem 0;
+
+  @media only screen and (max-width: 990px) {
+    display: block;
+  }
 `;
 
 const Farmers = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farmers, setFarmers] = useState(null);
+  const [newAddedIds, setNewAddedIds] = useState([]);
   const user = useSelector(store => store.auth.user);
 
   const toggleFilter = () => setShowFilter(!showFilter);
 
   useEffect(() => {
     getList();
+    getNewAddedIds();
   }, []);
+
+  const getNewAddedIds = () => {
+    let newAddedArray = JSON.parse(sessionStorage.getItem("farmerNew"));
+    let tempArr = [];
+    if (newAddedArray) {
+      newAddedArray.forEach(item => tempArr.push(item._id));
+    }
+    setNewAddedIds(tempArr);
+  };
 
   const getList = () => {
     let queryString = "";
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
-      // console.log("QUERY IS ", queryString);
     }
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
@@ -60,7 +76,6 @@ const Farmers = () => {
   return (
     <Container>
       <Flexbox justify="space-between">
-        {/* <Button text="ADD FARMER" margin="unset" /> */}
         <Title>Farmers</Title>
         <FilterContainer>
           <img
@@ -80,7 +95,13 @@ const Farmers = () => {
       </Flexbox>
       <CardsContainer>
         {farmers?.map(item => {
-          return <Card data={item} key={item._id} />;
+          return (
+            <Card
+              data={item}
+              key={item._id}
+              highlight={newAddedIds.includes(item._id)}
+            />
+          );
         })}
       </CardsContainer>
     </Container>

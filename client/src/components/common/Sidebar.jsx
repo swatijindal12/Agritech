@@ -4,7 +4,7 @@ import CrossIcon from "../../assets/cross.svg";
 import Button from "./Button";
 import { adminNavItems, buyerNavItems } from "../../metaData/navItems";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../../redux/actions";
+import { clearCart, logout } from "../../redux/actions";
 
 const Container = styled.div`
   display: ${props => (props.show ? "block" : "none")};
@@ -36,7 +36,12 @@ const NavItem = styled.div`
   font-size: 1.5rem;
   font-weight: 500;
   color: #6c584c;
+  color: ${props => (props.highlight ? "#ADC178" : "#6c584c")};
   margin: 2.5rem 0;
+  pointer-events: ${props => (props.disabled ? "none" : "auto")};
+
+  /* text-decoration: ${props => (props.highlight ? "underline" : "none")};
+  text-underline-offset: 0.5rem; */
 `;
 
 const Logout = styled.p`
@@ -54,10 +59,16 @@ const Sidebar = ({ show, toggle }) => {
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    setCurrentNavItem(
-      user?.data?.role === "customer" ? buyerNavItems : adminNavItems
+    console.log(
+      "Admin title",
+      adminNavItems.filter(item => item.title)
     );
-  }, []);
+    const NavItems =
+      user?.data?.role === "customer"
+        ? buyerNavItems
+        : adminNavItems.filter(item => item.title !== "Admin");
+    setCurrentNavItem(NavItems);
+  }, [user]);
 
   const handleNavClick = item => {
     toggle();
@@ -65,6 +76,7 @@ const Sidebar = ({ show, toggle }) => {
   };
 
   const handleLogout = () => {
+    dispatch(clearCart());
     dispatch(logout());
   };
 
@@ -74,7 +86,12 @@ const Sidebar = ({ show, toggle }) => {
         <Cross src={CrossIcon} onClick={toggle} />
         {currentNavItem?.map(navItem => {
           return (
-            <NavItem onClick={() => handleNavClick(navItem)} key={navItem.title}>
+            <NavItem
+              onClick={() => handleNavClick(navItem)}
+              key={navItem.title}
+              highlight={window.location.pathname === navItem.url}
+              disabled={navItem.title === "Admin"}
+            >
               {navItem.title}
             </NavItem>
           );

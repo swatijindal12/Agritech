@@ -26,6 +26,7 @@ const Card = styled(Flexbox)`
   border-radius: 20px;
   width: 48%;
   justify-content: flex-start;
+  cursor: pointer;
 `;
 
 const CardData = styled.div`
@@ -96,7 +97,7 @@ const Dashboard = () => {
               <p>Buyers</p>
             </CardData>
           </Card>
-          <Card color="#D62828" onClick={() => navigateTo("contracts")}>
+          <Card color="#D62828" onClick={() => navigateTo("marketplace")}>
             <img src={ContractsImage} alt="contract-icon" />
             <CardData>
               <Number>{data?.contracts || 0}</Number>

@@ -9,6 +9,7 @@ import axios from "axios";
 import { clearCart } from "../../../redux/actions/cartActions";
 import FallbackIcon from "../../../assets/empty-cart.svg";
 import Modal from "./Modal";
+import Logo from "../../../assets/logo.png";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
@@ -42,10 +43,24 @@ const Fallback = styled.img`
   opacity: 0.3;
 `;
 
+const CardsContainer = styled(Flexbox)`
+  flex-wrap: wrap;
+  justify-content: space-around;
+`;
+
+const Error = styled.p`
+  font-size: 1rem;
+  color: red;
+  text-align: center;
+  margin-bottom: 0.5rem;
+`;
+
 const Cart = () => {
   const [finalAmount, setFinalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [error, setError] = useState(false);
+
   const data = useSelector(store => store.cart.cart);
   const user = useSelector(store => store.auth.user);
   const dispatch = useDispatch();
@@ -94,16 +109,25 @@ const Cart = () => {
     if (data.length == 0) {
       return;
     }
-    const order = await axios.post(
-      `${process.env.REACT_APP_BASE_URL}/marketplace/checkout`,
-      checkoutData,
-      {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
+    let order;
+    try {
+      order = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/marketplace/checkout`,
+        checkoutData,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      );
+      console.log("order data", order.data)
+      if(order.data.error){
+        setError(order.data.error)
       }
-    );
-
+    } catch (err) {
+      console.log("error while buy contract", err);
+      setError(err.order.data.error);
+    }
     console.log("here the key is ", " data is ", order);
 
     const options = {
@@ -112,8 +136,7 @@ const Cart = () => {
       currency: "INR",
       name: "Agritrust",
       description: "RazorPay payment",
-      image:
-        "https://razorpay.com/docs/build/browser/assets/images/payment-pages-v3-pp_complete_image.jpg",
+      image: Logo,
       order_id: order?.data.data.id,
       handler: function (response) {
         console.log("response :", response);
@@ -139,9 +162,9 @@ const Cart = () => {
           .catch(err => console.log("Error ", err));
       },
       prefill: {
-        name: "",
-        email: "agritrust@example.com",
-        contact: "9999999999",
+        name: user?.data.name,
+        email: user?.data.email,
+        contact: user?.data.phone,
       },
       notes: {
         address: "Razorpay Corporate Office",
@@ -163,24 +186,27 @@ const Cart = () => {
           <Title>My Cart</Title>
         </Flexbox>
         <br />
-        {data?.length > 0 ? (
-          data?.map((item, index) => {
-            return <Card data={item} key={item.id} index={index} />;
-          })
-        ) : (
-          <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
-            <Fallback src={FallbackIcon} />
-            <p>Empty</p>
-          </Flexbox>
-        )}
+        <CardsContainer>
+          {data?.length > 0 ? (
+            data?.map((item, index) => {
+              return <Card data={item} key={item.id} index={index} />;
+            })
+          ) : (
+            <Flexbox style={{ opacity: "0.3" }} margin="5rem 0">
+              <Fallback src={FallbackIcon} />
+              <p>Empty</p>
+            </Flexbox>
+          )}
+        </CardsContainer>
         <Box>
           <FinalAmount>
             <span>Total </span> ₹ {finalAmount}
           </FinalAmount>
+          {error && <Error>Error : {error}</Error>}
 
           <Button
             text="CHECKOUT"
-            width="100%"
+            width="30%"
             onClick={handleCheckout}
             disabled={data.length === 0}
           />

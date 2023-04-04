@@ -1,21 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
+import NFTPopup from "../../common/NFTPopup";
+import VerificationPopup from "../../common/VerificationPopup";
 import axios from "axios";
 
 const Container = styled.div`
   box-sizing: border-box;
-  width: 100%;
+  width: 48%;
   background-color: #f0ead254;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
+  @media only screen and (max-width: 990px) {
+    width: 100%;
+  }
 `;
 
 const Id = styled.p`
-  font-size: 0.8rem;
+  font-size: 1rem;
   opacity: 60%;
   font-weight: 700;
 `;
@@ -36,7 +41,7 @@ const Address = styled.p`
   opacity: 60%;
   font-weight: 400;
   width: 90%;
-  margin: 0.5rem 0;
+  margin: 0.7rem 0;
 `;
 
 const TypeBox = styled(Flexbox)`
@@ -46,62 +51,133 @@ const TypeBox = styled(Flexbox)`
   justify-content: space-between;
 `;
 
+const Number = styled.p`
+  font-size: 1.25rem;
+  opacity: 60%;
+  font-weight: 400;
+  margin-top: 0rem;
+`;
+
 const Area = styled.p`
   font-size: 1rem;
   font-weight: 600;
 `;
 
+const PopupContent = styled.p`
+  padding: 0.5rem;
+  @media screen and (max-width: 990px) {
+    scroll-margin-top: 1rem;
+    max-width: 20rem;
+    overflow-x: scroll;
+  }
+`;
+
 const ActiveCard = ({ data }) => {
+  const [selectedNFTId, setSelectedNFTId] = useState("");
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+  const [showVerificationError, setShowVerificationError] = useState("");
   const user = useSelector(store => store.auth.user);
 
-  const closeContract = () => {
+  const togglePopup = nftId => {
+    if (selectedNFTId === nftId) {
+      setSelectedNFTId("");
+    } else {
+      setSelectedNFTId(nftId);
+    }
+  };
+
+  const closeContract = adminPassord => {
+    console.log("password is:", adminPassord);
     axios
       .get(
         `${process.env.REACT_APP_BASE_URL}/admin/agreement/closed/${data.agreements[0]}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: adminPassord,
           },
         }
       )
       .then(res => {
-        window.location.reload();
-        console.log("Successfully updated ", res);
+        if (res.data.error) {
+          setShowVerificationError(res.data.error);
+        } else {
+          window.location.reload();
+          console.log("Successfully updated ", res);
+        }
       })
       .catch(err => console.log("Error in closing contract ", err));
   };
 
   return (
-    <Container>
-      <Id>
-        Contract NFT ID{" "}
-        {data.agreement_nft_id.map((nftId, index) => (
-          <React.Fragment key={index}>
-            <a href={data.tx_hash[index]} target="_blank">
-              #{nftId}
-            </a>{" "}
-          </React.Fragment>
+    <>
+      {showVerificationPopup && (
+        <VerificationPopup
+          togglePopup={() => setShowVerificationPopup(false)}
+          onSubmit={password => closeContract(password)}
+          error={showVerificationError}
+        />
+      )}
+
+      {selectedNFTId &&
+        data?.agreement_nft_id.map((nftId, index) => (
+          <NFTPopup
+            type="Contract"
+            isOpen={selectedNFTId === nftId}
+            togglePopup={togglePopup}
+            tx_hash={data.tx_hash[index]}
+            getUrl={data?.ipfs_url[index]}
+            dbData={data._id}
+            requiredFields={["start_date", "end_date", "crop", "area"]}
+          />
         ))}
-      </Id>
-      <Flexbox justify="space-between" margin="0.3rem 0">
-        <Name>{data.farmer_name}</Name>
-        <div>
-          <Date>{`from ${data.start_date}`}</Date>
-          <Date>{`to ${data.end_date}`}</Date>
-        </div>
-      </Flexbox>
-      <Address>{data.address}</Address>
-      <TypeBox>
-        <Id styele={{ opacity: 1 }}>{data.crop.toUpperCase()}</Id>
-        <Area>{data._id}</Area>
-      </TypeBox>
-      <Flexbox justify="space-between">
-        <Area>₹ {data.price}</Area>
-        {user.data.role === "admin" && (
-          <Button text="CLOSE" margin="0 0 0 2rem" onClick={closeContract} />
-        )}
-      </Flexbox>
-    </Container>
+      <Container>
+        <Id>
+          Contract NFT ID{" "}
+          {data?.agreement_nft_id.map((nftId, index) => (
+            <React.Fragment key={index}>
+              <a style={{ color: "blue" }} onClick={() => togglePopup(nftId)}>
+                #{nftId}{" "}
+              </a>
+            </React.Fragment>
+          ))}
+        </Id>
+        <Flexbox justify="space-between" margin="0.3rem 0">
+          <Name>{data?.farmer_name}</Name>
+          <div>
+            <Date>{`from ${data?._id.start_date}`}</Date>
+            <Date>{`to ${data?._id.end_date}`}</Date>
+          </div>
+        </Flexbox>
+        <Address>{data.address}</Address>
+        <TypeBox style={{ display: "block" }}>
+          <Id styele={{ opacity: 1 }}>{data?._id?.crop?.toUpperCase()}</Id>
+          <Flexbox justify="space-between">
+            <Area style={{ marginTop: "0.5rem" }}>
+              Quantity: {data?.unit_bought}
+            </Area>
+            <Area>{data?._id.area}</Area>
+          </Flexbox>
+        </TypeBox>
+
+        <TypeBox style={{ display: "block" }}>
+          <Name>{data?.customer_name}</Name>
+          <Number>{data?.customer_phone}</Number>
+          <Address>{data?.customer_address || "Buyer Address"}</Address>
+        </TypeBox>
+
+        <Flexbox justify="space-between">
+          <Area>₹ {data?._id.price}</Area>
+          {user.data.role === "admin" && (
+            <Button
+              text="CLOSE"
+              margin="0 0 0 2rem"
+              onClick={() => setShowVerificationPopup(true)}
+            /> //{closeContract}
+          )}
+        </Flexbox>
+      </Container>
+    </>
   );
 };
 

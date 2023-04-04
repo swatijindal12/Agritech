@@ -32,18 +32,16 @@ const Message = styled.p`
 
 const Modal = () => {
   return (
-    <>
-      <Container>
-        <InnerContianer>
-          <Message>Payment Successfull</Message>
-          <Lottie
-            animationData={SuccessLottie}
-            loop={false}
-            style={{ height: "100px" }}
-          />
-        </InnerContianer>
-      </Container>
-    </>
+    <Container>
+      <InnerContianer>
+        <Message>Payment Successful</Message>
+        <Lottie
+          animationData={SuccessLottie}
+          loop={false}
+          style={{ height: "100px" }}
+        />
+      </InnerContianer>
+    </Container>
   );
 };
 
