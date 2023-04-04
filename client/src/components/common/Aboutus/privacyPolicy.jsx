@@ -4,6 +4,7 @@ import Title from "../Title";
 
 const Container = styled.div`
   padding: 1rem;
+  overflow-x: hidden;
 `;
 
 const Description = styled.p`
@@ -39,8 +40,8 @@ const PrivacyPolicy = () => {
         <br />
         Company (referred to as either 'the Company', 'We', 'Us' or 'Our' in
         this Agreement) refers to SOUL Society for Organic Farming Research &
-        Education, Coral Woods, Hoshangabad Rd, Misrod, Bhopal,
-        Madhya Pardesh 462047, India.
+        Education, Coral Woods, Hoshangabad Rd, Misrod, Bhopal, Madhya Pardesh
+        462047, India.
         <br />
         <br />
         Cookies are small files that are placed on Your computer, mobile device
@@ -125,14 +126,15 @@ const PrivacyPolicy = () => {
         indicate when a Cookie is being sent. However, if You do not accept
         Cookies, You may not be able to use some parts of our Service. Unless
         you have adjusted Your browser setting so that it will refuse Cookies,
-        our Service may use Cookies. 
-        <br/>Flash Cookies: Certain features of our
-        Service may use local stored objects (or Flash Cookies) to collect and
-        store information about Your preferences or Your activity on our
-        Service. Flash Cookies are not managed by the same browser settings as
-        those used for Browser Cookies. For more information on how You can
-        delete Flash Cookies, please read 'Where can I change the settings for
-        disabling, or deleting local shared objects?' available at
+        our Service may use Cookies.
+        <br />
+        Flash Cookies: Certain features of our Service may use local stored
+        objects (or Flash Cookies) to collect and store information about Your
+        preferences or Your activity on our Service. Flash Cookies are not
+        managed by the same browser settings as those used for Browser Cookies.
+        For more information on how You can delete Flash Cookies, please read
+        'Where can I change the settings for disabling, or deleting local shared
+        objects?' available at
         https://helpx.adobe.com/flash-player/kb/disable-local-shared-objects-flash.html#main_Where_can_I_change_the_settings_for_disabling__or_deleting_local_shared_objects_
         Web Beacons. Certain sections of our Service and our emails may contain
         small electronic files known as web beacons (also referred to as clear
