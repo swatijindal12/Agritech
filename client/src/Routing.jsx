@@ -45,7 +45,6 @@ const Routing = () => {
 
   useEffect(() => {
     if (!user && window.location.pathname === "/privacy") {
-      console.log("inside if loop", window.location.pathname);
       return;
     } else if (!user && window.location.pathname === "/terms-condition") {
       return;
