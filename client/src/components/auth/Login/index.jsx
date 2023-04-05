@@ -87,7 +87,7 @@ const ResendMessageStyle = styled.p`
   margin: 0.5rem 1rem;
   margin-bottom: 2.5rem;
   text-align: right;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 `;
 
