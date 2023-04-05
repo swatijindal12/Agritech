@@ -10,15 +10,11 @@ const FooterContainer = styled.footer`
   justify-content: center;
   align-items: center;
   bottom: 0;
-  width: 100%;
   position: ${props => (props.user ? "static" : "fixed")};
-  overflow-x: hidden;
   right: 0;
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;
-    width: 100%;
-    overflow: hidden;
   }
 `;
 
