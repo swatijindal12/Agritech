@@ -10,6 +10,7 @@ const FooterContainer = styled.footer`
   justify-content: center;
   align-items: center;
   bottom: 0;
+  width: 100%;
   position: ${props => (props.user ? "static" : "fixed")};
   right: 0;
   @media only screen and (max-width: 990px) {
