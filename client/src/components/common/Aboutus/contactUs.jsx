@@ -1,6 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import Title from "../Title";
+import { useSelector } from "react-redux";
+import BackButton from "../../../assets/back-button.svg";
+import Flexbox from "../Flexbox";
 
 const Container = styled.div`
   padding: 1rem;
@@ -12,10 +15,24 @@ const Description = styled.p`
   margin-top: 1.5rem;
 `;
 
+const Back = styled.img`
+  cursor: pointer;
+`;
+
 const ContactUs = () => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
-      <Title>Contact Us</Title>
+      {!user ? (
+        <Flexbox justify="space-between">
+          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Title>Contact Us</Title>
+        </Flexbox>
+      ) : (
+        <Title>Contact Us</Title>
+      )}
+
       <Description>
         <br />
         Address : Bhopal: A2 402, Coral woods, Hoshangabad Road, Bhopal (MP)

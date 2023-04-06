@@ -118,7 +118,7 @@ const OrderList = () => {
       .then(res => {
         let data = res.data.data.data;
         setLoading(false);
-        console.log("here the response is ", res.data);
+        // console.log("here the response is ", res.data);
         if (data.length > 0) {
           setList(data);
           setTotalPage(res.data.data.totalPages);
@@ -131,7 +131,7 @@ const OrderList = () => {
       })
       .catch(err => {
         setLoading(false);
-        console.log("error in fetching list ", err);
+        // console.log("error in fetching list ", err);
       });
   };
 

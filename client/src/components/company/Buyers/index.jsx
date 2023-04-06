@@ -32,7 +32,7 @@ const Buyers = () => {
         },
       })
       .then(res => {
-        console.log("response is ", res);
+        // console.log("response is ", res);
         setBuyers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

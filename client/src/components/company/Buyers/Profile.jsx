@@ -41,7 +41,7 @@ const Profile = () => {
   const {slug} = useParams();
 
 useEffect(()=> {
-  console.log("here the user id is ", slug);
+  // console.log("here the user id is ", slug);
 }, [])
 
   return (

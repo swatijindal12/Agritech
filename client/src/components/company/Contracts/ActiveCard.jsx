@@ -87,7 +87,6 @@ const ActiveCard = ({ data }) => {
   };
 
   const closeContract = adminPassord => {
-    console.log("password is:", adminPassord);
     axios
       .get(
         `${process.env.REACT_APP_BASE_URL}/admin/agreement/closed/${data.agreements[0]}`,

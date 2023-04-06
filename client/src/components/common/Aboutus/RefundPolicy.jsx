@@ -1,6 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import Title from "../Title";
+import { useSelector } from "react-redux";
+import BackButton from "../../../assets/back-button.svg";
+import Flexbox from "../Flexbox";
 
 const Container = styled.div`
   padding: 1rem;
@@ -10,12 +13,29 @@ const Description = styled.p`
   font-size: 1rem;
   color: #6c584c;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
+  @media screen and (max-width: 990px){
+    margin-bottom: 11.5rem;
+  }
+`;
+
+const Back = styled.img`
+  cursor: pointer;
 `;
 
 const ContactUs = () => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
-      <Title>Returns & Refund Policy</Title>
+      {!user ? (
+        <Flexbox justify="space-between">
+          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Title>Returns and Refunds Policy</Title>
+        </Flexbox>
+      ) : (
+        <Title>Returns and Refunds Policy</Title>
+      )}
       <Description>
         Thank you for shopping at www.soulbiofarms.com. If for any reason, you
         are not completely satisfied with a purchase, we invite you to review

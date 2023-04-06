@@ -61,7 +61,7 @@ const MarketPlace = () => {
     if (newAddedArray) {
       newAddedArray.forEach(item => tempArr.push(item._id));
     }
-    console.log("here the new added is ", tempArr);
+    // console.log("here the new added is ", tempArr);
     setNewAddedIds(tempArr);
   };
 
@@ -82,7 +82,7 @@ const MarketPlace = () => {
       })
       .catch(err => {
         setLoading(false);
-        console.log("Error in fetching dashboard data ", err);
+        // console.log("Error in fetching dashboard data ", err);
       });
   };
 

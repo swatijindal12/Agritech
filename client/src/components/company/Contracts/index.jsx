@@ -95,13 +95,13 @@ const Contracts = () => {
       )
       .then(res => {
         setLoading(false);
-        console.log("response is ", res);
+        // console.log("response is ", res);
         setActive(res.data.data.active);
         setClosed(res.data.data.close);
       })
       .catch(err => {
         setLoading(false);
-        console.log("Error in fetching dashboard data ", err);
+        // console.log("Error in fetching dashboard data ", err);
       });
   };
 
