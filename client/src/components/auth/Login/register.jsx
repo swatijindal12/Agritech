@@ -159,12 +159,12 @@ const Register = () => {
       })
       .then(res => {
         if (res.status === 200) {
-          console.log("res", res);
+          // console.log("res", res);
           setAuthorised(true);
         }
       })
       .catch(err => {
-        console.log("error in sending otp", err);
+        // console.log("error in sending otp", err);
         setError(err.response.data.error);
       });
   };
@@ -176,13 +176,13 @@ const Register = () => {
         otp: otp,
       })
       .then(res => {
-        console.log("res data", res);
+        // console.log("res data", res);
         if (res.status === 200) {
           window.location.href = "/login";
         }
       })
       .catch(err => {
-        console.log("error in otp", err);
+        // console.log("error in otp", err);
       });
   };
 

@@ -7,7 +7,7 @@ const INITIAL_STATE = {
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case ADD_TO_CART:
-      console.log("Inside add to cart ", action.payload);
+      // console.log("Inside add to cart ", action.payload);
       let currentItem = state.cart.filter(
         item => item.agreements[0] === action.payload.agreements[0]
       );

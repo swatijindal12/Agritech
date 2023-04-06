@@ -183,7 +183,7 @@ const CsvUpload = () => {
             tempArr.push(key);
           }
           setTableHeading(tempArr);
-          console.log("res : ", res);
+          // console.log("res : ", res);
         })
         .catch(err => {
           console.log("error in validating", err);
@@ -208,12 +208,12 @@ const CsvUpload = () => {
       )
       .then(res => {
         setLoading(false);
-        console.log("res in setting new data: ", res);
+        // console.log("res in setting new data: ", res);
         window.location.href = "/admin/approve";
       })
       .catch(err => {
         setLoading(false);
-        console.log("error in setting new data", err);
+        // console.log("error in setting new data", err);
         alert("error in setting new data ", err);
       });
   };

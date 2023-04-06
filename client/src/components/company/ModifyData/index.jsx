@@ -146,7 +146,7 @@ const ModifyData = () => {
       .then(res => {
         let data = res.data.data.data;
         setLoading(false);
-        console.log("here the response is ", res.data);
+        // console.log("here the response is ", res.data);
         if (data.length > 0) {
           setList(data);
           setTotalPage(res.data.data.totalPages);
@@ -161,7 +161,7 @@ const ModifyData = () => {
       })
       .catch(err => {
         setLoading(false);
-        console.log("error in fetching list ", err);
+        // console.log("error in fetching list ", err);
       });
   };
 
@@ -179,14 +179,14 @@ const ModifyData = () => {
         }
       )
       .then(res => {
-        console.log("res : ", res);
+        // console.log("res : ", res);
         setShowUpdatePopup(false);
         if (res.data.error) {
-          console.log("Error while deleting farmer:", res.data.error);
+          // console.log("Error while deleting farmer:", res.data.error);
           setVerificationError(res.data.error);
         } else {
           window.location.reload();
-          console.log("edit response is ", res.data);
+          // console.log("edit response is ", res.data);
         }
       })
       .catch(err => {

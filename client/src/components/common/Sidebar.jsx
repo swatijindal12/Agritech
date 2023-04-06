@@ -59,10 +59,6 @@ const Sidebar = ({ show, toggle }) => {
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    console.log(
-      "Admin title",
-      adminNavItems.filter(item => item.title)
-    );
     const NavItems =
       user?.data?.role === "customer"
         ? buyerNavItems

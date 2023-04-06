@@ -144,7 +144,7 @@ const FarmDetails = () => {
   const handleInfoIcon3Hover = () => setShowTooltip3(!showTooltip3);
 
   useEffect(() => {
-    console.log("here the user id is ", atob(slug));
+    // console.log("here the user id is ", atob(slug));
   }, [slug]);
 
   useEffect(() => {
@@ -155,8 +155,8 @@ const FarmDetails = () => {
         },
       })
       .then(res => {
-        console.log("res is", res.data.data.farm);
-        console.log("farmer data is", res.data.data.farmer);
+        // console.log("res is", res.data.data.farm);
+        // console.log("farmer data is", res.data.data.farmer);
         setFarmDetails(res.data.data);
         // console.log("data", res.data.data.farm);
       })

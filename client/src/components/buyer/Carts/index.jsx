@@ -120,15 +120,15 @@ const Cart = () => {
           },
         }
       );
-      console.log("order data", order.data)
+      // console.log("order data", order.data)
       if(order.data.error){
         setError(order.data.error)
       }
     } catch (err) {
-      console.log("error while buy contract", err);
+      // console.log("error while buy contract", err);
       setError(err.order.data.error);
     }
-    console.log("here the key is ", " data is ", order);
+    // console.log("here the key is ", " data is ", order);
 
     const options = {
       key: process.env.REACT_APP_RZORPAY_KEY,
@@ -139,7 +139,7 @@ const Cart = () => {
       image: Logo,
       order_id: order?.data.data.id,
       handler: function (response) {
-        console.log("response :", response);
+        // console.log("response :", response);
         axios
           .post(
             `${process.env.REACT_APP_BASE_URL}/marketplace/paymentverification`,
@@ -155,7 +155,7 @@ const Cart = () => {
             }
           )
           .then(res => {
-            console.log("response ", res);
+            // console.log("response ", res);
             dispatch(clearCart());
             setShowSuccessModal(true);
           })
