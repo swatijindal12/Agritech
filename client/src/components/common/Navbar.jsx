@@ -15,7 +15,6 @@ const WebContainer = styled.div`
   top: 0;
   left: 0;
 
-  width: 100vw;
   background-color: #f0ead2;
 
   @media only screen and (max-width: 990px) {

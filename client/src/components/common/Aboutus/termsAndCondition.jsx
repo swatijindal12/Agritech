@@ -1,6 +1,9 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Title from "../Title";
+import BackButton from "../../../assets/back-button.svg";
+import Flexbox from "../Flexbox";
 
 const Container = styled.div`
   padding: 1rem;
@@ -10,16 +13,34 @@ const Description = styled.p`
   font-size: 1rem;
   color: #6c584c;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
+  @media screen and (max-width: 990px) {
+    margin-bottom: 11.5rem;
+  }
 `;
 
 const Heading = styled.h3`
   color: #6c584c;
 `;
 
+const Back = styled.img`
+  cursor: pointer;
+`;
+
 const TermsAndConditions = () => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
-      <Title>Terms And Conditions</Title>
+      {!user ? (
+        <Flexbox justify="space-between">
+          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Title>Terms And Conditions</Title>
+        </Flexbox>
+      ) : (
+        <Title>Terms And Conditions</Title>
+      )}
+
       <Description>
         These terms and conditions outline the rules and regulations for the use
         of SOUL Society for Organic Farming Research & Education's Website,

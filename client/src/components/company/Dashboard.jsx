@@ -56,7 +56,7 @@ const Dashboard = () => {
         },
       })
       .then(res => {
-        console.log("response is ", res);
+        // console.log("response is ", res);
         setData(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));

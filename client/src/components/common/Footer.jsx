@@ -11,7 +11,8 @@ const FooterContainer = styled.footer`
   align-items: center;
   bottom: 0;
   width: 100%;
-  overflow-x: hidden;
+  position: ${props => (props.user ? "static" : "fixed")};
+  right: 0;
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;
@@ -47,27 +48,19 @@ const FooterItem = styled.div`
 const CopyRight = styled.div`
   font-size: 1rem;
   color: #6c584c;
-  margin-left: 2rem;
+  margin-left: 0.8rem;
   text-align: right;
   @media only screen and (max-width: 990px) {
     text-align: center;
     width: 100%;
-    font-size: 1rem;
     margin-left: 0.2rem;
     margin-top: 0.5rem;
   }
 `;
 
-const Footer = ({}) => {
+const Footer = () => {
   const [currentFooterItem, setCurrentFooterItem] = useState(null);
-  const [showFooter, setShowFooter] = useState(false);
   const user = useSelector(store => store.auth.user);
-
-  useEffect(() => {
-    if (user) {
-      setShowFooter(true);
-    }
-  }, [user]);
 
   useEffect(() => {
     setCurrentFooterItem(footerItems);
@@ -78,32 +71,27 @@ const Footer = ({}) => {
   };
 
   return (
-    <>
-      {showFooter && (
-        <FooterContainer>
-          <WebInnerContainer>
-            {currentFooterItem?.map(footerItem => {
-              return (
-                <FooterItem
-                  onClick={() => handleFooterClick(footerItem)}
-                  key={footerItem.title}
-                  highlight={
-                    window.location.pathname === footerItem.url ||
-                    window.location.pathname.includes(footerItem.url)
-                  }
-                >
-                  {footerItem.title}
-                </FooterItem>
-              );
-            })}
-            <CopyRight>
-              &copy; {new Date().getFullYear()} SoulBioFarms. All rights
-              reserved.
-            </CopyRight>
-          </WebInnerContainer>
-        </FooterContainer>
-      )}
-    </>
+    <FooterContainer user={user}>
+      <WebInnerContainer>
+        {currentFooterItem?.map(footerItem => {
+          return (
+            <FooterItem
+              onClick={() => handleFooterClick(footerItem)}
+              key={footerItem.title}
+              highlight={
+                window.location.pathname === footerItem.url ||
+                window.location.pathname.includes(footerItem.url)
+              }
+            >
+              {footerItem.title}
+            </FooterItem>
+          );
+        })}
+        <CopyRight>
+          &copy; {new Date().getFullYear()} SoulBioFarms. All rights reserved.
+        </CopyRight>
+      </WebInnerContainer>
+    </FooterContainer>
   );
 };
 

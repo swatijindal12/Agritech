@@ -87,7 +87,7 @@ const ResendMessageStyle = styled.p`
   margin: 0.5rem 1rem;
   margin-bottom: 2.5rem;
   text-align: right;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 `;
 
@@ -145,13 +145,13 @@ const Login = () => {
         phone: number,
       })
       .then(res => {
-        console.log("res : ", res);
+        // console.log("res : ", res);
         if (res.status === 200) {
           setAuthorised(true);
         }
       })
       .catch(err => {
-        console.log("error in sending otp", err);
+        // console.log("error in sending otp", err);
         setError(err?.response?.data?.error);
       });
   };
@@ -225,6 +225,7 @@ const Login = () => {
           {}
         </RightContainer>
       </Container>
+      {/* <Footer /> */}
     </>
   );
 };

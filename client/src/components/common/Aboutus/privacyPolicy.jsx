@@ -1,6 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import Title from "../Title";
+import { useSelector } from "react-redux";
+import BackButton from "../../../assets/back-button.svg";
+import Flexbox from "../Flexbox";
 
 const Container = styled.div`
   padding: 1rem;
@@ -11,12 +14,29 @@ const Description = styled.p`
   font-size: 1rem;
   color: #6c584c;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
+  @media screen and (max-width: 990px) {
+    margin-bottom: 11.5rem;
+  }
+`;
+
+const Back = styled.img`
+  cursor: pointer;
 `;
 
 const PrivacyPolicy = () => {
+  const user = useSelector(store => store.auth.user);
+
   return (
     <Container>
-      <Title>Privacy Policy</Title>
+      {!user ? (
+        <Flexbox justify="space-between">
+          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Title>Privacy Policy</Title>
+        </Flexbox>
+      ) : (
+        <Title>Privacy Policy</Title>
+      )}
       <Description>
         This Privacy Policy describes Our policies and procedures on the
         collection, use and disclosure of Your information when You use the

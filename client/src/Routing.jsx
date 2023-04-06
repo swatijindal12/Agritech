@@ -44,7 +44,15 @@ const Routing = () => {
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    if (!user && window.location.href.indexOf("login") === -1) {
+    if (!user && window.location.pathname === "/privacy") {
+      return;
+    } else if (!user && window.location.pathname === "/terms-condition") {
+      return;
+    } else if (!user && window.location.pathname === "/contact-us") {
+      return;
+    } else if (!user && window.location.pathname === "/return-policy") {
+      return;
+    } else if (!user && window.location.href.indexOf("login") === -1) {
       window.location.href = "/login";
     }
   }, []);

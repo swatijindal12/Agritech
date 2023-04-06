@@ -189,7 +189,7 @@ const LogsModal = ({ toggle }) => {
         const data = res.data.data.data;
         setList(data);
         setTotalpage(res.data.data.totalPages);
-        console.log("Here the response is ", res);
+        // console.log("Here the response is ", res);
 
         let tempArr = [];
         for (const key in data[0]) {
