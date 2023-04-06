@@ -3,6 +3,9 @@ const Farm = require("../models/farms");
 const User = require("../models/users");
 const Agreement = require("../models/agreements");
 const Audit = require("../models/audit");
+const Order = require("../models/order");
+const OrderItem = require("../models/orderItem");
+const Payment = require("../models/payment");
 const StageAgreement = require("../models/stageAgreement");
 const StageFarmer = require("../models/stageFarmer");
 const StageFarm = require("../models/stageFarm");
@@ -11,6 +14,7 @@ const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 const mongoose = require("mongoose");
+const Razorpay = require("razorpay");
 
 const getEnvVariable = require("../config/privateketAWS");
 
@@ -2754,6 +2758,112 @@ exports.getAudit = async (req) => {
     console.log("ERR", error);
     response.error = "failed operation";
     response.httpStatus = 500;
+  }
+
+  return response;
+};
+
+exports.getOrder = async (req) => {
+  // General response format
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  try {
+    // Parse search parameters from request query
+    const { orderId } = req.query;
+
+    // Build search query
+    const searchQuery = {};
+    if (orderId) {
+      searchQuery.order_id = orderId;
+    }
+
+    // Count the total number of documents
+    const totalDocuments = await Payment.countDocuments(searchQuery);
+
+    // Parse pagination parameters from request query
+    const { page = 1, limit = 10 } = req.query;
+
+    // Find all Payment Done that match the search query and apply pagination
+    const payments = await Payment.find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Creating RazorPay Instance
+    const instance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET_KEY,
+    });
+
+    const orderList = [];
+
+    //wait for promise to complete..
+    await Promise.all(
+      payments.map(async (payment, index) => {
+        const payDetail = await instance.payments.fetch(
+          payment.razorpay_payment_id
+        );
+
+        const {
+          order_id,
+          amount,
+          status,
+          method,
+          email,
+          contact,
+          created_at,
+          captured,
+        } = payDetail;
+
+        const order = await Order.findOne({ razorpay_order_id: order_id });
+
+        // const orderId = order?._id;
+        const orderId = order ? order._id : null;
+        const orderItems = await OrderItem.find({ order_id: orderId }).populate(
+          {
+            path: "agreement_id",
+            select: "agreement_nft_id -_id",
+          }
+        );
+
+        let orderItemsList = [];
+        orderItems.forEach((item, index) => {
+          if (item.agreement_id) {
+            orderItemsList.push(item.agreement_id.agreement_nft_id);
+          }
+          // orderItemsList.push(item.agreement_id?.agreement_nft_id);
+        });
+
+        orderList.push({
+          razorpay_order_id: order_id,
+          orderId,
+          email,
+          contact,
+          amount: amount / 100,
+          status,
+          captured,
+          method,
+          created_at: new Date(created_at * 1000).toLocaleString(),
+          orderItemsList,
+          unit: orderItems.length,
+        });
+      })
+    );
+
+    //return response
+    response.data = {
+      totalPages: Math.ceil(totalDocuments / limit),
+      data: orderList,
+    };
+    response.httpStatus = 200;
+  } catch (error) {
+    response.httpStatus = 400;
+    response.error = `failed operation ${error}`;
   }
 
   return response;

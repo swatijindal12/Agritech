@@ -2,6 +2,7 @@ const validator = require("validator");
 // import { Request, Response, NextFunction } from "express";
 const User = require("../models/users");
 const sendToken = require("../utils/jwtToken");
+const emailTransporter = require("../utils/emailTransporter");
 
 // Twilio setup start
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -151,10 +152,28 @@ exports.verifyCreateUser = async (req) => {
   //     response.httpStatus = 500;
   //     response.error = "failed operation";
   //   });
+
+  //creating a message
+  const message = {
+    from: process.env.EMAIL_ID,
+    to: process.env.ADMIN_EMAIL,
+    subject: "Agritrust User Registration",
+    text: `A new user  "${user.name}"  is registered with email  ${user.email}`,
+  };
+
   //update is_verified
   await User.updateOne({ phone: phone }, { is_verified: true });
-  response.httpStatus = 200;
+
+  //sending email.
+  emailTransporter.sendMail(message, (error, info) => {
+    if (error) {
+      console.log("Nodemailer error : ", error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
   response.message = "user created successful";
+  response.httpStatus = 201;
   response.data = user;
   return response;
 };

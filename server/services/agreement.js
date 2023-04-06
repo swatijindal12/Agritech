@@ -1,7 +1,7 @@
 const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 const User = require("../models/users");
-const Cart = require("../models/cart");
+
 const StageAgreement = require("../models/stageAgreement");
 const epocTimeConv = require("../utils/epocTimeConv");
 const Agreement = require("../models/agreements");

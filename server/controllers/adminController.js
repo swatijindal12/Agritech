@@ -167,7 +167,7 @@ exports.createFarmer = async (req, res, next) => {
     })
     .catch((error) => {
       res.status(400).json({
-        error: `failed operation 2 ${error}`,
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -268,7 +268,6 @@ exports.getStagedFarms = async (req, res, next) => {
 // Route to      => POST: api/v1/admin/farm
 // Create farm
 exports.createFarm = async (req, res, next) => {
-  console.log("Inside createFarm controllers.");
   adminService
     .createFarm(req)
     .then((response) => {
@@ -276,7 +275,7 @@ exports.createFarm = async (req, res, next) => {
     })
     .catch((error) => {
       res.status(400).json({
-        error: `failed operation controllers ${error}`,
+        error: `failed operation  ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -453,6 +452,23 @@ exports.getAudit = async (req, res, next) => {
     .catch((error) => {
       res.status(400).json({
         error: "failed operation",
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
+// Route to => api/v1/admin/order
+exports.getOrder = async (req, res, next) => {
+  adminService
+    .getOrder(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      res.status(400).json({
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
