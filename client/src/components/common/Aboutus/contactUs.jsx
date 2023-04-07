@@ -26,7 +26,10 @@ const ContactUs = () => {
     <Container>
       {!user ? (
         <Flexbox justify="space-between">
-          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Back
+            src={BackButton}
+            onClick={() => (window.location.href = "/login")}
+          />
           <Title>Contact Us</Title>
         </Flexbox>
       ) : (

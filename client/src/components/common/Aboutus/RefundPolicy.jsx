@@ -14,7 +14,7 @@ const Description = styled.p`
   color: #6c584c;
   margin-top: 1.5rem;
   margin-bottom: 4rem;
-  @media screen and (max-width: 990px){
+  @media screen and (max-width: 990px) {
     margin-bottom: 11.5rem;
   }
 `;
@@ -30,7 +30,10 @@ const ContactUs = () => {
     <Container>
       {!user ? (
         <Flexbox justify="space-between">
-          <Back src={BackButton} onClick={() => window.history.go(-1)} />
+          <Back
+            src={BackButton}
+            onClick={() => (window.location.href = "/login")}
+          />
           <Title>Returns and Refunds Policy</Title>
         </Flexbox>
       ) : (
