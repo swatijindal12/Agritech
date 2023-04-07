@@ -127,11 +127,7 @@ exports.createOrder = async (req) => {
 // Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
   const userId = req.user._id;
-  const keyDetails = process.env.KEY_DETAILS;
 
-  let filterUser = JSON.parse(keyDetails).filter(function (user) {
-    return user.user_id === userId.toString();
-  });
   // console.log("filterUser", filterUser);
   // Getting private From aws params store
   const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
