@@ -20,8 +20,8 @@ const Container = styled.div`
   width: 100vw;
   @media only screen and (max-width: 990px) {
     display: block;
-    padding: 1rem;
-    height: 100vh;
+    padding: 0.5rem;
+    height: auto;
     width: 100vw;
   }
 `;

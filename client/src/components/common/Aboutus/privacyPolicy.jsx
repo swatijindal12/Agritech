@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import Title from "../Title";
 import { useSelector } from "react-redux";
 import BackButton from "../../../assets/back-button.svg";
 import Flexbox from "../Flexbox";
@@ -10,7 +9,7 @@ const Container = styled.div`
   overflow-x: hidden;
 `;
 
-const Description = styled.p`
+const Description = styled.span`
   font-size: 1rem;
   color: #6c584c;
   margin-top: 1.5rem;
@@ -22,6 +21,14 @@ const Description = styled.p`
 
 const Back = styled.img`
   cursor: pointer;
+`;
+
+const Title = styled.p`
+  font-size: 1.5rem;
+  color: #6c584c;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 auto;
 `;
 
 const PrivacyPolicy = () => {
@@ -41,6 +48,7 @@ const PrivacyPolicy = () => {
         <Title>Privacy Policy</Title>
       )}
       <Description>
+        <br />
         This Privacy Policy describes Our policies and procedures on the
         collection, use and disclosure of Your information when You use the
         Service and tells You about Your privacy rights and how the law protects

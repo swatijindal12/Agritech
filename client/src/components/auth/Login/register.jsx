@@ -14,9 +14,11 @@ const Container = styled.div`
   display: flex;
   width: 100vw;
   @media only screen and (max-width: 990px) {
+    position: static;
     display: block;
-    padding: 1rem;
-    height: 100vh;
+    padding: 0.5rem;
+    height: auto;
+    overflow-x: hidden;
   }
 `;
 
@@ -53,10 +55,11 @@ const MiddleContainer = styled.div`
   display: block;
   text-align: center;
   height: 100%;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 
   @media screen and (max-width: 990px) {
     margin: 0;
+    /* overflow-y: none; */
   }
 `;
 

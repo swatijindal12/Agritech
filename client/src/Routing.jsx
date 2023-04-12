@@ -52,6 +52,8 @@ const Routing = () => {
       return;
     } else if (!user && window.location.pathname === "/return-policy") {
       return;
+    } else if (!user && window.location.pathname === "/register") {
+      return;
     } else if (!user && window.location.href.indexOf("login") === -1) {
       window.location.href = "/login";
     }

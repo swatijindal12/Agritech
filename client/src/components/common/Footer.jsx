@@ -16,6 +16,7 @@ const FooterContainer = styled.footer`
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;
+    position: ${props => (props.user ? "static" : "relative")};
   }
 `;
 
@@ -34,8 +35,6 @@ const FooterItem = styled.div`
   color: #6c584c;
   margin: 0 0.5rem;
   cursor: pointer;
-  text-decoration: ${props => (props.highlight ? "underline" : "none")};
-  text-underline-offset: 0.5rem;
   width: auto;
   margin-right: 1rem;
   @media only screen and (max-width: 990px) {
@@ -67,13 +66,18 @@ const Footer = () => {
   }, []);
 
   const handleFooterClick = item => {
+    console.log("INside handle footer link", item,  window.location.pathname.includes(item.url));
     window.location.href = item.url;
   };
-
+  console.log(
+    "PATH NAME",
+    window.location.pathname
+  );
   return (
     <FooterContainer user={user}>
       <WebInnerContainer>
         {currentFooterItem?.map(footerItem => {
+          console.log(footerItem);
           return (
             <FooterItem
               onClick={() => handleFooterClick(footerItem)}
@@ -88,7 +92,8 @@ const Footer = () => {
           );
         })}
         <CopyRight>
-          &copy; {new Date().getFullYear()} SoulBioFarms. All rights reserved.
+          &copy;{new Date().getFullYear()} SOUL Societie for Organic Farming R &
+          E Pvt. Ltd. All rights reserved.
         </CopyRight>
       </WebInnerContainer>
     </FooterContainer>
