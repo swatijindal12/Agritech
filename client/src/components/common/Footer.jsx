@@ -66,13 +66,9 @@ const Footer = () => {
   }, []);
 
   const handleFooterClick = item => {
-    console.log("INside handle footer link", item,  window.location.pathname.includes(item.url));
     window.location.href = item.url;
   };
-  console.log(
-    "PATH NAME",
-    window.location.pathname
-  );
+
   return (
     <FooterContainer user={user}>
       <WebInnerContainer>
