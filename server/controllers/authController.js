@@ -25,8 +25,6 @@ exports.createUser = async (req, res, next) => {
 // Route to     => api/v1/auth/verify-register
 
 exports.verifyCreateUser = async (req, res, next) => {
-  console.log("verifyCreateUser inside...");
-
   const { phone, otp } = req.body;
 
   // Checks if phone or otp is entered by user
@@ -41,7 +39,6 @@ exports.verifyCreateUser = async (req, res, next) => {
 
   // Finding user in database which is not verified with this Phone.
   const user = await User.findOne({ phone, is_verified: false });
-  console.log("User : ", user);
 
   // checking
   if (!user) {
@@ -65,7 +62,7 @@ exports.verifyCreateUser = async (req, res, next) => {
         { phone: phone },
         { is_verified: true }
       );
-      console.log("result :- ", result);
+
       // creating a message
       const message = {
         from: process.env.EMAIL_ID,
