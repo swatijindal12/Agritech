@@ -73,7 +73,6 @@ const Footer = () => {
     <FooterContainer user={user}>
       <WebInnerContainer>
         {currentFooterItem?.map(footerItem => {
-          console.log(footerItem);
           return (
             <FooterItem
               onClick={() => handleFooterClick(footerItem)}
