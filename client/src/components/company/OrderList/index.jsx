@@ -167,19 +167,27 @@ const OrderList = () => {
           <TableContainer>
             <Table>
               <tr>
-                {tableHeading?.map(item => {
-                  return <th>{item.toUpperCase()}</th>;
+                {tableHeading?.map((item, index) => {
+                  return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
-              {list?.map(row => {
+              {list?.map((row, index) => {
                 return (
-                  <tr>
+                  <tr key={index}>
                     {tableHeading?.map(item => {
                       if (item === "orderItemsList") {
-                        return <td>{row[item].join(", ")}</td>;
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row[item].join(", ")}
+                          </td>
+                        );
                       }
-                      if (row[item] === true) return <td>1</td>;
-                      else return <td>{row[item] || 0}</td>;
+                      if (row[item] === true)
+                        return <td key={`${index}-${item}`}>1</td>;
+                      else
+                        return (
+                          <td key={`${index}-${item}`}>{row[item] || 0}</td>
+                        );
                     })}
                   </tr>
                 );

@@ -25,6 +25,8 @@ const Container = styled.div`
 const RightContainer = styled.div`
   width: 50%;
   padding: 1rem;
+  height: calc(100vh - 4rem);
+  overflow: auto;
   @media only screen and (max-width: 990px) {
     height: 100vh;
     width: 100vw;
