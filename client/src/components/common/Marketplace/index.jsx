@@ -91,7 +91,7 @@ const MarketPlace = () => {
       <InputContainer margin="0 2rem">
         <Input
           type="text"
-          placeholder="Search by Name"
+          placeholder="Search by Name and Crop"
           onChange={e => setSearchText(e.target.value)}
           value={searchText}
         />
