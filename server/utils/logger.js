@@ -1,4 +1,5 @@
 const winston = require("winston");
+const { DailyRotateFile } = require("winston-daily-rotate-file");
 
 const logFormat = winston.format.combine(
   winston.format.colorize(),

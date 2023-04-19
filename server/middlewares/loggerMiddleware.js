@@ -1,7 +1,6 @@
 const { logger } = require("../utils/logger");
 
 exports.preRequestLogger = (req, res, next) => {
-  console.log("preRequestLogger => ", req.body);
   const body = { ...req.body };
 
   // if there is password
@@ -20,7 +19,6 @@ exports.preRequestLogger = (req, res, next) => {
 };
 
 exports.postRequestLogger = (req, res, next) => {
-  console.log("postRequestLogger => ", req.body);
   const body = { ...req.body };
 
   // if there is password
