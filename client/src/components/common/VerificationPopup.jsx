@@ -80,14 +80,19 @@ const VerificationPopup = ({
   getReason,
   warning,
   selectedModelType,
+  selectedEntity,
 }) => {
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const handleSubmit = async () => {
     await onSubmit(password, reason);
-    setIsSubmitting(true);
+    if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
+      setIsSubmitting(true);
+    }
+    setIsSubmitting(false);
+
   };
 
   return (

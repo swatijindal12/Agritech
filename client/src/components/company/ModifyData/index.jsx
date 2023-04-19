@@ -257,6 +257,7 @@ const ModifyData = () => {
               : false)
           }
           selectedModelType={showVerificationFor}
+          selectedEntity = {selectedType.name}
         />
       )}
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}
