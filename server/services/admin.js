@@ -1975,6 +1975,8 @@ exports.deleteFarm = async (req) => {
 exports.updateFarm = async (req) => {
   const userLogged = req.user;
   const userId = userLogged._id;
+
+  console.log("req", req.body);
   // General response format
   let response = {
     error: null,
@@ -2000,6 +2002,7 @@ exports.updateFarm = async (req) => {
   const reason = req.headers["reason"];
 
   const updatedData = req.body;
+  delete updatedData.updatedAt;
 
   try {
     //Validation
@@ -2160,6 +2163,7 @@ exports.updateFarm = async (req) => {
       // const old_values = { ...updatedData.toJSON() };
       // console.log("old_values ", old_values);
       // update the Farm data..
+
       const updateStatus = await Farm.updateOne({ _id: id }, updatedData);
 
       // const new_values = { ...updatedData.toJSON() };
@@ -2262,7 +2266,7 @@ exports.updateFarm = async (req) => {
       const transaction = await web3.eth.sendSignedTransaction(
         signedTx.rawTransaction
       );
-      console.log("Transaction : ", transaction.transactionHash);
+
       // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
       farm.tx_hash = `${Tran}/${transaction.transactionHash}`;
 
@@ -2845,8 +2849,29 @@ exports.getAudit = async (req) => {
       response.httpStatus = 200;
       logger.log("info", "Data fetch is successful");
     } else if (req.params.table == "agreement" && page && limit) {
-      let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
-      let totalDocuments = await Audit.countDocuments(auditQuery);
+      console.log("agreement query ...");
+      // let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
+      // let totalDocuments = await Audit.countDocuments(auditQuery);
+
+      let auditQuery;
+      let totalDocuments;
+      //If search query
+      if (req.query.search) {
+        auditQuery = Audit.find({
+          table_name: "agreement",
+          $or: [
+            { user_name: { $regex: req.query.search, $options: "i" } },
+            { change_type: { $regex: req.query.search, $options: "i" } },
+            { record_id: { $regex: req.query.search, $options: "i" } },
+          ],
+        }).select("-__v -updateAt");
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      } else {
+        auditQuery = Audit.find({ table_name: "agreement" }).select(
+          "-__v -updateAt"
+        );
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      }
 
       const skip = (page - 1) * limit;
 
