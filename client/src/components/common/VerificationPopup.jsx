@@ -91,8 +91,6 @@ const VerificationPopup = ({
     if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
       setIsSubmitting(true);
     }
-    setIsSubmitting(false);
-
   };
 
   return (
