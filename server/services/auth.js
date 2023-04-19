@@ -10,6 +10,8 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 
 const nameRegex = /^[A-Za-z'-\s]+$/;
 
@@ -82,11 +84,13 @@ exports.createUser = async (req) => {
         .then(
           (verification) => (response.httpStatus = 200),
           (response.message = `OTP sent to your number `),
-          (response.httpStatus = 200)
+          (response.httpStatus = 200),
+          logger.log("info", "OTP sent to your number")
         )
         .catch((error) => {
           (response.httpStatus = 400),
             (response.error = `failed operation ${error}`);
+          errorLog(req, error);
         });
       // response.message = `OTP sent to your number`;
       // response.httpStatus = 200;
@@ -94,11 +98,13 @@ exports.createUser = async (req) => {
       // if some fields are empty
       response.httpStatus = 400;
       response.error = "some fields are empty";
+      logger.log("info", "some fields are empty");
     }
   } catch (error) {
     response.httpStatus = 500;
     // console.log(error);
     response.error = `${error}`;
+    errorLog(req, error);
   }
 
   return response;
@@ -263,11 +269,13 @@ exports.login = async (req) => {
       .then(
         (verification) => (response.httpStatus = 200),
         (response.message = `OTP sent to your number`),
-        (response.httpStatus = 200)
+        (response.httpStatus = 200),
+        logger.log("info", "OTP sent to your number")
       )
       .catch((error) => {
         (response.httpStatus = 400),
           (response.error = `failed operation ${error}`);
+        errorLog(req, error);
       });
     //Uncomment for Dev
     // response.message = `OTP sent to your number`;
@@ -275,6 +283,7 @@ exports.login = async (req) => {
   } catch (error) {
     response.httpStatus = 404;
     response.error = `User not found`;
+    errorLog(req, error);
   }
 
   return response;

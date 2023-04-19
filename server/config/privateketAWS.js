@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-
+const { errorLog } = require("../utils/commonError");
 // // Importing environment setup file.
 require("dotenv").config({ path: "./config/config.env" });
 
@@ -11,6 +11,7 @@ const getSSMParameter = async (ssm, parameter) => {
     return response.Parameters;
   } catch (err) {
     console.log(err);
+    errorLog(req, err);
     throw err;
   }
 };

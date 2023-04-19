@@ -8,6 +8,8 @@ const crypto = require("crypto");
 const Farm = require("../models/farms");
 const getEnvVariable = require("../config/privateketAWS");
 const emailTransporter = require("../utils/emailTransporter");
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 
 // Calling function to get the privateKey from aws params storage
 async function getPrivateKeyAWS(keyName) {
@@ -116,9 +118,11 @@ exports.createOrder = async (req) => {
     response.message = `Order created successful`;
     response.httpStatus = 200;
     response.data = order;
+    logger.log("info", "Order created successful");
   } catch (error) {
     response.message = `Failed operation ${error}`;
     response.httpStatus = 500;
+    errorLog(req, error);
   }
 
   return response;
@@ -264,6 +268,7 @@ exports.paymentVerification = async (req) => {
                   // console.log(events[0]);
                   if (error) {
                     console.log("BlockchainError", error);
+                    errorLog(req, error);
                   }
                 }
               );
@@ -292,8 +297,10 @@ exports.paymentVerification = async (req) => {
           emailTransporter.sendMail(message, (error, info) => {
             if (error) {
               console.log("Nodemailer error : ", error);
+              errorLog(req, error);
             } else {
               console.log("Email sent: " + info.response);
+              logger.log("info", `${info.response}`);
             }
           });
         } else {
@@ -305,15 +312,18 @@ exports.paymentVerification = async (req) => {
       .catch((err) => {
         response.message = `failed operation ${err}`;
         response.httpStatus = 500;
+        errorLog(req, err);
         return response;
       });
 
     response.message = `Payment Successful`;
     response.httpStatus = 200;
     response.data = razorpay_payment_id;
+    logger.log("info", "Payment Successful");
   } else {
     response.error = "Payment failed";
     response.httpStatus = 500;
+    logger.log("info", "Payment failed");
     return response;
   }
 

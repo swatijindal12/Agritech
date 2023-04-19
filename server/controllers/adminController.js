@@ -1,5 +1,6 @@
 const adminService = require("../services/admin");
-
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 // Route to      => api/v1/admin/validate-data
 // Validate the Json data in table
 exports.validateData = async (req, res, next) => {
@@ -9,6 +10,7 @@ exports.validateData = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -16,6 +18,7 @@ exports.validateData = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/state : POST
@@ -27,6 +30,7 @@ exports.stagedAgreements = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -34,6 +38,7 @@ exports.stagedAgreements = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/stage :: GET
@@ -45,6 +50,7 @@ exports.getStagedAgreements = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -52,6 +58,7 @@ exports.getStagedAgreements = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.deleteAgreements = async (req, res, next) => {
@@ -61,6 +68,7 @@ exports.deleteAgreements = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -68,6 +76,7 @@ exports.deleteAgreements = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.updateAgreement = async (req, res, next) => {
@@ -77,6 +86,7 @@ exports.updateAgreement = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -84,6 +94,7 @@ exports.updateAgreement = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // List of agreements for admin edit/delete
@@ -94,6 +105,7 @@ exports.listAgreements = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -101,6 +113,7 @@ exports.listAgreements = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/validate/farmer :: POST
@@ -112,6 +125,7 @@ exports.validateFarmers = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -119,6 +133,7 @@ exports.validateFarmers = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/stage : POST
@@ -130,6 +145,7 @@ exports.stagedFarmers = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -137,6 +153,7 @@ exports.stagedFarmers = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/stage :: GET
@@ -148,6 +165,7 @@ exports.getStagedFarmers = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -155,6 +173,7 @@ exports.getStagedFarmers = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => POST: api/v1/admin/farmer
@@ -166,6 +185,7 @@ exports.createFarmer = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -173,6 +193,7 @@ exports.createFarmer = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => UPDATE: api/v1/admin/farmer/:id
@@ -184,13 +205,15 @@ exports.updateFarmer = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
-        error: `failed operation 2 ${error}`,
+        error: `failed operation  ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => DELETE: api/v1/admin/farmer/:id
@@ -202,13 +225,15 @@ exports.deleteFarmer = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
-        error: `failed operation 2 ${error}`,
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/validate/farm :: POST
@@ -220,6 +245,7 @@ exports.validateFarms = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -227,6 +253,7 @@ exports.validateFarms = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/farm/stage : POST
@@ -238,6 +265,7 @@ exports.stagedFarms = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -245,6 +273,7 @@ exports.stagedFarms = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/admin/farm/stage :: GET
@@ -256,6 +285,7 @@ exports.getStagedFarms = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -263,6 +293,7 @@ exports.getStagedFarms = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => POST: api/v1/admin/farm
@@ -274,6 +305,7 @@ exports.createFarm = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation  ${error}`,
         message: null,
@@ -281,6 +313,7 @@ exports.createFarm = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => UPDATE: api/v1/admin/farm/:id
@@ -292,6 +325,7 @@ exports.updateFarm = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -299,6 +333,7 @@ exports.updateFarm = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => DELETE: api/v1/admin/farm/:id
@@ -310,6 +345,7 @@ exports.deleteFarm = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -317,6 +353,7 @@ exports.deleteFarm = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.getFarms = async (req, res, next) => {
@@ -326,6 +363,7 @@ exports.getFarms = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -333,6 +371,7 @@ exports.getFarms = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => GET: api/v1/admin/farmers
@@ -344,6 +383,7 @@ exports.getFarmers = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -351,6 +391,7 @@ exports.getFarmers = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => api/v1/admin/company
@@ -362,6 +403,7 @@ exports.createCustomer = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -369,6 +411,7 @@ exports.createCustomer = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => api/v1/admin/customers
@@ -379,6 +422,7 @@ exports.getCustomers = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -386,6 +430,7 @@ exports.getCustomers = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => api/v1/admin/ageeement
@@ -397,6 +442,7 @@ exports.getAgreementsForAdmin = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -404,6 +450,7 @@ exports.getAgreementsForAdmin = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => api/v1/admin/agreement/closed/:id
@@ -415,6 +462,7 @@ exports.closeAgreement = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -422,6 +470,7 @@ exports.closeAgreement = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to     => api/v1/admin/dashboard
@@ -432,13 +481,15 @@ exports.getdashBoard = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
-        error: "failed operation",
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,
       });
     });
+  next();
 };
 
 // Route to => api/v1/admin/audit/:table
@@ -450,6 +501,7 @@ exports.getAudit = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -457,6 +509,7 @@ exports.getAudit = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to => api/v1/admin/order
@@ -467,6 +520,7 @@ exports.getOrder = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation ${error}`,
         message: null,
@@ -474,4 +528,5 @@ exports.getOrder = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };

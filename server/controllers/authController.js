@@ -9,6 +9,9 @@ const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
+
 // Importing all the services
 const authService = require("../services/auth");
 
@@ -17,9 +20,14 @@ exports.createUser = async (req, res, next) => {
   authService
     .createUser(req)
     .then((response) => {
+      errorLog(req, error);
       res.status(response.httpStatus).json(response);
     })
-    .catch((err) => res.json(err));
+    .catch((err) => {
+      errorLog(req, err);
+      res.json(err);
+    });
+  next();
 };
 
 // Route to     => api/v1/auth/verify-register
@@ -74,12 +82,15 @@ exports.verifyCreateUser = async (req, res, next) => {
       // sending email.
       emailTransporter.sendMail(message, (error, info) => {
         if (error) {
+          errorLog(req, err);
           console.log("Nodemailer error : ", error);
         } else {
           console.log("Email sent: ");
+          logger.log("info", "Email sent");
         }
       });
 
+      logger.log("info", "User created successfully");
       return res.status(200).json({
         error: null,
         message: "User created successfully",
@@ -87,6 +98,7 @@ exports.verifyCreateUser = async (req, res, next) => {
         data: user,
       });
     } else {
+      errorLog(req, err);
       return res.status(400).json({
         error: "Verification failed",
         message: null,
@@ -95,8 +107,7 @@ exports.verifyCreateUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log("Twilio error : ", error);
-
+    errorLog(req, err);
     return res.status(500).json({
       error: `failed operation ${error}`,
       message: null,
@@ -104,6 +115,7 @@ exports.verifyCreateUser = async (req, res, next) => {
       data: null,
     });
   }
+  next();
 };
 
 // Route to      => api/v1/auth/login
@@ -113,7 +125,11 @@ exports.loginUser = async (req, res, next) => {
     .then((response) => {
       res.status(response.httpStatus).json(response);
     })
-    .catch((err) => res.json(err));
+    .catch((err) => {
+      errorLog(req, err);
+      res.json(err);
+    });
+  next();
 };
 
 // Route to      => api/v1/auth/verify
@@ -135,6 +151,7 @@ exports.verifyUser = async (req, res, next) => {
 
   // checking
   if (!user) {
+    logger.log("info", "User not found");
     return res.status(404).json({
       error: "User not found",
       message: null,
@@ -150,8 +167,10 @@ exports.verifyUser = async (req, res, next) => {
     .then((verification_check) => {
       if (verification_check.status === "approved") {
         // Create JSON Web token
+        logger.log("info", "verified in twilio");
         sendToken(user, res);
       } else {
+        logger.log("info", "User not found");
         return res.status(400).json({
           error: "failed operation",
           message: null,
@@ -161,6 +180,7 @@ exports.verifyUser = async (req, res, next) => {
       }
     })
     .catch((error) => {
+      errorLog(req, error);
       return res.status(500).json({
         error: `failed operation ${error}`,
         message: null,
@@ -170,6 +190,7 @@ exports.verifyUser = async (req, res, next) => {
     });
 
   //sendToken(user, res); // uncomment for withoutotp
+  next();
 };
 
 // Route to     => api/v1/auth/logout
@@ -185,4 +206,5 @@ exports.logoutUser = async (req, res, next) => {
     httpStatus: 200,
     data: null,
   });
+  next();
 };
