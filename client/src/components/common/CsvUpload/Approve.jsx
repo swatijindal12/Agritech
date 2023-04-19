@@ -176,6 +176,7 @@ const Approve = ({ setBackgroundColor }) => {
           onSubmit={password => handleUploadClick(password)}
           error={showVerificationError}
           setError={setShowVerificationError}
+          selectedModelType="Approve"
         />
       )}
       <Container>

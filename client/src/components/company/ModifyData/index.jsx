@@ -256,6 +256,8 @@ const ModifyData = () => {
               ? "Approx cost of modifying contract will be $0.0113"
               : false)
           }
+          selectedModelType={showVerificationFor}
+          selectedEntity = {selectedType.name}
         />
       )}
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}
@@ -290,17 +292,17 @@ const ModifyData = () => {
           <TableContainer>
             <Table>
               <tr>
-                {tableHeading?.map(item => {
-                  return <th>{item.toUpperCase()}</th>;
+                {tableHeading?.map((item, index) => {
+                  return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
-              {list?.map(row => {
+              {list?.map((row, index) => {
                 return (
-                  <tr>
+                  <tr key={index}>
                     {tableHeading?.map((item, tdIndex) => {
                       if (tdIndex === 0)
                         return (
-                          <td>
+                          <td key={`${tdIndex}-${item}`}>
                             <img
                               src={EditIcon}
                               onClick={() => {
@@ -312,7 +314,7 @@ const ModifyData = () => {
                         );
                       if (tdIndex === 1)
                         return (
-                          <td>
+                          <td key={`${tdIndex}-${item}`}>
                             <img
                               src={DeleteIcon}
                               onClick={() => {
@@ -322,14 +324,21 @@ const ModifyData = () => {
                             />
                           </td>
                         );
-                      if (row[item] === true) return <td>1</td>;
+                      if (row[item] === true)
+                        return <td key={`${tdIndex}-${item}`}>1</td>;
                       if (row[item]?.toString()?.includes("http"))
                         return (
-                          <UrlTd onClick={() => window.open(row[item])}>
+                          <UrlTd
+                            onClick={() => window.open(row[item])}
+                            key={`${tdIndex}-${item}`}
+                          >
                             {item}
                           </UrlTd>
                         );
-                      else return <td>{row[item] || 0}</td>;
+                      else
+                        return (
+                          <td key={`${tdIndex}-${item}`}>{row[item] || 0}</td>
+                        );
                     })}
                   </tr>
                 );

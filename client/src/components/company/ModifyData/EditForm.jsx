@@ -120,7 +120,7 @@ const EditForm = ({ data, toggle, setEditData }) => {
         <Form>
           {inputs?.map(item => {
             return (
-              <InputContainer>
+              <InputContainer key={item}>
                 <Title>{item.toUpperCase()}</Title>
                 <Input
                   type="text"

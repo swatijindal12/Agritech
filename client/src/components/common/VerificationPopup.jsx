@@ -79,6 +79,8 @@ const VerificationPopup = ({
   setError,
   getReason,
   warning,
+  selectedModelType,
+  selectedEntity,
 }) => {
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
@@ -86,15 +88,21 @@ const VerificationPopup = ({
 
   const handleSubmit = async () => {
     await onSubmit(password, reason);
-    setIsSubmitting(true);
+    if (
+      selectedEntity === "Farms" ||
+      selectedEntity === "Contracts" ||
+      selectedModelType === "update" ||
+      selectedModelType === "Approve"
+    ) {
+      setIsSubmitting(true);
+    }
   };
 
   return (
     <Container>
       <InnerContianer>
-        {isSubmitting ? (
+        {!error && isSubmitting ? (
           <>
-            {" "}
             <Lottie
               animationData={LoadingLottie}
               loop={true}

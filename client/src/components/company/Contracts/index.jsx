@@ -107,20 +107,22 @@ const Contracts = () => {
 
   return (
     <Container>
-      {/* <InputContainer margin="0 2rem">
-        <Input
-          type="text"
-          placeholder="Search by Name"
-          onChange={e => setSearchText(e.target.value)}
-          value={searchText}
-        />
-        <Button
-          text={loading ? "...LOADING" : "SEARCH"}
-          margin="0 1rem"
-          onClick={getList}
-          disabled={loading}
-        />
-      </InputContainer> */}
+      {user?.data.role === "admin" && (
+        <InputContainer margin="0 2rem">
+          <Input
+            type="text"
+            placeholder="Search by Name and Crop"
+            onChange={e => setSearchText(e.target.value)}
+            value={searchText}
+          />
+          <Button
+            text={loading ? "...LOADING" : "SEARCH"}
+            margin="0 1rem"
+            onClick={getList}
+            disabled={loading}
+          />
+        </InputContainer>
+      )}
       <OptionContainer>
         <Option
           selected={currentPage === "active"}
@@ -135,8 +137,8 @@ const Contracts = () => {
           Closed
         </Option>
       </OptionContainer>
-      {((currentPage === "active" && active?.length == 0) ||
-        (currentPage === "closed" && closed?.length == 0)) && (
+      {((currentPage === "active" && active?.length === 0) ||
+        (currentPage === "closed" && closed?.length === 0)) && (
         <ImageContainer>
           <EmptyImage src={EmptyIcon} />
         </ImageContainer>
