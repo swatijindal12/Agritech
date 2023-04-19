@@ -88,7 +88,12 @@ const VerificationPopup = ({
 
   const handleSubmit = async () => {
     await onSubmit(password, reason);
-    if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
+    if (
+      selectedEntity === "Farms" ||
+      selectedEntity === "Contracts" ||
+      selectedModelType === "update" ||
+      selectedModelType === "Approve"
+    ) {
       setIsSubmitting(true);
     }
   };
@@ -96,7 +101,7 @@ const VerificationPopup = ({
   return (
     <Container>
       <InnerContianer>
-        {!error && isSubmitting && selectedModelType === "update" ? (
+        {!error && isSubmitting ? (
           <>
             <Lottie
               animationData={LoadingLottie}
