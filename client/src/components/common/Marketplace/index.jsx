@@ -74,7 +74,7 @@ const MarketPlace = () => {
     setNewAddedIds(tempArr);
   };
 
-  const getList = (page) => {
+  const getList = page => {
     setLoading(true);
     axios
       .get(
@@ -87,7 +87,6 @@ const MarketPlace = () => {
       )
       .then(res => {
         setLoading(false);
-        console.log("RES DATA", res.data.data)
         setContract(res.data.data);
       })
       .catch(err => {
