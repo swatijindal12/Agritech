@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const Farmer = require('../models/farmers')
 const Farm = require('../models/farms')
 const User = require('../models/users')
@@ -17,6 +18,28 @@ const mongoose = require('mongoose')
 const Razorpay = require('razorpay')
 
 const getEnvVariable = require('../config/privateketAWS')
+=======
+const Farmer = require("../models/farmers");
+const Farm = require("../models/farms");
+const User = require("../models/users");
+const Agreement = require("../models/agreements");
+const Audit = require("../models/audit");
+const Order = require("../models/order");
+const OrderItem = require("../models/orderItem");
+const Payment = require("../models/payment");
+const StageAgreement = require("../models/stageAgreement");
+const StageFarmer = require("../models/stageFarmer");
+const StageFarm = require("../models/stageFarm");
+const csvToJson = require("../utils/csvToJson");
+const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
+const farmSchemaCheck = require("../utils/farmSchemaCheck");
+const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
+const mongoose = require("mongoose");
+const Razorpay = require("razorpay");
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
+const getEnvVariable = require("../config/privateketAWS");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
 // Calling function to get the privateKey from aws params storage
 async function getPrivateKeyAWS(keyName) {
@@ -63,8 +86,14 @@ exports.validate = async (req) => {
   }
 
   if (!req.files || !req.files.file) {
+<<<<<<< HEAD
     response.error = 'no file selected'
     response.httpStatus = 400
+=======
+    response.error = "no file selected";
+    response.httpStatus = 400;
+    logger.log("info", "no file selected");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   } else {
     // Read the contents of the file
     // const fileContent = req.files.file.data.toString(); //JSON DATA
@@ -75,6 +104,7 @@ exports.validate = async (req) => {
     //console.log("data :- ", data);
     const isValid = await agreementSchemaCheck(data)
     // Check file type
+<<<<<<< HEAD
     if (file.mimetype != 'text/csv') {
       response.error = 'select csv file'
       response.httpStatus = 400
@@ -82,6 +112,17 @@ exports.validate = async (req) => {
       // Check schema of the file
       response.error = 'data format do not match, download sample'
       response.httpStatus = 400
+=======
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+      logger.log("info", "select csv file");
+    } else if (!isValid) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+      logger.log("info", "data format do not match, download sample");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       const errorLines = []
       for (let i = 0; i < data.length; i++) {
@@ -209,6 +250,7 @@ exports.validate = async (req) => {
 
       if (errorLines.length >= 1) {
         // There are error some lines missing data
+<<<<<<< HEAD
         ;(response.httpStatus = 400), (response.error = errorLines)
       } else {
         // No error
@@ -220,6 +262,22 @@ exports.validate = async (req) => {
           response.httpStatus = 200
           response.message = 'validation successful'
           response.data = data
+=======
+        (response.httpStatus = 400), (response.error = errorLines);
+        logger.log("info", `${errorLines}`);
+      } else {
+        // No error
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+          logger.log("info", `Empty File`);
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+          logger.log("info", `validation successful`);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
         }
       }
       response.data = data
@@ -239,17 +297,30 @@ exports.stagedAgreements = async (req) => {
   }
 
   if (!req.files || !req.files.file) {
+<<<<<<< HEAD
     response.error = 'no file selected'
     response.httpStatus = 400
+=======
+    response.error = "no file selected";
+    response.httpStatus = 400;
+    logger.log("info", "no file selected");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   } else {
     try {
       const file = req.files.file
       //console.log("file Name :- ", file);
 
       // Check file type
+<<<<<<< HEAD
       if (file.mimetype != 'text/csv') {
         response.error = 'select csv file'
         response.httpStatus = 400
+=======
+      if (file.mimetype != "text/csv") {
+        response.error = "select csv file";
+        response.httpStatus = 400;
+        logger.log("info", "select csv file");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       } else {
         const data = await csvToJson(file)
         // Add the file name to each data object
@@ -265,6 +336,7 @@ exports.stagedAgreements = async (req) => {
           // Insert record into DB (stageAgreement)
           const stageAgreement = await StageAgreement.create(updatedData)
 
+<<<<<<< HEAD
           response.httpStatus = 200
           response.message = 'Insertion successful'
           response.data = stageAgreement
@@ -276,6 +348,22 @@ exports.stagedAgreements = async (req) => {
     } catch (error) {
       response.error = `failed operation ${error}`
       response.httpStatus = 500
+=======
+          response.httpStatus = 200;
+          response.message = "Insertion successful";
+          response.data = stageAgreement;
+          logger.log("info", "stageAgreement Insertion successful");
+        } else {
+          response.httpStatus = 400;
+          response.message = "file name, already exist.";
+          logger.log("info", "stageAgreement file name, already exist.");
+        }
+      }
+    } catch (error) {
+      response.error = `failed operation ${error}`;
+      response.httpStatus = 500;
+      errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     }
   }
   return response
@@ -315,11 +403,21 @@ exports.getStagedAgreements = async (req) => {
       }),
     )
 
+<<<<<<< HEAD
     response.httpStatus = 200
     response.data = dataArray.length > 0 ? dataArray : []
   } catch (error) {
     response.error = `operation failed ${error}`
     response.httpStatus = 500
+=======
+    response.httpStatus = 200;
+    response.data = dataArray.length > 0 ? dataArray : [];
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    response.error = `operation failed ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -357,8 +455,14 @@ exports.listAgreements = async (req) => {
       // Return all documents
       const agreements = await agreementQuery.select('-__v')
 
+<<<<<<< HEAD
       response.data = agreements
       response.httpStatus = 200
+=======
+      response.data = agreements;
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       // Apply pagination
       const agreements = await agreementQuery
@@ -377,10 +481,19 @@ exports.listAgreements = async (req) => {
             timeZone: 'Asia/Kolkata',
           }),
         })),
+<<<<<<< HEAD
       }
     }
   } catch (error) {
     ;(response.error = 'failed operation'), (response.httpStatus = 400)
+=======
+      };
+      logger.log("info", "Data fetch is successful");
+    }
+  } catch (error) {
+    (response.error = "failed operation"), (response.httpStatus = 400);
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -405,9 +518,16 @@ exports.updateAgreement = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   //Checking header reason for change
   const reason = req.headers['reason']
@@ -550,6 +670,7 @@ exports.updateAgreement = async (req) => {
       await agreement.save()
 
       if (transaction.transactionHash) {
+<<<<<<< HEAD
         response.message = `Successfully updated `
         response.httpStatus = 200
       } else {
@@ -563,6 +684,25 @@ exports.updateAgreement = async (req) => {
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 500
+=======
+        response.message = `Successfully updated `;
+        response.httpStatus = 200;
+        logger.log("info", "Successfully updated ");
+      } else {
+        response.message = `Blockchain error `;
+        response.httpStatus = 500;
+        logger.log("info", "Blockchain error ");
+      }
+    } else {
+      response.error = `agreement is active`;
+      response.httpStatus = 404;
+      logger.log("info", "agreement is active");
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -585,9 +725,16 @@ exports.deleteAgreement = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   //reading reason from header
@@ -621,6 +768,7 @@ exports.deleteAgreement = async (req) => {
           change_reason: reason,
         })
 
+<<<<<<< HEAD
         response.message = `Successfully deleted`
         response.httpStatus = 200
       } else {
@@ -634,6 +782,25 @@ exports.deleteAgreement = async (req) => {
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 500
+=======
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+        logger.log("info", "Successfully deleted");
+      } else {
+        response.error = `agreement is active`;
+        response.httpStatus = 400;
+        logger.log("info", "agreement is active");
+      }
+    } else {
+      response.error = `agreement not found`;
+      response.httpStatus = 404;
+      logger.log("info", "agreement not found");
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -658,6 +825,7 @@ exports.validateFarmers = async (req) => {
     const data = await csvToJson(file)
 
     // Check file type
+<<<<<<< HEAD
     if (file.mimetype != 'text/csv') {
       response.error = 'select csv file'
       response.httpStatus = 400
@@ -665,6 +833,17 @@ exports.validateFarmers = async (req) => {
       // Check schema of the file
       response.error = 'data format do not match, download sample'
       response.httpStatus = 400
+=======
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+      logger.log("info", "select csv file");
+    } else if (!farmerSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+      logger.log("info", "data format do not match, download sample");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       const errorLines = []
       // Creating List of errors.
@@ -807,6 +986,7 @@ exports.validateFarmers = async (req) => {
 
       if (errorLines.length >= 1) {
         // There are error some lines missing data
+<<<<<<< HEAD
         response.httpStatus = 400
         response.error = errorLines
         response.data = data
@@ -821,6 +1001,25 @@ exports.validateFarmers = async (req) => {
           response.httpStatus = 200
           response.message = 'validation successful'
           response.data = data
+=======
+        response.httpStatus = 400;
+        response.error = errorLines;
+        response.data = data;
+        logger.log("info", `${errorLines}`);
+      } else {
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+          response.data = data;
+          logger.log("info", `Empty File`);
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+          logger.log("info", `validation successful`);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
         }
       }
     }
@@ -839,17 +1038,30 @@ exports.stagedFarmers = async (req) => {
   }
 
   if (!req.files || !req.files.file) {
+<<<<<<< HEAD
     response.error = 'no file selected'
     response.httpStatus = 400
+=======
+    response.error = "no file selected";
+    response.httpStatus = 400;
+    logger.log("info", "no file selected");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   } else {
     try {
       const file = req.files.file
       //console.log("file Name :- ", file);
 
       // Check file type
+<<<<<<< HEAD
       if (file.mimetype != 'text/csv') {
         response.error = 'select csv file'
         response.httpStatus = 400
+=======
+      if (file.mimetype != "text/csv") {
+        response.error = "select csv file";
+        response.httpStatus = 400;
+        logger.log("info", "select csv file");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       } else {
         const data = await csvToJson(file)
         // Add the file name to each data object
@@ -867,6 +1079,7 @@ exports.stagedFarmers = async (req) => {
           // console.log("updatedData :- ", updatedData);
           const stageFarmer = await StageFarmer.create(updatedData)
 
+<<<<<<< HEAD
           response.httpStatus = 200
           response.message = 'Insertion succeesful'
           response.data = stageFarmer
@@ -878,6 +1091,22 @@ exports.stagedFarmers = async (req) => {
     } catch (error) {
       response.error = `failed operation ${error}`
       response.httpStatus = 500
+=======
+          response.httpStatus = 200;
+          response.message = "Insertion succeesful";
+          response.data = stageFarmer;
+          logger.log("info", "Insertion succeesful");
+        } else {
+          response.httpStatus = 400;
+          response.message = "file name, already exist.";
+          logger.log("info", "file name, already exist.");
+        }
+      }
+    } catch (error) {
+      response.error = `failed operation ${error}`;
+      response.httpStatus = 500;
+      errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     }
   }
   return response
@@ -918,11 +1147,21 @@ exports.getStagedFarmers = async (req) => {
       }),
     )
 
+<<<<<<< HEAD
     response.httpStatus = 200
     response.data = dataArray.length > 0 ? dataArray : []
   } catch (error) {
     response.error = `operation failed ${error}`
     response.httpStatus = 500
+=======
+    response.httpStatus = 200;
+    response.data = dataArray.length > 0 ? dataArray : [];
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    response.error = `operation failed ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -941,9 +1180,16 @@ exports.createFarmer = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   // Save Farm data in mongoDB , skip id,s.no key in json
@@ -962,13 +1208,17 @@ exports.createFarmer = async (req) => {
       select: `-_id -stage_status -approval_status -file_name`,
     })
 
+<<<<<<< HEAD
     console.log('data 12 :- ', data)
+=======
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     // Removing from staging stable
     data.map(async (farmer) => {
       await StageFarmer.deleteOne({ _id: farmer._id, stage_status: false })
     })
 
     if (farmers.length != 0) {
+<<<<<<< HEAD
       response.message = 'Data Insertion successful'
       response.httpStatus = 201
       response.data = farmers
@@ -979,6 +1229,21 @@ exports.createFarmer = async (req) => {
   } catch (error) {
     response.error = `Insertion failed ${error}`
     response.httpStatus = 500
+=======
+      response.message = "Data Insertion successful";
+      response.httpStatus = 201;
+      response.data = farmers;
+      logger.log("info", "Data Insertion successful");
+    } else {
+      response.error = "Data Insertion failed, duplicate data";
+      response.httpStatus = 500;
+      logger.log("info", "Data Insertion failed, duplicate data");
+    }
+  } catch (error) {
+    response.error = `Insertion failed ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -1001,9 +1266,16 @@ exports.updateFarmer = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   //Checking header reason for change
   const reason = req.headers['reason']
@@ -1128,6 +1400,7 @@ exports.updateFarmer = async (req) => {
         change_reason: reason,
       })
       // creating response
+<<<<<<< HEAD
       response.message = `Successfully updated`
       response.httpStatus = 200
     } else {
@@ -1137,6 +1410,20 @@ exports.updateFarmer = async (req) => {
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 500
+=======
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
+      logger.log("info", "Successfully updated");
+    } else {
+      response.error = `farmer not found`;
+      response.httpStatus = 404;
+      logger.log("info", "farmer not found");
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -1199,6 +1486,7 @@ exports.deleteFarmer = async (req) => {
           change_reason: reason,
         })
 
+<<<<<<< HEAD
         response.message = `Successfully deleted`
         response.httpStatus = 200
       }
@@ -1209,6 +1497,21 @@ exports.deleteFarmer = async (req) => {
   } catch (error) {
     response.error = `failed operation${error}`
     response.httpStatus = 500
+=======
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+        logger.log("info", "Successfully deleted");
+      }
+    } else {
+      response.error = `farmer not found`;
+      response.httpStatus = 404;
+      logger.log("info", "farmer not found");
+    }
+  } catch (error) {
+    response.error = `failed operation${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -1264,14 +1567,26 @@ exports.getFarmers = async (req) => {
         updatedAt: farmer.updatedAt.toLocaleString('en-IN', {
           timeZone: 'Asia/Kolkata',
         }),
+<<<<<<< HEAD
       }))
       response.httpStatus = 200
+=======
+      }));
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else if (isNaN(page) && isNaN(limit)) {
       // Return all documents
       const farmers = await farmerQuery.select('-__v')
 
+<<<<<<< HEAD
       response.data = farmers
       response.httpStatus = 200
+=======
+      response.data = farmers;
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       // Apply pagination
       const skip = (page - 1) * limit
@@ -1294,8 +1609,14 @@ exports.getFarmers = async (req) => {
         })),
       }
     }
+    logger.log("info", "Data fetch is successful");
   } catch (error) {
+<<<<<<< HEAD
     ;(response.error = `failed operation ${error}`), (response.httpStatus = 400)
+=======
+    (response.error = `failed operation ${error}`), (response.httpStatus = 400);
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -1312,8 +1633,14 @@ exports.validateFarms = async (req) => {
   }
 
   if (!req.files || !req.files.file) {
+<<<<<<< HEAD
     response.error = 'no file selected'
     response.httpStatus = 400
+=======
+    response.error = "no file selected";
+    response.httpStatus = 400;
+    logger.log("info", "no file selected");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   } else {
     // Read the contents of the file
 
@@ -1322,6 +1649,7 @@ exports.validateFarms = async (req) => {
     // const data = JSON.parse(fileContent); //JSON DATA
     const data = await csvToJson(file)
 
+<<<<<<< HEAD
     console.log('data', data)
     // Check file type
     if (file.mimetype != 'text/csv') {
@@ -1331,6 +1659,18 @@ exports.validateFarms = async (req) => {
       // Check schema of the file
       response.error = 'data format do not match, download sample'
       response.httpStatus = 400
+=======
+    // Check file type
+    if (file.mimetype != "text/csv") {
+      response.error = "select csv file";
+      response.httpStatus = 400;
+      logger.log("info", "select csv file");
+    } else if (!farmSchemaCheck(data)) {
+      // Check schema of the file
+      response.error = "data format do not match, download sample";
+      response.httpStatus = 400;
+      logger.log("info", "data format do not match, download sample");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       const errorLines = []
       // Creating List of errors.
@@ -1533,6 +1873,7 @@ exports.validateFarms = async (req) => {
 
       if (errorLines.length >= 1) {
         // There are error some lines missing data
+<<<<<<< HEAD
         ;(response.httpStatus = 400), (response.error = errorLines)
       } else {
         // check if the empty file
@@ -1544,6 +1885,22 @@ exports.validateFarms = async (req) => {
           response.httpStatus = 200
           response.message = 'validation successful'
           response.data = data
+=======
+        (response.httpStatus = 400), (response.error = errorLines);
+        logger.log("info", `${errorLines}`);
+      } else {
+        // check if the empty file
+        if (data.length == 0) {
+          response.httpStatus = 400;
+          response.error = "Empty File";
+          logger.log("info", `Empty File`);
+        } else {
+          // No error
+          response.httpStatus = 200;
+          response.message = "validation successful";
+          response.data = data;
+          logger.log("info", `validation successful`);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
         }
       }
     }
@@ -1562,23 +1919,39 @@ exports.stagedFarms = async (req) => {
   }
 
   if (!req.files || !req.files.file) {
+<<<<<<< HEAD
     response.error = 'no file selected'
     response.httpStatus = 400
+=======
+    response.error = "no file selected";
+    response.httpStatus = 400;
+    logger.log("info", "no file selected");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   } else {
     try {
       const file = req.files.file
       //console.log("file Name :- ", file);
 
       // Check file type
+<<<<<<< HEAD
       if (file.mimetype != 'text/csv') {
         response.error = 'select csv file'
         response.httpStatus = 400
+=======
+      if (file.mimetype != "text/csv") {
+        response.error = "select csv file";
+        response.httpStatus = 400;
+        logger.log("info", "select csv file");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       } else {
         const data = await csvToJson(file)
         // Add the file name to each data object
 
+<<<<<<< HEAD
         console.log('data', data)
 
+=======
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
         // if Same file name do not exist
         const fileExist = await StageFarm.find({ file_name: file.name })
 
@@ -1601,6 +1974,7 @@ exports.stagedFarms = async (req) => {
           // Insert record into DB (stageFarmer)
           const stageFarm = await StageFarm.create(updatedData)
 
+<<<<<<< HEAD
           response.httpStatus = 200
           response.message = 'Insertion succeesful'
           response.data = stageFarm
@@ -1612,6 +1986,22 @@ exports.stagedFarms = async (req) => {
     } catch (error) {
       response.error = `failed operation ${error}`
       response.httpStatus = 500
+=======
+          response.httpStatus = 200;
+          response.message = "Insertion succeesful";
+          response.data = stageFarm;
+          logger.log("info", "stagedfarm => Insertion succeesful");
+        } else {
+          response.httpStatus = 400;
+          response.message = "file name, already exist.";
+          logger.log("info", "stagedfarm => file name, already exist");
+        }
+      }
+    } catch (error) {
+      response.error = `failed operation ${error}`;
+      response.httpStatus = 500;
+      errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     }
   }
   return response
@@ -1648,11 +2038,21 @@ exports.getStagedFarms = async (req) => {
       data: farms,
     }))
 
+<<<<<<< HEAD
     response.httpStatus = 200
     response.data = dataArray.length > 0 ? dataArray : []
   } catch (error) {
     response.error = `operation failed ${error}`
     response.httpStatus = 500
+=======
+    response.httpStatus = 200;
+    response.data = dataArray.length > 0 ? dataArray : [];
+    logger.log("info", "get staged data");
+  } catch (error) {
+    response.error = `operation failed ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -1709,9 +2109,15 @@ exports.createFarm = async (req) => {
       const farmer = await Farmer.findOne({ _id: farm.farmer_id })
       // console.log('farmer', farmer)
 
+<<<<<<< HEAD
       rest.farmer_rating = farmer.rating
       console.log('rest', rest)
       farm.ipfs_url = ''
+=======
+      rest.farmer_rating = farmer.rating;
+
+      farm.ipfs_url = "";
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
       // -------------- IPFS --------------------
       const options = {
@@ -1817,6 +2223,7 @@ exports.createFarm = async (req) => {
 
       ;(response.message = 'Data Insertion successful'),
         (response.httpStatus = 200),
+<<<<<<< HEAD
         (response.data = updatedData)
     } else {
       // console.log("checking else length");
@@ -1825,6 +2232,19 @@ exports.createFarm = async (req) => {
     }
   } catch (error) {
     ;(response.error = `Insertion failed ${error}`), (response.httpStatus = 400)
+=======
+        (response.data = updatedData);
+      logger.log("info", "Data Insertion successful");
+    } else {
+      // console.log("checking else length");
+      (response.error = "Data Insertion failed duplicate data"),
+        (response.httpStatus = 500);
+      logger.log("info", "Data Insertion failed duplicate data");
+    }
+  } catch (error) {
+    (response.error = `Insertion failed ${error}`), (response.httpStatus = 400);
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response
@@ -1848,9 +2268,16 @@ exports.deleteFarm = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   const reason = req.headers['reason']
 
@@ -1887,6 +2314,7 @@ exports.deleteFarm = async (req) => {
           change_reason: reason,
         })
 
+<<<<<<< HEAD
         response.message = `Successfully deleted`
         response.httpStatus = 200
       }
@@ -1897,13 +2325,35 @@ exports.deleteFarm = async (req) => {
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 500
+=======
+        response.message = `Successfully deleted`;
+        response.httpStatus = 200;
+        logger.log("info", "Farm successfully deleted");
+      }
+    } else {
+      response.error = `farm not found`;
+      response.httpStatus = 404;
+      logger.log("info", "farm not found");
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
 
 exports.updateFarm = async (req) => {
+<<<<<<< HEAD
   const userLogged = req.user
   const userId = userLogged._id
+=======
+  const userLogged = req.user;
+  const userId = userLogged._id;
+
+  console.log("req", req.body);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   // General response format
   let response = {
     error: null,
@@ -1921,13 +2371,25 @@ exports.updateFarm = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   if (!password || password != envPassword) {
+<<<<<<< HEAD
     response.error = `Invalid password`
     response.httpStatus = 401
     return response
+=======
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   const reason = req.headers['reason']
 
+<<<<<<< HEAD
   const updatedData = req.body
+=======
+  const updatedData = req.body;
+  delete updatedData.updatedAt;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
   try {
     //Validation
@@ -2088,8 +2550,14 @@ exports.updateFarm = async (req) => {
       // const old_values = { ...updatedData.toJSON() };
       // console.log("old_values ", old_values);
       // update the Farm data..
+<<<<<<< HEAD
       const updateStatus = await Farm.updateOne({ _id: id }, updatedData)
       console.log('updateStatus 123 : ', updateStatus)
+=======
+
+      const updateStatus = await Farm.updateOne({ _id: id }, updatedData);
+
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       // const new_values = { ...updatedData.toJSON() };
 
       const old_values = {}
@@ -2188,12 +2656,19 @@ exports.updateFarm = async (req) => {
       }
       const signedTx = await web3.eth.accounts.signTransaction(tx, Private_Key)
       const transaction = await web3.eth.sendSignedTransaction(
+<<<<<<< HEAD
         signedTx.rawTransaction,
       )
       console.log('Transaction : ', transaction.transactionHash)
+=======
+        signedTx.rawTransaction
+      );
+
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       // console.log("trx url :", `${Tran}/${transaction.transactionHash}`);
       farm.tx_hash = `${Tran}/${transaction.transactionHash}`
 
+<<<<<<< HEAD
       await farm.save()
       response.message = `Successfully updated`
       response.httpStatus = 200
@@ -2204,6 +2679,21 @@ exports.updateFarm = async (req) => {
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 500
+=======
+      await farm.save();
+      response.message = `Successfully updated`;
+      response.httpStatus = 200;
+      logger.log("info", "Successfully updated");
+    } else {
+      response.error = `farm not found`;
+      response.httpStatus = 404;
+      logger.log("info", "farm not found");
+    }
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -2267,7 +2757,12 @@ exports.getFarms = async (req) => {
             timeZone: 'Asia/Kolkata',
           }),
         })),
+<<<<<<< HEAD
       }
+=======
+      };
+      logger.log("info", "Data fetch is successful");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       const farms = await farmQuery
 
@@ -2301,16 +2796,27 @@ exports.getFarms = async (req) => {
       // }));
     }
 
+<<<<<<< HEAD
     response.httpStatus = 200
   } catch (error) {
     console.log(error)
     response.error = 'failed operation'
     response.httpStatus = 400
+=======
+    response.httpStatus = 200;
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    console.log(error);
+    response.error = "failed operation";
+    response.httpStatus = 400;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response
 }
 
+// Not in Our Scope ...
 exports.createCustomer = async (req) => {
   // General response format
   let response = {
@@ -2363,35 +2869,68 @@ exports.getCustomers = async (req) => {
 
   let customers
   try {
+<<<<<<< HEAD
     customers = await User.find({ is_verified: true }).select('-__v')
     ;(response.data = customers), (response.httpStatus = 200)
   } catch (error) {
     ;(response.error = 'failed operation'), (response.httpStatus = 400)
+=======
+    customers = await User.find({ is_verified: true }).select("-__v");
+    (response.data = customers), (response.httpStatus = 200);
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    (response.error = "failed operation"), (response.httpStatus = 400);
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
 
 exports.getAgreementsForAdmin = async (req) => {
+<<<<<<< HEAD
   const searchString = req.query.search
+=======
+  const searchString = req.query.search;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   // General response format
   let response = {
     error: null,
     message: null,
     httpStatus: null,
     data: null,
+<<<<<<< HEAD
   }
 
+=======
+  };
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   // // Grouping farm... for Admin to show in their active/close Tab
   try {
     let match = {
       sold_status: true,
       agreementclose_status: false,
+<<<<<<< HEAD
     }
 
     if (searchString) {
       match.farmer_name = { $regex: new RegExp(searchString, 'i') }
     }
 
+=======
+    };
+
+    let searchQuery = {};
+
+    if (searchString) {
+      searchQuery["$or"] = [
+        { farmer_name: { $regex: new RegExp(searchString, "i") } },
+        { crop: { $regex: new RegExp(searchString, "i") } },
+      ];
+    }
+
+    match = { $and: [match, searchQuery] };
+
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     const activeContractswithCustomerData = await Agreement.aggregate([
       {
         $match: match,
@@ -2445,17 +2984,35 @@ exports.getAgreementsForAdmin = async (req) => {
           '_id.crop': 1,
         },
       },
+<<<<<<< HEAD
     ])
+=======
+    ]);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
     match = {
       sold_status: true,
       agreementclose_status: true,
+<<<<<<< HEAD
     }
 
     if (searchString) {
       match.farmer_name = { $regex: new RegExp(searchString, 'i') }
     }
 
+=======
+    };
+
+    if (searchString) {
+      searchQuery["$or"] = [
+        { farmer_name: { $regex: new RegExp(searchString, "i") } },
+        { crop: { $regex: new RegExp(searchString, "i") } },
+      ];
+    }
+
+    match = { $and: [match, searchQuery] };
+
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     const closeContractswithCustomerData = await Agreement.aggregate([
       {
         $match: match,
@@ -2503,16 +3060,29 @@ exports.getAgreementsForAdmin = async (req) => {
       {
         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
       },
+<<<<<<< HEAD
     ])
+=======
+    ]);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
     response.httpStatus = 200
     response.data = {
       active: activeContractswithCustomerData,
       close: closeContractswithCustomerData,
+<<<<<<< HEAD
     }
   } catch (error) {
     response.httpStatus = 400
     response.error = 'failed operation'
+=======
+    };
+    logger.log("info", "data fetch successful");
+  } catch (error) {
+    response.httpStatus = 400;
+    response.error = "failed operation";
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
   return response
 }
@@ -2608,11 +3178,21 @@ exports.closeAgreement = async (req) => {
     await agreementClose.save()
     //BLOCKCHAIN TRANS END-------------------------------------------
 
+<<<<<<< HEAD
     response.message = 'Agreement closed Successful'
     response.httpStatus = 200
   } catch (error) {
     response.error = `failed operation ${error}`
     response.httpStatus = 200
+=======
+    response.message = "Agreement closed Successful";
+    response.httpStatus = 200;
+    logger.log("info", "Agreement closed Successful");
+  } catch (error) {
+    response.error = `failed operation ${error}`;
+    response.httpStatus = 200;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response
@@ -2633,6 +3213,7 @@ exports.getdashBoard = async (req) => {
   }
 
   try {
+<<<<<<< HEAD
     const farms = await Farm.countDocuments()
     const farmers = await Farmer.countDocuments()
     const customers = await User.countDocuments({ is_verified: true })
@@ -2643,6 +3224,20 @@ exports.getdashBoard = async (req) => {
     response.data.contracts = agreements
   } catch (error) {
     ;(response.error = 'failed operation'), (response.httpStatus = 500)
+=======
+    const farms = await Farm.countDocuments();
+    const farmers = await Farmer.countDocuments();
+    const customers = await User.countDocuments({ is_verified: true });
+    const agreements = await Agreement.countDocuments({ sold_status: false });
+    (response.httpStatus = 200), (response.data.farmers = farmers);
+    response.data.customers = customers;
+    response.data.farms = farms;
+    response.data.contracts = agreements;
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    (response.error = `failed operation ${error}`), (response.httpStatus = 500);
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response
@@ -2701,11 +3296,20 @@ exports.getAudit = async (req) => {
             timeZone: 'Asia/Kolkata',
           }),
         })),
+<<<<<<< HEAD
       }
       response.httpStatus = 200
     } else if (req.params.table == 'farm' && page && limit) {
       let auditQuery
       let totalDocuments
+=======
+      };
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+    } else if (req.params.table == "farm" && page && limit) {
+      let auditQuery;
+      let totalDocuments;
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
       //If search query
       if (req.query.search) {
         auditQuery = Audit.find({
@@ -2740,11 +3344,41 @@ exports.getAudit = async (req) => {
             timeZone: 'Asia/Kolkata',
           }),
         })),
+<<<<<<< HEAD
       }
       response.httpStatus = 200
     } else if (req.params.table == 'agreement' && page && limit) {
       let auditQuery = Audit.find({ table_name: 'agreement' }).select('-__v')
       let totalDocuments = await Audit.countDocuments(auditQuery)
+=======
+      };
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+    } else if (req.params.table == "agreement" && page && limit) {
+      console.log("agreement query ...");
+      // let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
+      // let totalDocuments = await Audit.countDocuments(auditQuery);
+
+      let auditQuery;
+      let totalDocuments;
+      //If search query
+      if (req.query.search) {
+        auditQuery = Audit.find({
+          table_name: "agreement",
+          $or: [
+            { user_name: { $regex: req.query.search, $options: "i" } },
+            { change_type: { $regex: req.query.search, $options: "i" } },
+            { record_id: { $regex: req.query.search, $options: "i" } },
+          ],
+        }).select("-__v -updateAt");
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      } else {
+        auditQuery = Audit.find({ table_name: "agreement" }).select(
+          "-__v -updateAt"
+        );
+        totalDocuments = await Audit.countDocuments(auditQuery);
+      }
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
 
       const skip = (page - 1) * limit
 
@@ -2765,16 +3399,28 @@ exports.getAudit = async (req) => {
             timeZone: 'Asia/Kolkata',
           }),
         })),
+<<<<<<< HEAD
       }
       response.httpStatus = 200
+=======
+      };
+      response.httpStatus = 200;
+      logger.log("info", "Data fetch is successful");
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
     } else {
       response.message = 'Enter params :- farmer or farm or agreement'
       response.httpStatus = 200
     }
   } catch (error) {
+<<<<<<< HEAD
     console.log('ERR', error)
     response.error = 'failed operation'
     response.httpStatus = 500
+=======
+    response.error = "failed operation";
+    response.httpStatus = 500;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response
@@ -2876,11 +3522,21 @@ exports.getOrder = async (req) => {
     response.data = {
       totalPages: Math.ceil(totalDocuments / limit),
       data: orderList,
+<<<<<<< HEAD
     }
     response.httpStatus = 200
   } catch (error) {
     response.httpStatus = 400
     response.error = `failed operation ${error}`
+=======
+    };
+    response.httpStatus = 200;
+    logger.log("info", "Data fetch is successful");
+  } catch (error) {
+    response.httpStatus = 400;
+    response.error = `failed operation ${error}`;
+    errorLog(req, error);
+>>>>>>> 626c0f7e1e84d0d8a6c9f07f259ccfa0ad697602
   }
 
   return response

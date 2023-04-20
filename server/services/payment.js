@@ -8,6 +8,8 @@ const crypto = require("crypto");
 const Farm = require("../models/farms");
 const getEnvVariable = require("../config/privateketAWS");
 const emailTransporter = require("../utils/emailTransporter");
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 
 // Calling function to get the privateKey from aws params storage
 async function getPrivateKeyAWS(keyName) {
@@ -116,9 +118,11 @@ exports.createOrder = async (req) => {
     response.message = `Order created successful`;
     response.httpStatus = 200;
     response.data = order;
+    logger.log("info", "Order created successful");
   } catch (error) {
     response.message = `Failed operation ${error}`;
     response.httpStatus = 500;
+    errorLog(req, error);
   }
 
   return response;
@@ -127,11 +131,7 @@ exports.createOrder = async (req) => {
 // Verify Service for RazorPay
 exports.paymentVerification = async (req) => {
   const userId = req.user._id;
-  const keyDetails = process.env.KEY_DETAILS;
 
-  let filterUser = JSON.parse(keyDetails).filter(function (user) {
-    return user.user_id === userId.toString();
-  });
   // console.log("filterUser", filterUser);
   // Getting private From aws params store
   const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
@@ -268,6 +268,7 @@ exports.paymentVerification = async (req) => {
                   // console.log(events[0]);
                   if (error) {
                     console.log("BlockchainError", error);
+                    errorLog(req, error);
                   }
                 }
               );
@@ -296,8 +297,10 @@ exports.paymentVerification = async (req) => {
           emailTransporter.sendMail(message, (error, info) => {
             if (error) {
               console.log("Nodemailer error : ", error);
+              errorLog(req, error);
             } else {
               console.log("Email sent: " + info.response);
+              logger.log("info", `${info.response}`);
             }
           });
         } else {
@@ -309,15 +312,18 @@ exports.paymentVerification = async (req) => {
       .catch((err) => {
         response.message = `failed operation ${err}`;
         response.httpStatus = 500;
+        errorLog(req, err);
         return response;
       });
 
     response.message = `Payment Successful`;
     response.httpStatus = 200;
     response.data = razorpay_payment_id;
+    logger.log("info", "Payment Successful");
   } else {
     response.error = "Payment failed";
     response.httpStatus = 500;
+    logger.log("info", "Payment failed");
     return response;
   }
 

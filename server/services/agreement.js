@@ -14,6 +14,8 @@ const pinataSDK = require("@pinata/sdk");
 const stageAgreement = require("../models/stageAgreement");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 const getEnvVariable = require("../config/privateketAWS");
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 
 // Calling function to get the privateKey from aws params storage
 async function getPrivateKeyAWS(keyName) {
@@ -186,9 +188,11 @@ exports.getAgreementsOfCustomer = async (req) => {
       active: activeContractsWithCustomerData,
       close: closeContractsWithCustomerData,
     };
+    logger.log("info", "Data fetch is successful");
   } catch (error) {
     response.httpStatus = 400;
     response.error = "failed operation";
+    errorLog(req, error);
   }
 
   return response;
@@ -212,6 +216,7 @@ exports.createAgreement = async (req) => {
   if (!password || password != envPassword) {
     response.error = `Invalid password`;
     response.httpStatus = 401;
+    logger.log("info", "Invalid password");
     return response;
   }
 
@@ -361,6 +366,7 @@ exports.createAgreement = async (req) => {
         .catch((error) => {
           response.error = `failed operation ${error}`;
           response.httpStatus = 400;
+          errorLog(req, error);
         });
       mintPromises.push(mintPromise);
     }
@@ -384,15 +390,78 @@ exports.createAgreement = async (req) => {
     response.message = "Data Insertion successful";
     response.httpStatus = 200;
     response.data = agreements;
+    logger.log("info", "Data Insertion successful");
   } catch (error) {
     response.error = `operation failed  ${error}`;
     response.httpStatus = 500;
+    errorLog(req, error);
   }
 
   return response;
 };
 
 // Marketplace both customer & admin
+// exports.getAgreements = async (req) => {
+//   const searchString = req.query.search;
+//   // General response format
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
+
+//   try {
+//     //
+//     let match = { sold_status: false };
+//     if (searchString) {
+//       match.farmer_name = { $regex: new RegExp(searchString, "i") };
+//     }
+
+//     const result = await Agreement.aggregate([
+//       { $match: match },
+//       {
+//         $group: {
+//           _id: {
+//             crop: "$crop",
+//             start_date: "$start_date",
+//             end_date: "$end_date",
+//             price: "$price",
+//             area: "$area",
+//             farm_id: "$farm_id",
+//           },
+//           address: { $first: "$address" },
+//           farmer_name: { $first: "$farmer_name" },
+//           agreements: { $push: "$_id" },
+//           ipfs_url: { $push: "$ipfs_url" },
+//           tx_hash: { $push: "$tx_hash" },
+//           agreement_nft_id: { $push: "$agreement_nft_id" },
+//           unit_available: { $sum: 1 },
+//         },
+//       },
+//       {
+//         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+//       },
+//       {
+//         $sort: {
+//           "_id.start_date": 1,
+//           "_id.crop": 1,
+//         },
+//       },
+//     ]);
+
+//     response.data = result;
+//     response.httpStatus = 200;
+//     logger.log("info", "Data fetch is successful");
+//   } catch (err) {
+//     response.error = "failed operation";
+//     response.httpStatus = 500;
+//     errorLog(req, err);
+//   }
+
+//   return response;
+// };
+
 exports.getAgreements = async (req) => {
   const searchString = req.query.search;
   // General response format
@@ -406,9 +475,16 @@ exports.getAgreements = async (req) => {
   try {
     //
     let match = { sold_status: false };
+
+    let searchQuery = {};
     if (searchString) {
-      match.farmer_name = { $regex: new RegExp(searchString, "i") };
+      searchQuery["$or"] = [
+        { farmer_name: { $regex: new RegExp(searchString, "i") } },
+        { crop: { $regex: new RegExp(searchString, "i") } },
+      ];
     }
+
+    match = { $and: [match, searchQuery] };
 
     const result = await Agreement.aggregate([
       { $match: match },
@@ -444,9 +520,10 @@ exports.getAgreements = async (req) => {
 
     response.data = result;
     response.httpStatus = 200;
+    logger.log("info", "Data fetch is successful");
   } catch (err) {
     response.error = "failed operation";
-    response.httpStatus = 500;
+    errorLog(req, err);
   }
 
   return response;
