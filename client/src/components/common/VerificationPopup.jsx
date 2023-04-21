@@ -88,13 +88,13 @@ const VerificationPopup = ({
 
   const handleSubmit = async () => {
     await onSubmit(password, reason);
-    if (
-      selectedEntity === "Farms" ||
-      selectedEntity === "Contracts" ||
-      selectedModelType === "update" ||
-      selectedModelType === "Approve"
-    ) {
-      setIsSubmitting(true);
+
+    if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
+      if (selectedModelType === "update" || selectedModelType === "Approve") {
+        setIsSubmitting(true);
+      }
+    } else {
+      setIsSubmitting(false);
     }
   };
 

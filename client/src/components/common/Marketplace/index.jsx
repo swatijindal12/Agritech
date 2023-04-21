@@ -86,8 +86,10 @@ const MarketPlace = () => {
         }
       )
       .then(res => {
+        console.log("res", res.data)
         setLoading(false);
-        setContract(res.data.data);
+        setContract(res.data.data.data);
+        setTotalPage(res.data.data.totalPages)
       })
       .catch(err => {
         setLoading(false);
