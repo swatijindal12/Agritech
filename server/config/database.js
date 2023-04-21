@@ -12,7 +12,6 @@ const deleteUnverifiedUsers = async () => {
     is_verified: false,
     created_at: { $lte: timeThreshold },
   });
-  logger.log("info", `Deleted ${result.deletedCount} unverified users.`);
 };
 
 //Delete after 2 min
