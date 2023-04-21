@@ -108,11 +108,48 @@ exports.validate = async (req) => {
           errors.name = "Name should be 3 characters long";
         }
 
+        // if (item.start_date) {
+        //   const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+        //   if (!dateRegex.test(item.start_date)) {
+        //     errors.start_date =
+        //       "Start date should be in the format of dd/mm/yyyy";
+        //   }
+        // }
+
+        // if (item.end_date) {
+        //   const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+        //   if (!dateRegex.test(item.end_date)) {
+        //     errors.end_date = "End date should be in the format of dd/mm/yyyy";
+        //   }
+        // }
+
         if (item.start_date) {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.start_date)) {
             errors.start_date =
               "Start date should be in the format of dd/mm/yyyy";
+          } else {
+            const [day, month] = item.start_date.split("/");
+            if (
+              (day >= 31 && month == 1) ||
+              month == 3 ||
+              month == 5 ||
+              month == 7 ||
+              month == 8 ||
+              month == 10 ||
+              month == 12
+            ) {
+              errors.start_date = "Invalid day or month in start date";
+            } else if (
+              (day >= 30 && month == 4) ||
+              month == 6 ||
+              month == 9 ||
+              month == 11
+            ) {
+              errors.start_date = "Invalid day or month in start date";
+            } else if (day >= 29 || month == 2) {
+              errors.start_date = "Invalid day or month in start date";
+            }
           }
         }
 
@@ -120,8 +157,31 @@ exports.validate = async (req) => {
           const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.end_date)) {
             errors.end_date = "End date should be in the format of dd/mm/yyyy";
+          } else {
+            const [day, month] = item.end_date.split("/");
+            if (
+              (day >= 31 && month == 1) ||
+              month == 3 ||
+              month == 5 ||
+              month == 7 ||
+              month == 8 ||
+              month == 10 ||
+              month == 12
+            ) {
+              errors.end_date = "Invalid day or month in end date";
+            } else if (
+              (day >= 30 && month == 4) ||
+              month == 6 ||
+              month == 9 ||
+              month == 11
+            ) {
+              errors.end_date = "Invalid day or month in end date";
+            } else if (day >= 29 || month == 2) {
+              errors.end_date = "Invalid day or month in end date";
+            }
           }
         }
+
         const date = new Date();
         const day = date.getDate();
         const month = date.getMonth() + 1;
@@ -3015,3 +3075,73 @@ exports.getOrder = async (req) => {
 
   return response;
 };
+
+// exports.getOrderNewq = async (req) => {
+//   // General response format
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
+
+//   try {
+//     // Parse search parameters from request query
+//     const { orderId, email } = req.query;
+
+//     // Build search query
+//     const searchQuery = {};
+//     if (orderId) {
+//       searchQuery.order_id = orderId;
+//     }
+
+//     // Parse pagination parameters from request query
+//     const { page = 1, limit = 10 } = req.query;
+
+//     // Fetch orders using Razorpay API
+//     const instance = new Razorpay({
+//       key_id: process.env.RAZORPAY_KEY_ID,
+//       key_secret: process.env.RAZORPAY_SECRET_KEY,
+//     });
+
+//     const orders = await instance.payments.fetch({
+//       from: (page - 1) * limit,
+//       to: page * limit - 1,
+//       count: limit,
+//       search: {
+//         email,
+//       },
+//     });
+
+//     const orderList = [];
+
+//     orders.items.forEach((order) => {
+//       orderList.push({
+//         razorpay_order_id: order.id,
+//         email: order.email,
+//         contact: order.contact,
+//         amount: order.amount / 100,
+//         status: order.status,
+//         captured: order.captured,
+//         method: order.method,
+//         created_at: new Date(order.created_at * 1000).toLocaleString(),
+//         orderItemsList: [],
+//         unit: 0,
+//       });
+//     });
+
+//     //return response
+//     response.data = {
+//       totalPages: Math.ceil(orders.count / limit),
+//       data: orderList,
+//     };
+//     response.httpStatus = 200;
+//     logger.log("info", "Data fetch is successful");
+//   } catch (error) {
+//     response.httpStatus = 400;
+//     response.error = `failed operation ${error}`;
+//     errorLog(req, error);
+//   }
+
+//   return response;
+// };
