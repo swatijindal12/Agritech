@@ -137,7 +137,8 @@ const NFTPopup = ({
                     {dbData && dbData[row]?.toString()?.includes("https://") ? (
                       <TableData>
                         <a href={dbData[row]} target="_blank">
-                          {dbData && dbData[row]?.toString()}
+                          {/* {dbData && dbData[row]?.toString()} */}
+                          Go to
                         </a>
                       </TableData>
                     ) : (
@@ -149,7 +150,8 @@ const NFTPopup = ({
                     blockchainData[row]?.toString()?.includes("https://") ? (
                       <TableData>
                         <a href={blockchainData[row]} target="_blank">
-                          {blockchainData && blockchainData[row]?.toString()}
+                          {/* {blockchainData && blockchainData[row]?.toString()} */}
+                          Go to
                         </a>
                       </TableData>
                     ) : (
