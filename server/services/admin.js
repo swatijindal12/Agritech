@@ -2912,7 +2912,7 @@ exports.getAudit = async (req) => {
   return response;
 };
 
-exports.getOrderOld = async (req) => {
+exports.getOrder = async (req) => {
   // General response format
   let response = {
     error: null,
@@ -3020,7 +3020,7 @@ exports.getOrderOld = async (req) => {
   return response;
 };
 
-exports.getOrder = async (req) => {
+exports.getOrderNew = async (req) => {
   let response = {
     error: null,
     message: null,
