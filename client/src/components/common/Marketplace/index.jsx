@@ -5,6 +5,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import Flexbox from "../Flexbox";
 import Button from "../Button";
+import Pagination from "../../common/Pagination";
 
 const Container = styled.div`
   padding: 1rem;
@@ -43,17 +44,25 @@ const Input = styled.input`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const MarketPlace = () => {
   const [contract, setContract] = useState(null);
   const [newAddedIds, setNewAddedIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(2);
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    getList();
+    getList(currentPage);
     getNewAddedIds();
-  }, []);
+  }, [currentPage]);
 
   const getNewAddedIds = () => {
     let newAddedArray = JSON.parse(sessionStorage.getItem("agreementNew"));
@@ -65,11 +74,11 @@ const MarketPlace = () => {
     setNewAddedIds(tempArr);
   };
 
-  const getList = () => {
+  const getList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=5`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -77,8 +86,10 @@ const MarketPlace = () => {
         }
       )
       .then(res => {
+        console.log("res", res.data)
         setLoading(false);
-        setContract(res.data.data);
+        setContract(res.data.data.data);
+        setTotalPage(res.data.data.totalPages)
       })
       .catch(err => {
         setLoading(false);
@@ -115,6 +126,14 @@ const MarketPlace = () => {
           );
         })}
       </CardsContainer>
+      <PaginationContainer>
+        <Pagination
+          currentPage={currentPage}
+          totalCount={totalPage}
+          pageSize={1}
+          onPageChange={page => setCurrentPage(page)}
+        />
+      </PaginationContainer>
     </Container>
   );
 };

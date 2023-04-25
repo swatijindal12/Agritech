@@ -20,7 +20,6 @@ exports.createUser = async (req, res, next) => {
   authService
     .createUser(req)
     .then((response) => {
-      errorLog(req, error);
       res.status(response.httpStatus).json(response);
     })
     .catch((err) => {
@@ -82,7 +81,7 @@ exports.verifyCreateUser = async (req, res, next) => {
       // sending email.
       emailTransporter.sendMail(message, (error, info) => {
         if (error) {
-          errorLog(req, err);
+          errorLog(req, error);
           console.log("Nodemailer error : ", error);
         } else {
           console.log("Email sent: ");
@@ -98,7 +97,6 @@ exports.verifyCreateUser = async (req, res, next) => {
         data: user,
       });
     } else {
-      errorLog(req, err);
       return res.status(400).json({
         error: "Verification failed",
         message: null,
@@ -107,7 +105,7 @@ exports.verifyCreateUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    errorLog(req, err);
+    errorLog(req, error);
     return res.status(500).json({
       error: `failed operation ${error}`,
       message: null,

@@ -472,6 +472,10 @@ exports.getAgreements = async (req) => {
     data: null,
   };
 
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const skip = (page - 1) * limit;
+
   try {
     //
     let match = { sold_status: false };
@@ -516,9 +520,18 @@ exports.getAgreements = async (req) => {
           "_id.crop": 1,
         },
       },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
 
-    response.data = result;
+    response.data = {
+      data: result[0].data,
+      totalPages: Math.ceil(result[0].metadata[0].total / limit),
+    };
     response.httpStatus = 200;
     logger.log("info", "Data fetch is successful");
   } catch (err) {
@@ -528,3 +541,71 @@ exports.getAgreements = async (req) => {
 
   return response;
 };
+
+//Without Pagination
+// exports.getAgreements = async (req) => {
+//   const searchString = req.query.search;
+//   // General response format
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
+
+//   try {
+//     //
+//     let match = { sold_status: false };
+
+//     let searchQuery = {};
+//     if (searchString) {
+//       searchQuery["$or"] = [
+//         { farmer_name: { $regex: new RegExp(searchString, "i") } },
+//         { crop: { $regex: new RegExp(searchString, "i") } },
+//       ];
+//     }
+
+//     match = { $and: [match, searchQuery] };
+
+//     const result = await Agreement.aggregate([
+//       { $match: match },
+//       {
+//         $group: {
+//           _id: {
+//             crop: "$crop",
+//             start_date: "$start_date",
+//             end_date: "$end_date",
+//             price: "$price",
+//             area: "$area",
+//             farm_id: "$farm_id",
+//           },
+//           address: { $first: "$address" },
+//           farmer_name: { $first: "$farmer_name" },
+//           agreements: { $push: "$_id" },
+//           ipfs_url: { $push: "$ipfs_url" },
+//           tx_hash: { $push: "$tx_hash" },
+//           agreement_nft_id: { $push: "$agreement_nft_id" },
+//           unit_available: { $sum: 1 },
+//         },
+//       },
+//       {
+//         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+//       },
+//       {
+//         $sort: {
+//           "_id.start_date": 1,
+//           "_id.crop": 1,
+//         },
+//       },
+//     ]);
+
+//     response.data = result;
+//     response.httpStatus = 200;
+//     logger.log("info", "Data fetch is successful");
+//   } catch (err) {
+//     response.error = "failed operation";
+//     errorLog(req, err);
+//   }
+
+//   return response;
+// };

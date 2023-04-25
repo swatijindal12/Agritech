@@ -73,7 +73,6 @@ exports.createUser = async (req) => {
       // if all field are entered then create user/customer
       const user = await User.create({ name, address, phone, email });
 
-      console.log("s", user);
       // Twilio send OTP service
       client.verify.v2
         .services(serviceId)
@@ -85,7 +84,7 @@ exports.createUser = async (req) => {
           (verification) => (response.httpStatus = 200),
           (response.message = `OTP sent to your number `),
           (response.httpStatus = 200),
-          logger.log("info", "OTP sent to your number")
+          logger.log("info", `OTP sent successful `)
         )
         .catch((error) => {
           (response.httpStatus = 400),
@@ -98,7 +97,6 @@ exports.createUser = async (req) => {
       // if some fields are empty
       response.httpStatus = 400;
       response.error = "some fields are empty";
-      logger.log("info", "some fields are empty");
     }
   } catch (error) {
     response.httpStatus = 500;
