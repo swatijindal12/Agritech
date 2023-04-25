@@ -6,6 +6,7 @@ import Flexbox from "../../common/Flexbox";
 import FilterIcon from "../../../assets/filter.svg";
 import Card from "./Card";
 import Filter from "./Filter";
+import Button from "../../common/Button";
 import axios from "axios";
 
 const Container = styled.div`
@@ -27,11 +28,48 @@ const CardsContainer = styled.div`
   }
 `;
 
+const InputContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    width: 100vw;
+    padding: 1rem;
+    margin: 0 auto 1rem;
+    flex-direction: column;
+    display: none;
+  }
+`;
+
+const SearchContainer = styled(Flexbox)`
+  @media screen and (max-width: 990px) {
+    width: 100vw;
+    padding: 1rem;
+    margin: 0 auto 1rem;
+    flex-direction: row;
+  }
+
+  @media screen and (min-width: 991px) {
+    display: none;
+  }
+`;
+
+const Input = styled.input`
+  padding: 1rem 2rem;
+  border: none;
+  width: 18rem;
+  border-radius: 24px;
+  background-color: #f5f5f5;
+
+  @media screen and (max-width: 990px) {
+    width: 70%;
+  }
+`;
+
 const Farmers = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({});
   const [farmers, setFarmers] = useState(null);
   const [newAddedIds, setNewAddedIds] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const user = useSelector(store => store.auth.user);
 
   const toggleFilter = () => setShowFilter(!showFilter);
@@ -51,18 +89,20 @@ const Farmers = () => {
   };
 
   const getList = () => {
+    setLoading(true);
     let queryString = "";
     if (selectedFilter.rating) {
       queryString += `sortOrder=${selectedFilter.rating}`;
     }
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}&search=${searchText}`, {
         headers: {
           Authorization: "Bearer " + user?.data.token,
         },
       })
       .then(res => {
         // console.log("response is ", res);
+        setLoading(false);
         setFarmers(res.data.data);
       })
       .catch(err => console.log("Error in fetching dashboard data ", err));
@@ -77,6 +117,21 @@ const Farmers = () => {
     <Container>
       <Flexbox justify="space-between">
         <Title>Farmers</Title>
+        <InputContainer margin="0 2rem">
+          <Input
+            type="text"
+            placeholder="Search by name, pin, phone"
+            onChange={e => setSearchText(e.target.value)}
+          />
+          <Button
+            text={loading ? "...LOADING" : "SEARCH"}
+            margin="0 1rem"
+            onClick={() => {
+              getList();
+            }}
+            disabled={loading}
+          />
+        </InputContainer>
         <FilterContainer>
           <img
             src={FilterIcon}
@@ -93,6 +148,22 @@ const Farmers = () => {
           )}
         </FilterContainer>
       </Flexbox>
+      <SearchContainer margin="0 2rem">
+        <Input
+          type="text"
+          placeholder="Search by name, pin"
+          onChange={e => setSearchText(e.target.value)}
+        />
+        <Button
+          text={loading ? "...LOADING" : "SEARCH"}
+          margin="0 1rem"
+          onClick={() => {
+            getList();
+          }}
+          disabled={loading}
+        />
+      </SearchContainer>
+
       <CardsContainer>
         {farmers?.map(item => {
           return (

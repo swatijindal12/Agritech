@@ -26,6 +26,7 @@ const PopupBox = styled.div`
   padding: 1rem;
   height: 80vh;
   width: 70rem;
+  padding-bottom: 3.5rem;
 `;
 
 const CrossImage = styled.img`
@@ -122,6 +123,7 @@ const NFTPopup = ({
       <PopupBox>
         <CrossImage src={CrossIcon} alt="cross-icon" onClick={handleClose} />
         <Heading style={{ textAlign: "center" }}>{type} NFT</Heading>
+        <Heading2>Verify Platform and Blockchain data in below table</Heading2>
         <TableContainer>
           <table>
             <tr>
@@ -137,7 +139,8 @@ const NFTPopup = ({
                     {dbData && dbData[row]?.toString()?.includes("https://") ? (
                       <TableData>
                         <a href={dbData[row]} target="_blank">
-                          {dbData && dbData[row]?.toString()}
+                          {/* {dbData && dbData[row]?.toString()} */}
+                          Go to
                         </a>
                       </TableData>
                     ) : (
@@ -149,7 +152,8 @@ const NFTPopup = ({
                     blockchainData[row]?.toString()?.includes("https://") ? (
                       <TableData>
                         <a href={blockchainData[row]} target="_blank">
-                          {blockchainData && blockchainData[row]?.toString()}
+                          {/* {blockchainData && blockchainData[row]?.toString()} */}
+                          Go to
                         </a>
                       </TableData>
                     ) : (
