@@ -108,79 +108,21 @@ exports.validate = async (req) => {
           errors.name = 'Name should be 3 characters long'
         }
 
-        // if (item.start_date) {
-        //   const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
-        //   if (!dateRegex.test(item.start_date)) {
-        //     errors.start_date =
-        //       "Start date should be in the format of dd/mm/yyyy";
-        //   }
-        // }
-
-        // if (item.end_date) {
-        //   const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
-        //   if (!dateRegex.test(item.end_date)) {
-        //     errors.end_date = "End date should be in the format of dd/mm/yyyy";
-        //   }
-        // }
-
         if (item.start_date) {
-          const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
+          const dateRegex =
+            /^(((0[1-9])|([12][0-9])|(3[01]))\/((0[0-9])|(1[012]))\/(\d{4}))$/;
+          // /^\d{1,2}\/\d{1,2}\/\d{4}$/;
           if (!dateRegex.test(item.start_date)) {
             errors.start_date =
               "Start date should be in the format of dd/mm/yyyy";
-          } else {
-            const [day, month] = item.start_date.split("/");
-            console.log("START DATE DAY & MONTH IS", day, month)
-            if (
-              day >= 31 && (month == 1 ||
-              month == 3 ||
-              month == 5 ||
-              month == 7 ||
-              month == 8 ||
-              month == 10 ||
-              month == 12)
-            ) {
-              errors.start_date = "Invalid day or month in start date";
-            } else if (
-              day >= 30 && ( month == 4 ||
-              month == 6 ||
-              month == 9 ||
-              month == 11)
-            ) {
-              errors.start_date = "Invalid day or month in start date";
-            } else if (day >= 29 && month == 2) {
-              errors.start_date = "Invalid day or month in start date";
-            }
           }
         }
 
         if (item.end_date) {
-          const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/
+          const dateRegex =
+            /^(((0[1-9])|([12][0-9])|(3[01]))\/((0[0-9])|(1[012]))\/(\d{4}))$/;
           if (!dateRegex.test(item.end_date)) {
             errors.end_date = "End date should be in the format of dd/mm/yyyy";
-          } else {
-            const [day, month] = item.end_date.split("/");
-            console.log("DAY & MONTH IS", day, month)
-            if (
-              day >= 31 && ( month == 1 ||
-              month == 3 ||
-              month == 5 ||
-              month == 7 ||
-              month == 8 ||
-              month == 10 ||
-              month == 12)
-            ) {
-              errors.end_date = "Invalid day or month in end date";
-            } else if (
-              day >= 30 && ( month == 4 ||
-              month == 6 ||
-              month == 9 ||
-              month == 11)
-            ) {
-              errors.end_date = "Invalid day or month in end date";
-            } else if (day >= 29 && month == 2) {
-              errors.end_date = "Invalid day or month in end date";
-            }
           }
         }
 
@@ -3072,6 +3014,67 @@ exports.getOrder = async (req) => {
     errorLog(req, error);
   }
 
+  return response;
+};
+
+exports.getOrderNew = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { email, phone, order_id, page, limit } = req.query;
+  const skip = (page - 1) * limit;
+
+  try {
+    let orders;
+    let query = {};
+
+    if (email) {
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).send("User not found.");
+      }
+      query.customer_id = user._id;
+    }
+
+    if (phone) {
+      const user = await User.findOne({ phone: phone });
+      if (!user) {
+        return res.status(404).send("User not found.");
+      }
+      query.customer_id = user._id;
+    }
+
+    if (order_id) {
+      query._id = order_id;
+    }
+
+    orders = await Order.find(query)
+      .populate("customer_id", "name email phone")
+      .select("_id razorpay_order_id amount currency created_at")
+      .sort("-created_at")
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    for (let i = 0; i < orders.length; i++) {
+      const payment = await Payment.findOne({ order_id: orders[i]._id });
+      if (payment) {
+        orders[i].payment_status = payment.payment_status;
+      } else {
+        orders[i].payment_status = false;
+      }
+    }
+
+    response.data = orders;
+    response.httpStatus = 200;
+  } catch (error) {
+    console.error(error);
+    response.error = "Server error";
+    response.httpStatus = 500;
+  }
   return response;
 };
 
