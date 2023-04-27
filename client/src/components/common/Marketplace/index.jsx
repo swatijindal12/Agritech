@@ -74,6 +74,12 @@ const MarketPlace = () => {
     setNewAddedIds(tempArr);
   };
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   const getList = page => {
     setLoading(true);
     axios
@@ -86,10 +92,10 @@ const MarketPlace = () => {
         }
       )
       .then(res => {
-        console.log("res", res.data)
+        console.log("res", res.data);
         setLoading(false);
         setContract(res.data.data.data);
-        setTotalPage(res.data.data.totalPages)
+        setTotalPage(res.data.data.totalPages);
       })
       .catch(err => {
         setLoading(false);
@@ -105,6 +111,7 @@ const MarketPlace = () => {
           placeholder="Search by Name and Crop"
           onChange={e => setSearchText(e.target.value)}
           value={searchText}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}

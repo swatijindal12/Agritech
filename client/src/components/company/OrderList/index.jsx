@@ -94,8 +94,9 @@ const OrderList = () => {
   const [tableHeading, setTableHeading] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
+  const [searchEmailText, setSearchEmailText] = useState("");
+  const [searchPhoneText, setSearchPhoneText] = useState("");
   const [searchText, setSearchText] = useState("");
-
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
@@ -104,11 +105,30 @@ const OrderList = () => {
   useEffect(() => {
     getOrderList(currentPage);
   }, [currentPage]);
+
+  const setEmailOrPhone = () => {
+    if (!isNaN(searchText)) {
+      setSearchPhoneText(searchText);
+    } else if (searchText.length != 10) {
+      setSearchEmailText(searchText);
+    }
+  };
+
+  useEffect(() => {
+    setEmailOrPhone();
+  });
+
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getOrderList();
+    }
+  };
+
   const getOrderList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/order?page=${page}&limit=8&orderId=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/admin/order?page=${page}&limit=8&email=${searchEmailText}&phone=${searchPhoneText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -116,16 +136,32 @@ const OrderList = () => {
         }
       )
       .then(res => {
-        let data = res.data.data.data;
+        let data = res.data.data.data.map(item => {
+          return {
+            ...item,
+            orderId: item._id, // Change the field name here
+          };
+        });
+        console.log("DATA IS", data);
         setLoading(false);
         // console.log("here the response is ", res.data);
         if (data.length > 0) {
           setList(data);
           setTotalPage(res.data.data.totalPages);
           let tempArr = [];
-          for (const key in data[0]) {
+          for (const key in data[0].customer_id) {
+            if (key === "_id") {
+              continue;
+            }
             tempArr.push(key);
           }
+          for (const key in data[0]) {
+            if (key === "customer_id" || key === "_id") {
+              continue;
+            }
+            tempArr.push(key);
+          }
+
           setTableHeading(tempArr);
         }
       })
@@ -145,6 +181,7 @@ const OrderList = () => {
               type="text"
               placeholder="Search by order id"
               onChange={e => setSearchText(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
             <Button
               text={loading ? "...LOADING" : "SEARCH"}
@@ -171,11 +208,33 @@ const OrderList = () => {
                   return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
+
               {list?.map((row, index) => {
                 return (
                   <tr key={index}>
                     {tableHeading?.map(item => {
-                      if (item === "orderItemsList") {
+                      if (item === "name") {
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row.customer_id.name}
+                          </td>
+                        );
+                      }
+                      if (item === "phone") {
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row.customer_id.phone}
+                          </td>
+                        );
+                      }
+                      if (item === "email") {
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row.customer_id.email}
+                          </td>
+                        );
+                      }
+                      if (item === "itemList") {
                         return (
                           <td key={`${index}-${item}`}>
                             {row[item].join(", ")}

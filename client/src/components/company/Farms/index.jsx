@@ -116,6 +116,13 @@ const Farms = () => {
     setShowFilter(false);
   };
 
+  // search handle by enter press
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   return (
     <Container>
       <Flexbox justify="space-between">
@@ -125,6 +132,7 @@ const Farms = () => {
             type="text"
             placeholder="Search by name, pin"
             onChange={e => setSearchText(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
@@ -152,6 +160,7 @@ const Farms = () => {
           type="text"
           placeholder="Search by name, pin"
           onChange={e => setSearchText(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}
