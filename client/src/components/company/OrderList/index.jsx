@@ -179,7 +179,7 @@ const OrderList = () => {
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Search by email, phone"
               onChange={e => setSearchText(e.target.value)}
               onKeyPress={handleKeyPress}
             />
