@@ -164,6 +164,18 @@ const Login = () => {
     navigate("/register");
   };
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getOTP();
+    }
+  };
+
+  const handleKeyPress1 = event => {
+    if (event.key === "Enter") {
+      verifyOTP();
+    }
+  };
+
   return (
     <>
       {user && (
@@ -189,6 +201,7 @@ const Login = () => {
                 placeholder="Enter Mobile Number"
                 value={number}
                 onChange={e => setNumber(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
               <Button text="SEND OTP" onClick={getOTP} />
               <ResendMessageStyle
@@ -210,6 +223,7 @@ const Login = () => {
                 style={{ textAlign: "center" }}
                 value={otp}
                 onChange={e => setOtp(e.target.value)}
+                onKeyPress={handleKeyPress1}
               />
               {timeRemaining === 0 ? (
                 <ResendMessageStyle
