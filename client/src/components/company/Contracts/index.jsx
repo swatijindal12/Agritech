@@ -88,7 +88,7 @@ const Contracts = () => {
   useEffect(() => {
     getList();
     setSearchText("");
-  }, [currentPage]);
+  }, [currentPage, currentPageNum]);
 
   const handleKeyPress = event => {
     if (event.key === "Enter") {
@@ -101,7 +101,7 @@ const Contracts = () => {
     axios
       .get(
         user?.data.role === "admin"
-          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}`
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${currentPageNum}&limit=5`
           : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement?search=${searchText}`,
         {
           headers: {
@@ -112,9 +112,19 @@ const Contracts = () => {
       .then(res => {
         setLoading(false);
         console.log("response is ", res);
-        setActive(res.data.data.active);
-        setClosed(res.data.data.close);
-        setTotalPage(res.data.data.totalPages);
+        if (user?.data.role === "admin") {
+          setActive(res.data.data.active[0].data);
+          setClosed(res.data.data.close[0].data);
+        } else {
+          setActive(res.data.data.active);
+          setClosed(res.data.data.close);
+        }
+
+        if (currentPage === "active") {
+          setTotalPage(res.data.data.totalPagesForActive);
+        } else if (currentPage === "closed") {
+          setTotalPage(res.data.data.totalPagesForClosed);
+        }
       })
       .catch(err => {
         setLoading(false);
