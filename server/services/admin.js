@@ -2912,176 +2912,8 @@ exports.getAudit = async (req) => {
   return response;
 };
 
-exports.getOrder = async (req) => {
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  try {
-    // Parse search parameters from request query
-    const { orderId } = req.query;
-
-    // Build search query
-    const searchQuery = {};
-    if (orderId) {
-      searchQuery.order_id = orderId;
-    }
-
-    // Count the total number of documents
-    const totalDocuments = await Payment.countDocuments(searchQuery);
-
-    // Parse pagination parameters from request query
-    const { page = 1, limit = 10 } = req.query;
-
-    // Find all Payment Done that match the search query and apply pagination
-    const payments = await Payment.find(searchQuery)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    // Creating RazorPay Instance
-    const instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_SECRET_KEY,
-    });
-
-    const orderList = [];
-
-    //wait for promise to complete..
-    await Promise.all(
-      payments.map(async (payment, index) => {
-        const payDetail = await instance.payments.fetch(
-          payment.razorpay_payment_id
-        );
-
-        const {
-          order_id,
-          amount,
-          status,
-          method,
-          email,
-          contact,
-          created_at,
-          captured,
-        } = payDetail;
-
-        const order = await Order.findOne({ razorpay_order_id: order_id });
-
-        // const orderId = order?._id;
-        const orderId = order ? order._id : null;
-        const orderItems = await OrderItem.find({ order_id: orderId }).populate(
-          {
-            path: "agreement_id",
-            select: "agreement_nft_id -_id",
-          }
-        );
-
-        let orderItemsList = [];
-        orderItems.forEach((item, index) => {
-          if (item.agreement_id) {
-            orderItemsList.push(item.agreement_id.agreement_nft_id);
-          }
-          // orderItemsList.push(item.agreement_id?.agreement_nft_id);
-        });
-
-        orderList.push({
-          razorpay_order_id: order_id,
-          orderId,
-          email,
-          contact,
-          amount: amount / 100,
-          status,
-          captured,
-          method,
-          created_at: new Date(created_at * 1000).toLocaleString(),
-          orderItemsList,
-          unit: orderItems.length,
-        });
-      })
-    );
-
-    //return response
-    response.data = {
-      totalPages: Math.ceil(totalDocuments / limit),
-      data: orderList,
-    };
-    response.httpStatus = 200;
-    logger.log("info", "Data fetch is successful");
-  } catch (error) {
-    response.httpStatus = 400;
-    response.error = `failed operation ${error}`;
-    errorLog(req, error);
-  }
-
-  return response;
-};
-
-exports.getOrderNew = async (req) => {
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { email, phone, order_id, page, limit } = req.query;
-  const skip = (page - 1) * limit;
-
-  try {
-    let orders;
-    let query = {};
-
-    if (email) {
-      const user = await User.findOne({ email: email });
-      if (!user) {
-        return res.status(404).send("User not found.");
-      }
-      query.customer_id = user._id;
-    }
-
-    if (phone) {
-      const user = await User.findOne({ phone: phone });
-      if (!user) {
-        return res.status(404).send("User not found.");
-      }
-      query.customer_id = user._id;
-    }
-
-    if (order_id) {
-      query._id = order_id;
-    }
-
-    orders = await Order.find(query)
-      .populate("customer_id", "name email phone")
-      .select("_id razorpay_order_id amount currency created_at")
-      .sort("-created_at")
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    for (let i = 0; i < orders.length; i++) {
-      const payment = await Payment.findOne({ order_id: orders[i]._id });
-      if (payment) {
-        orders[i].payment_status = payment.payment_status;
-      } else {
-        orders[i].payment_status = false;
-      }
-    }
-
-    response.data = orders;
-    response.httpStatus = 200;
-  } catch (error) {
-    console.error(error);
-    response.error = "Server error";
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
-// exports.getOrderNewq = async (req) => {
+//Using Razorpay API
+// exports.getOrderOld = async (req) => {
 //   // General response format
 //   let response = {
 //     error: null,
@@ -3092,7 +2924,7 @@ exports.getOrderNew = async (req) => {
 
 //   try {
 //     // Parse search parameters from request query
-//     const { orderId, email } = req.query;
+//     const { orderId } = req.query;
 
 //     // Build search query
 //     const searchQuery = {};
@@ -3100,44 +2932,82 @@ exports.getOrderNew = async (req) => {
 //       searchQuery.order_id = orderId;
 //     }
 
+//     // Count the total number of documents
+//     const totalDocuments = await Payment.countDocuments(searchQuery);
+
 //     // Parse pagination parameters from request query
 //     const { page = 1, limit = 10 } = req.query;
 
-//     // Fetch orders using Razorpay API
+//     // Find all Payment Done that match the search query and apply pagination
+//     const payments = await Payment.find(searchQuery)
+//       .sort({ createdAt: -1 })
+//       .skip((page - 1) * limit)
+//       .limit(limit);
+
+//     // Creating RazorPay Instance
 //     const instance = new Razorpay({
 //       key_id: process.env.RAZORPAY_KEY_ID,
 //       key_secret: process.env.RAZORPAY_SECRET_KEY,
 //     });
 
-//     const orders = await instance.payments.fetch({
-//       from: (page - 1) * limit,
-//       to: page * limit - 1,
-//       count: limit,
-//       search: {
-//         email,
-//       },
-//     });
-
 //     const orderList = [];
 
-//     orders.items.forEach((order) => {
-//       orderList.push({
-//         razorpay_order_id: order.id,
-//         email: order.email,
-//         contact: order.contact,
-//         amount: order.amount / 100,
-//         status: order.status,
-//         captured: order.captured,
-//         method: order.method,
-//         created_at: new Date(order.created_at * 1000).toLocaleString(),
-//         orderItemsList: [],
-//         unit: 0,
-//       });
-//     });
+//     //wait for promise to complete..
+//     await Promise.all(
+//       payments.map(async (payment, index) => {
+//         const payDetail = await instance.payments.fetch(
+//           payment.razorpay_payment_id
+//         );
+
+//         const {
+//           order_id,
+//           amount,
+//           status,
+//           method,
+//           email,
+//           contact,
+//           created_at,
+//           captured,
+//         } = payDetail;
+
+//         const order = await Order.findOne({ razorpay_order_id: order_id });
+
+//         // const orderId = order?._id;
+//         const orderId = order ? order._id : null;
+//         const orderItems = await OrderItem.find({ order_id: orderId }).populate(
+//           {
+//             path: "agreement_id",
+//             select: "agreement_nft_id -_id",
+//           }
+//         );
+
+//         let orderItemsList = [];
+//         orderItems.forEach((item, index) => {
+//           if (item.agreement_id) {
+//             orderItemsList.push(item.agreement_id.agreement_nft_id);
+//           }
+//           // orderItemsList.push(item.agreement_id?.agreement_nft_id);
+//         });
+
+//         orderList.push({
+//           razorpay_order_id: order_id,
+//           orderId,
+//           email,
+//           contact,
+//           amount: amount / 100,
+//           status,
+//           captured,
+//           method,
+//           created_at: new Date(created_at * 1000).toLocaleString(),
+//           orderItemsList,
+//           unit: orderItems.length,
+//         });
+//       })
+//     );
 
 //     //return response
 //     response.data = {
-//       totalPages: Math.ceil(orders.count / limit),
+//       totalPages: Math.ceil(totalDocuments / limit),
 //       data: orderList,
 //     };
 //     response.httpStatus = 200;
@@ -3150,3 +3020,114 @@ exports.getOrderNew = async (req) => {
 
 //   return response;
 // };
+
+// Return order History
+exports.getOrder = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { email, phone, orderId, page, limit } = req.query;
+  const skip = (page - 1) * limit;
+
+  // Creating RazorPay Instance
+  const instance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_SECRET_KEY,
+  });
+
+  try {
+    let orders;
+    let query = {};
+
+    if (email) {
+      const user = await User.findOne({ email: email });
+      if (user) {
+        query.customer_id = user._id;
+      }
+    }
+
+    if (phone) {
+      const user = await User.findOne({ phone: phone });
+      if (user) {
+        query.customer_id = user._id;
+      }
+    }
+
+    if (orderId) {
+      query._id = orderId;
+    }
+
+    orders = await Order.find(query)
+      .populate("customer_id", "name email phone")
+      .select("razorpay_order_id amount createdAt")
+      .sort("-createdAt")
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const orderIds = orders.map((order) => order._id);
+
+    const payments = await Payment.find({ order_id: { $in: orderIds } });
+
+    // console.log("Payments", typeof payments, payments);
+    // Creating RazorPay Instance
+
+    const result = await Promise.all(
+      orders.map(async (order) => {
+        const orderObj = order.toObject();
+
+        const orderItem = await OrderItem.find({
+          order_id: orderObj._id,
+        }).populate({
+          path: "agreement_id",
+          select: "agreement_nft_id -_id",
+        });
+
+        const itemList = [];
+        orderItem.map((item) => {
+          //console.log("item", item.agreement_id);
+          if (item.agreement_id) {
+            itemList.push(item.agreement_id.agreement_nft_id);
+          }
+        });
+
+        // console.log("orderItem : ", orderItem);
+
+        const paymentStatus = await Payment.findOne({
+          razorpay_order_id: orderObj.razorpay_order_id,
+        });
+        // console.log("paymentStatus :", paymentStatus);
+        return {
+          ...orderObj,
+          unit: orderItem.length,
+          itemList,
+          status:
+            paymentStatus && paymentStatus.payment_status
+              ? paymentStatus.payment_status
+              : false,
+          createdAt: order.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+        };
+      })
+    );
+
+    orders = result;
+
+    const count = await Order.countDocuments(query);
+
+    response.data = {
+      totalPages: Math.ceil(count / limit),
+      data: orders,
+    };
+    response.httpStatus = 200;
+  } catch (error) {
+    console.error(error);
+    response.error = `Server error`;
+    response.httpStatus = 500;
+  }
+  return response;
+};
