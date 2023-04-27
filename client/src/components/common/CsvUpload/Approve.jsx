@@ -110,10 +110,10 @@ const Approve = ({ setBackgroundColor }) => {
   useEffect(() => {
     async function getGasPrice() {
       if (selectedType.name === "Farms") {
-        const gasPrice = await TransactionFee.getGasPrice(332738);
+        const gasPrice = await TransactionFee(332738);
         setTxPrice(gasPrice);
       } else if (selectedType.name === "Contracts") {
-        const gasPrice = await TransactionFee.getGasPrice(472726);
+        const gasPrice = await TransactionFee(472726);
         setTxPrice(gasPrice);
       }
     }

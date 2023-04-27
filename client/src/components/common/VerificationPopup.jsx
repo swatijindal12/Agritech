@@ -65,6 +65,12 @@ const Error = styled.p`
   margin: 1rem 0;
 `;
 
+const WarningMessage = styled.p`
+  color: #6c584c;
+  font-size: 1rem;
+  margin: 1rem 0;
+`;
+
 const Message = styled.p`
   color: #a98467;
   font-size: 1rem;
@@ -137,7 +143,7 @@ const VerificationPopup = ({
                 />
               </>
             )}
-            <Error>{warning}</Error>
+            <WarningMessage>{warning}</WarningMessage>
             <Flexbox justify="center">
               <Button
                 onClick={handleSubmit}

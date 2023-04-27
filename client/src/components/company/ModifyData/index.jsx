@@ -133,10 +133,10 @@ const ModifyData = () => {
   useEffect(() => {
     async function getGasPrice() {
       if (selectedType.name === "Farms") {
-        const gasPrice = await TransactionFee.getGasPrice(60046);
+        const gasPrice = await TransactionFee(60046);
         setTxPrice(gasPrice);
       } else if (selectedType.name === "Contracts") {
-        const gasPrice = await TransactionFee.getGasPrice(81661);
+        const gasPrice = await TransactionFee(81661);
         setTxPrice(gasPrice);
       }
     }

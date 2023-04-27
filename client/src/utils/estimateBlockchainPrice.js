@@ -1,8 +1,8 @@
-const Web3 = require("web3");
+import Web3 from "web3";
 const RPC_URL = "https://rpc-mainnet.maticvigil.com/";
 const web3 = new Web3(RPC_URL);
 
-async function getGasPrice(gasFeeUsed) {
+async function TransactionFee(gasFeeUsed) {
   try {
     const result = await web3.eth.getGasPrice();
     const gasPrice = web3.utils.fromWei(result, "ether");
@@ -12,5 +12,4 @@ async function getGasPrice(gasFeeUsed) {
     throw error;
   }
 }
-
-module.exports = { getGasPrice };
+export default TransactionFee;
