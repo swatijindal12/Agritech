@@ -88,6 +88,12 @@ const Farmers = () => {
     setNewAddedIds(tempArr);
   };
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   const getList = () => {
     setLoading(true);
     let queryString = "";
@@ -95,11 +101,14 @@ const Farmers = () => {
       queryString += `sortOrder=${selectedFilter.rating}`;
     }
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}&search=${searchText}`, {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
-      })
+      .get(
+        `${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}&search=${searchText}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
       .then(res => {
         // console.log("response is ", res);
         setLoading(false);
@@ -122,6 +131,7 @@ const Farmers = () => {
             type="text"
             placeholder="Search by name, pin, phone"
             onChange={e => setSearchText(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
@@ -153,6 +163,7 @@ const Farmers = () => {
           type="text"
           placeholder="Search by name, pin"
           onChange={e => setSearchText(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}

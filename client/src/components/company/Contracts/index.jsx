@@ -7,6 +7,7 @@ import ActiveCard from "./ActiveCard";
 import ClosedCard from "./ClosedCard";
 import EmptyIcon from "../../../assets/empty-box.svg";
 import Button from "../../common/Button";
+import Pagination from "../../common/Pagination";
 
 const Container = styled.div`
   padding: 1rem;
@@ -67,18 +68,33 @@ const Input = styled.input`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const Contracts = () => {
   const [currentPage, setCurrentpage] = useState("active");
   const [active, setActive] = useState([]);
   const [closed, setClosed] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [totalPage, setTotalPage] = useState(2);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
+
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
     getList();
     setSearchText("");
   }, [currentPage]);
+
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
 
   const getList = () => {
     setLoading(true);
@@ -95,9 +111,10 @@ const Contracts = () => {
       )
       .then(res => {
         setLoading(false);
-        // console.log("response is ", res);
+        console.log("response is ", res);
         setActive(res.data.data.active);
         setClosed(res.data.data.close);
+        setTotalPage(res.data.data.totalPages);
       })
       .catch(err => {
         setLoading(false);
@@ -114,6 +131,7 @@ const Contracts = () => {
             placeholder="Search by Name and Crop"
             onChange={e => setSearchText(e.target.value)}
             value={searchText}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
@@ -152,6 +170,14 @@ const Contracts = () => {
               return <ClosedCard data={item} key={item.agreements[0]} />;
             })}
       </CardsContainer>
+      <PaginationContainer>
+        <Pagination
+          currentPage={currentPageNum}
+          totalCount={totalPage}
+          pageSize={1}
+          onPageChange={page => setCurrentPageNum(page)}
+        />
+      </PaginationContainer>
     </Container>
   );
 };

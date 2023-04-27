@@ -9,6 +9,7 @@ import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
 import VerificationPopup from "../VerificationPopup";
+import TransactionFee from "../../../utils/estimateBlockchainPrice";
 
 const Container = styled.div`
   padding: 1rem;
@@ -99,11 +100,25 @@ const Approve = ({ setBackgroundColor }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState(false);
+  const [txPrice, setTxPrice] = useState();
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
   );
+
+  useEffect(() => {
+    async function getGasPrice() {
+      if (selectedType.name === "Farms") {
+        const gasPrice = await TransactionFee.getGasPrice(332738);
+        setTxPrice(gasPrice);
+      } else if (selectedType.name === "Contracts") {
+        const gasPrice = await TransactionFee.getGasPrice(472726);
+        setTxPrice(gasPrice);
+      }
+    }
+    getGasPrice();
+  }, []);
 
   useEffect(() => {
     let tempArr = [];
@@ -154,7 +169,7 @@ const Approve = ({ setBackgroundColor }) => {
             JSON.stringify(selectedItem)
           );
           window.location.href = selectedType?.redirection_url;
-          console.log("posted Succssfully ", res.data);
+          console.log("posted Successfully ", res.data);
         }
       });
     setSelectedItem(null);
@@ -178,6 +193,13 @@ const Approve = ({ setBackgroundColor }) => {
           setError={setShowVerificationError}
           selectedEntity={selectedType.name}
           selectedModelType="Approve"
+          warning={
+            selectedType.name === "Farms"
+              ? `Approx cost of creating farm will be ${txPrice.toFixed(3)} matic. Are you sure you want to proceed?`
+              : selectedType.name === "Contracts"
+              ? `Approx cost of creating contract will be ${txPrice.toFixed(3)} matic. Are you sure you want to proceed?`
+              : false
+          }
         />
       )}
       <Container>

@@ -13,6 +13,7 @@ import Button from "../../common/Button";
 import LogsModal from "./LogsModal";
 import Lottie from "lottie-react";
 import LoadingLottie from "../../../assets/lottie/loader.json";
+import TransactionFee from "../../../utils/estimateBlockchainPrice";
 
 const Container = styled.div`
   padding: 1rem;
@@ -122,11 +123,25 @@ const ModifyData = () => {
   const [totalPage, setTotalPage] = useState(2);
   const [searchText, setSearchText] = useState("");
   const [showLogs, setShowLogs] = useState(false);
+  const [txPrice, setTxPrice] = useState(false);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
   );
+
+  useEffect(() => {
+    async function getGasPrice() {
+      if (selectedType.name === "Farms") {
+        const gasPrice = await TransactionFee.getGasPrice(60046);
+        setTxPrice(gasPrice);
+      } else if (selectedType.name === "Contracts") {
+        const gasPrice = await TransactionFee.getGasPrice(81661);
+        setTxPrice(gasPrice);
+      }
+    }
+    getGasPrice();
+  }, []);
 
   useEffect(() => {
     getList(currentPage);
@@ -251,13 +266,17 @@ const ModifyData = () => {
           warning={
             showVerificationFor === "update" &&
             (selectedType.name === "Farms"
-              ? "Approx cost of modifying farm will be $0.0097"
+              ? `Approx cost of modifying farm will be ${txPrice.toFixed(
+                 3
+                )} matic. Are you sure you want to proceed?`
               : selectedType.name === "Contracts"
-              ? "Approx cost of modifying contract will be $0.0113"
+              ? ` Approx cost of modifying contract will be ${txPrice.toFixed(
+                 3
+                )} matic. Are you sure you want to proceed?`
               : false)
           }
           selectedModelType={showVerificationFor}
-          selectedEntity = {selectedType.name}
+          selectedEntity={selectedType.name}
         />
       )}
       {showLogs && <LogsModal toggle={() => setShowLogs(false)} />}

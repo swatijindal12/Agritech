@@ -171,6 +171,12 @@ const LogsModal = ({ toggle }) => {
     getList();
   }, [currentPage]);
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   const getList = page => {
     setLoading(true);
     axios
@@ -219,6 +225,7 @@ const LogsModal = ({ toggle }) => {
               type="text"
               placeholder="Search by ID, Change type and User name"
               onChange={e => setSearchText(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
             <Button
               text={loading ? "...LOADING" : "SEARCH"}
