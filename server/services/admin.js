@@ -2487,6 +2487,7 @@ exports.getAgreementsForAdmin = async (req) => {
       searchQuery["$or"] = [
         { farmer_name: { $regex: new RegExp(searchString, "i") } },
         { crop: { $regex: new RegExp(searchString, "i") } },
+        { agreement_nft_id: { $regex: new RegExp(searchString, "i") } },
       ];
     }
 
@@ -2562,6 +2563,7 @@ exports.getAgreementsForAdmin = async (req) => {
       searchQuery["$or"] = [
         { farmer_name: { $regex: new RegExp(searchString, "i") } },
         { crop: { $regex: new RegExp(searchString, "i") } },
+        { agreement_nft_id: { $regex: new RegExp(searchString, "i") } },
       ];
     }
 
@@ -2626,16 +2628,23 @@ exports.getAgreementsForAdmin = async (req) => {
     response.data = {
       active: activeContractswithCustomerData,
       close: closeContractswithCustomerData,
-      totalPagesForActive: Math.ceil(
-        activeContractswithCustomerData[0].metadata[0].total / limit
-      ),
-      totalPagesForClosed: Math.ceil(
-        closeContractswithCustomerData[0].metadata[0].total / limit
-      ),
+      totalPagesForActive:
+        activeContractswithCustomerData[0].metadata.length > 0
+          ? Math.ceil(
+              activeContractswithCustomerData[0].metadata[0].total / limit
+            )
+          : 0,
+      totalPagesForClosed:
+        closeContractswithCustomerData[0].metadata.length > 0
+          ? Math.ceil(
+              closeContractswithCustomerData[0].metadata[0].total / limit
+            )
+          : 0,
     };
     logger.log("info", "data fetch successful");
   } catch (error) {
     response.httpStatus = 400;
+    console.log("ERR", error);
     response.error = "failed operation";
     errorLog(req, error);
   }
