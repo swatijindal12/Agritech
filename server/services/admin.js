@@ -2469,6 +2469,11 @@ exports.getAgreementsForAdmin = async (req) => {
     httpStatus: null,
     data: null,
   };
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const skip = (page - 1) * limit;
+
   // // Grouping farm... for Admin to show in their active/close Tab
   try {
     let match = {
@@ -2540,6 +2545,12 @@ exports.getAgreementsForAdmin = async (req) => {
           "_id.crop": 1,
         },
       },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
 
     match = {
@@ -2603,12 +2614,24 @@ exports.getAgreementsForAdmin = async (req) => {
       {
         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
       },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
 
     response.httpStatus = 200;
     response.data = {
       active: activeContractswithCustomerData,
       close: closeContractswithCustomerData,
+      totalPagesForActive: Math.ceil(
+        activeContractswithCustomerData[0].metadata[0].total / limit
+      ),
+      totalPagesForClosed: Math.ceil(
+        closeContractswithCustomerData[0].metadata[0].total / limit
+      ),
     };
     logger.log("info", "data fetch successful");
   } catch (error) {
@@ -3034,10 +3057,10 @@ exports.getOrder = async (req) => {
   const skip = (page - 1) * limit;
 
   // Creating RazorPay Instance
-  const instance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_SECRET_KEY,
-  });
+  // const instance = new Razorpay({
+  //   key_id: process.env.RAZORPAY_KEY_ID,
+  //   key_secret: process.env.RAZORPAY_SECRET_KEY,
+  // });
 
   try {
     let orders;
@@ -3125,7 +3148,6 @@ exports.getOrder = async (req) => {
     };
     response.httpStatus = 200;
   } catch (error) {
-    console.error(error);
     response.error = `Server error`;
     response.httpStatus = 500;
   }
