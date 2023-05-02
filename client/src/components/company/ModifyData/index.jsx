@@ -124,6 +124,7 @@ const ModifyData = () => {
   const [searchText, setSearchText] = useState("");
   const [showLogs, setShowLogs] = useState(false);
   const [txPrice, setTxPrice] = useState(false);
+  const [maticPrice, setMaticPrice] = useState(null);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -141,6 +142,15 @@ const ModifyData = () => {
       }
     }
     getGasPrice();
+  }, []);
+
+  useEffect(() => {
+    fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+    )
+      .then(response => response.json())
+      .then(data => setMaticPrice(data["matic-network"].inr))
+      .catch(error => console.error(error));
   }, []);
 
   useEffect(() => {
@@ -267,12 +277,16 @@ const ModifyData = () => {
             showVerificationFor === "update" &&
             (selectedType.name === "Farms"
               ? `Approx cost of modifying farm will be ${txPrice.toFixed(
-                 3
-                )} matic. Are you sure you want to proceed?`
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
               : selectedType.name === "Contracts"
               ? ` Approx cost of modifying contract will be ${txPrice.toFixed(
-                 3
-                )} matic. Are you sure you want to proceed?`
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
               : false)
           }
           selectedModelType={showVerificationFor}

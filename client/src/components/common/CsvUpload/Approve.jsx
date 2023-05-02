@@ -101,6 +101,7 @@ const Approve = ({ setBackgroundColor }) => {
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState(false);
   const [txPrice, setTxPrice] = useState();
+  const [maticPrice, setMaticPrice] = useState(null);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -146,6 +147,15 @@ const Approve = ({ setBackgroundColor }) => {
       .then(res => {
         setList(res.data.data);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+    )
+      .then(response => response.json())
+      .then(data => setMaticPrice(data["matic-network"].inr))
+      .catch(error => console.error(error));
   }, []);
 
   const handleUploadClick = adminPassword => {
@@ -195,9 +205,17 @@ const Approve = ({ setBackgroundColor }) => {
           selectedModelType="Approve"
           warning={
             selectedType.name === "Farms"
-              ? `Approx cost of creating farm will be ${txPrice.toFixed(3)} matic. Are you sure you want to proceed?`
+              ? `Approx cost of creating farm will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
               : selectedType.name === "Contracts"
-              ? `Approx cost of creating contract will be ${txPrice.toFixed(3)} matic. Are you sure you want to proceed?`
+              ? `Approx cost of creating contract will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
               : false
           }
         />
