@@ -37,14 +37,25 @@ app.use(cookieParser());
 // Setup body parser
 app.use(express.json());
 
+//Middleware
+const {
+  preRequestLogger,
+  postRequestLogger,
+} = require("./middlewares/loggerMiddleware");
+
 // Routing request to => {BASE_URL}/api/v1/auth to authenticate User.
-app.use("/api/v1/auth", auth);
+app.use("/api/v1/auth", preRequestLogger, auth, postRequestLogger);
 
 //---- SCOPE CHANGE ----- //
-app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/admin", preRequestLogger, adminRoutes, postRequestLogger);
 
 // Agreement
-app.use("/api/v1/marketplace", agreementRoutes);
+app.use(
+  "/api/v1/marketplace",
+  preRequestLogger,
+  agreementRoutes,
+  postRequestLogger
+);
 
 // Handling unhandled routes
 app.use("*", (req, res) => {

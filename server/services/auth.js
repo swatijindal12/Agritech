@@ -10,6 +10,8 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 
 const nameRegex = /^[A-Za-z'-\s]+$/;
 
@@ -72,23 +74,25 @@ exports.createUser = async (req) => {
       const user = await User.create({ name, address, phone, email });
 
       // Twilio send OTP service
-      // client.verify.v2
-      //   .services(serviceId)
-      //   .verifications.create({
-      //     to: "+91" + phone,
-      //     channel: "sms",
-      //   })
-      //   .then(
-      //     (verification) => (response.httpStatus = 200),
-      //     (response.message = `OTP sent to your number ${verification}`),
-      //     (response.httpStatus = 200)
-      //   )
-      //   .catch((error) => {
-      //     (response.httpStatus = 400),
-      //       (response.error = `failed operation ${error}`);
-      //   });
-      (response.message = `OTP sent to your number`),
-        (response.httpStatus = 200);
+      client.verify.v2
+        .services(serviceId)
+        .verifications.create({
+          to: "+91" + user.phone,
+          channel: "sms",
+        })
+        .then(
+          (verification) => (response.httpStatus = 200),
+          (response.message = `OTP sent to your number `),
+          (response.httpStatus = 200),
+          logger.log("info", `OTP sent successful `)
+        )
+        .catch((error) => {
+          (response.httpStatus = 400),
+            (response.error = `failed operation ${error}`);
+          errorLog(req, error);
+        });
+      // response.message = `OTP sent to your number`;
+      // response.httpStatus = 200;
     } else {
       // if some fields are empty
       response.httpStatus = 400;
@@ -98,85 +102,122 @@ exports.createUser = async (req) => {
     response.httpStatus = 500;
     // console.log(error);
     response.error = `${error}`;
+    errorLog(req, error);
   }
 
   return response;
 };
 
-exports.verifyCreateUser = async (req) => {
-  // General response format
+//Check Inside controller
+// exports.verifyCreateUser = async (req) => {
+//   // General response format
+//   let isverified = false;
+//   console.log("verifyCreateUser inside...");
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
 
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
+//   const { phone, otp } = req.body;
 
-  const { phone, otp } = req.body;
+//   // Checks if phone or otp is entered by user
+//   if (!phone || !otp) {
+//     response.httpStatus = 400;
+//     response.error = "Enter phone number and otp";
+//     return response;
+//   }
 
-  // Checks if phone or otp is entered by user
-  if (!phone || !otp) {
-    response.httpStatus = 400;
-    response.error = "Enter phone number and otp";
+//   // Finding user in database which is not verified with this Phone.
+//   const user = await User.findOne({ phone, is_verified: false });
+//   console.log("User : ", user);
 
-    return response;
-  }
+//   // checking
+//   if (!user) {
+//     response.httpStatus = 404;
+//     response.error = "User not found";
+//     return response;
+//   }
 
-  // Finding user in database which is not verified with this Phone.
-  const user = await User.findOne({ phone, is_verified: false });
+//   // verifying otp with twilio service .
 
-  // checking
-  if (!user) {
-    response.httpStatus = 404;
-    response.error = "User not found";
-    return response;
-  }
+//   client.verify
+//     .services(serviceId)
+//     .verificationChecks.create({ to: "+91" + phone, code: otp })
+//     .then((verification_check) => {
+//       if (verification_check.status === "approved") {
+//         isverified = true;
+//         // Create JSON Web token
+//       } else {
+//         return res.status(400).json({
+//           error: "failed operation",
+//           message: null,
+//           httpStatus: 400,
+//           data: null,
+//         });
+//       }
+//     })
+//     .catch((error) => {
+//       return res.status(500).json({
+//         error: `failed operation ${error}`,
+//         message: null,
+//         httpStatus: 500,
+//         data: null,
+//       });
+//     });
+//   console.log("outside IS isverified :- ", isverified);
 
-  // verifying otp with twilio service .
-  // client.verify
-  //   .services(serviceId)
-  //   .verificationChecks.create({ to: "+91" + phone, code: otp })
-  //   .then(async (verification_check) => {
-  //     if (verification_check.status === "approved") {
-  //       console.log("verification_check :", verification_check);
-  //       //update is_verified
-  //       await User.updateOne({ phone: phone }, { is_verified: true });
-  //       (response.httpStatus = 200), (response.data = token);
-  //     } else {
-  //       response.httpStatus = 500;
-  //       response.error = `failed operation`;
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     response.httpStatus = 500;
-  //     response.error = "failed operation";
-  //   });
+//   if (isverified) {
+//     console.log("iNSIDE IS isverified :- ", isverified);
+//     await User.updateOne({ phone: phone }, { is_verified: true });
+//     //creating a message
+//     const message = {
+//       from: process.env.EMAIL_ID,
+//       to: process.env.ADMIN_EMAIL,
+//       subject: "Agritrust User Registration",
+//       text: `A new user  "${user.name}"  is registered with email  ${user.email}`,
+//     };
 
-  //creating a message
-  const message = {
-    from: process.env.EMAIL_ID,
-    to: process.env.ADMIN_EMAIL,
-    subject: "Agritrust User Registration",
-    text: `A new user  "${user.name}"  is registered with email  ${user.email}`,
-  };
+//     //sending email.
+//     emailTransporter.sendMail(message, (error, info) => {
+//       if (error) {
+//         console.log("Nodemailer error : ", error);
+//       } else {
+//         console.log("Email sent: " + info.response);
+//       }
+//     });
+//     response.message = "user created successful";
+//     response.httpStatus = 201;
+//     response.data = user;
+//   }
 
-  //update is_verified
-  await User.updateOne({ phone: phone }, { is_verified: true });
+//   // for Dev
+//   /* //creating a message
+//   const message = {
+//     from: process.env.EMAIL_ID,
+//     to: process.env.ADMIN_EMAIL,
+//     subject: "Agritrust User Registration",
+//     text: `A new user  "${user.name}"  is registered with email  ${user.email}`,
+//   };
 
-  //sending email.
-  emailTransporter.sendMail(message, (error, info) => {
-    if (error) {
-      console.log("Nodemailer error : ", error);
-    } else {
-      console.log("Email sent: " + info.response);
-    }
-  });
-  response.message = "user created successful";
-  response.httpStatus = 201;
-  response.data = user;
-  return response;
-};
+//   //update is_verified
+//   await User.updateOne({ phone: phone }, { is_verified: true });
+
+//   //sending email.
+//   emailTransporter.sendMail(message, (error, info) => {
+//     if (error) {
+//       console.log("Nodemailer error : ", error);
+//     } else {
+//       console.log("Email sent: " + info.response);
+//     }
+//   });
+//   response.message = "user created successful";
+//   response.httpStatus = 201;
+//   response.data = user;*/
+
+//   return response;
+// };
 
 // Login service
 exports.login = async (req) => {
@@ -217,31 +258,36 @@ exports.login = async (req) => {
     }
 
     // Twilio send OTP service
-    // client.verify.v2
-    //   .services(serviceId)
-    //   .verifications.create({
-    //     to: "+91" + user.phone,
-    //     channel: "sms",
-    //   })
-    //   .then(
-    //     (verification) => (response.httpStatus = 200),
-    //     (response.message = `OTP sent to your number`),
-    //     (response.httpStatus = 200)
-    //   )
-    //   .catch((error) => {
-    //     (response.httpStatus = 400),
-    //       (response.error = `failed operation ${error}`);
-    //   });
-    response.message = `OTP sent to your number`;
-    response.httpStatus = 200;
+    client.verify.v2
+      .services(serviceId)
+      .verifications.create({
+        to: "+91" + user.phone,
+        channel: "sms",
+      })
+      .then(
+        (verification) => (response.httpStatus = 200),
+        (response.message = `OTP sent to your number`),
+        (response.httpStatus = 200),
+        logger.log("info", "OTP sent to your number")
+      )
+      .catch((error) => {
+        (response.httpStatus = 400),
+          (response.error = `failed operation ${error}`);
+        errorLog(req, error);
+      });
+    //Uncomment for Dev
+    // response.message = `OTP sent to your number`;
+    // response.httpStatus = 200;
   } catch (error) {
     response.httpStatus = 404;
     response.error = `User not found`;
+    errorLog(req, error);
   }
 
   return response;
 };
 
+//Check Inside controller
 // verify service working...
 // exports.verify = async (req) => {
 //   // General response format

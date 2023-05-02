@@ -1,14 +1,15 @@
 const agreementServices = require("../services/agreement");
-
+const { logger } = require("../utils/logger");
+const { errorLog } = require("../utils/commonError");
 // Route to      => api/v1/agreement
 exports.createAgreement = async (req, res, next) => {
-  console.log("Inside create Agreement controller");
   agreementServices
     .createAgreement(req)
     .then((response) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: `failed operation controller ${error}`,
         message: null,
@@ -16,6 +17,7 @@ exports.createAgreement = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/agreements
@@ -26,6 +28,7 @@ exports.getAgreements = async (req, res, next) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -33,16 +36,17 @@ exports.getAgreements = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.getFarmById = async (req, res, next) => {
-  console.log("Inside get agreement controllers");
   agreementServices
     .getFarmById(req)
     .then((response) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -50,16 +54,17 @@ exports.getFarmById = async (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.getAgreementsOfCustomer = (req, res, next) => {
-  console.log("Inside get getAgreementsOfCustomer controllers");
   agreementServices
     .getAgreementsOfCustomer(req)
     .then((response) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -67,17 +72,18 @@ exports.getAgreementsOfCustomer = (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/agreement/buy/:id
 exports.buyAgreement = (req, res, next) => {
-  console.log("Inside get buyAgreement controllers");
   agreementServices
     .buyAgreement(req)
     .then((response) => {
       res.json(response);
     })
     .catch((error) => {
+      errorLog(req, error);
       res.status(400).json({
         error: "failed operation",
         message: null,
@@ -85,11 +91,11 @@ exports.buyAgreement = (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 // Route to      => api/v1/cart
 exports.addToCart = (req, res, next) => {
-  console.log("Inside AddToCart Controllers");
   agreementServices
     .addToCart(req)
     .then((response) => {
@@ -103,10 +109,10 @@ exports.addToCart = (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.removeFromCart = (req, res, next) => {
-  console.log("Inside removeCart Controllers");
   agreementServices
     .removeFromCart(req)
     .then((response) => {
@@ -120,10 +126,10 @@ exports.removeFromCart = (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
 
 exports.getCart = (req, res, next) => {
-  console.log("Inside getCart Controllers");
   agreementServices
     .getCart(req)
     .then((response) => {
@@ -137,4 +143,5 @@ exports.getCart = (req, res, next) => {
         data: null,
       });
     });
+  next();
 };
