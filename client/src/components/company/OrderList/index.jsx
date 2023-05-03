@@ -115,17 +115,16 @@ const OrderList = () => {
   };
 
   useEffect(() => {
-        setEmailOrPhone();
+    setEmailOrPhone();
   });
 
   const handleKeyPress = event => {
     if (event.key === "Enter") {
-      getOrderList();
+      getOrderList(currentPage);
     }
   };
 
   const getOrderList = page => {
-    console.log("PAGE IS", page)
     setLoading(true);
     axios
       .get(
@@ -143,9 +142,8 @@ const OrderList = () => {
             orderId: item._id, // Change the field name here
           };
         });
-        console.log("DATA IS", data);
+
         setLoading(false);
-        // console.log("here the response is ", res.data);
         if (data.length > 0) {
           setList(data);
           setTotalPage(res.data.data.totalPages);
@@ -173,8 +171,7 @@ const OrderList = () => {
   };
 
   const redirectHandler = NFTId => {
-    console.log("INSIDE REDIRECT HANDLER");
-    window.location.href =`http://localhost:3000/contracts-admin?search=${NFTId}`;
+    window.location.href = `http://localhost:3000/contracts-admin?search=${NFTId}`;
     axios.get(
       `${process.env.REACT_APP_BASE_URL}/admin/agreement?page=1&limit=8&search=${NFTId}`,
       {
@@ -257,7 +254,6 @@ const OrderList = () => {
                                 onClick={() => {
                                   redirectHandler(item);
                                 }}
-                                // href={"http://localhost:3000/contracts-admin"} //{`${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${item}&page=1&limit=5`}
                                 key={index}
                               >
                                 <span key={index}>

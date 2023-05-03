@@ -108,7 +108,7 @@ const Contracts = () => {
     axios
       .get(
         user?.data.role === "admin"
-          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${page}&limit=5`
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${page}&limit=6`
           : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement?search=${searchText}`,
         {
           headers: {

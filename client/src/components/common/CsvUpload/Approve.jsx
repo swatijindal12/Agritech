@@ -150,12 +150,19 @@ const Approve = ({ setBackgroundColor }) => {
   }, []);
 
   useEffect(() => {
-    fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
-    )
-      .then(response => response.json())
-      .then(data => setMaticPrice(data["matic-network"].inr))
-      .catch(error => console.error(error));
+    axios
+      .get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+      )
+      .then(res => {
+        setMaticPrice(res.data["matic-network"].inr);
+      })
+      .catch(error => {
+        console.error(error);
+        setShowVerificationError(
+          "Try after sometime to get estimated transaction price in INR"
+        );
+      });
   }, []);
 
   const handleUploadClick = adminPassword => {
@@ -249,17 +256,17 @@ const Approve = ({ setBackgroundColor }) => {
           <TableContainer>
             <Table>
               <tr>
-                {tableHeading.map(item => {
-                  return <th>{item.toUpperCase()}</th>;
+                {tableHeading.map((item, index) => {
+                  return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
-              {selectedItem?.map(row => {
+              {selectedItem?.map((row, index) => {
                 return (
-                  <tr>
+                  <tr key={index}>
                     {tableHeading.map((item, tdIndex) => {
                       if (tdIndex === 0) {
                         return (
-                          <td>
+                          <td key={`${index}-${item}`}>
                             <StatusImage src={CheckIcon} />
                           </td>
                         );
@@ -268,15 +275,26 @@ const Approve = ({ setBackgroundColor }) => {
                         return row[item].includes(".jpg") ||
                           row[item].includes(".png") ||
                           row[item].includes(".jpeg") ? (
-                          <UrlTd onClick={() => window.open(row[item])}>
+                          <UrlTd
+                            onClick={() => window.open(row[item])}
+                            key={`${index}-${item}`}
+                          >
                             <ImagePreview src={row[item]} />
                           </UrlTd>
                         ) : (
-                          <UrlTd onClick={() => window.open(row[item])}>
+                          <UrlTd
+                            onClick={() => window.open(row[item])}
+                            key={`${index}-${item}`}
+                          >
                             {item}
                           </UrlTd>
                         );
-                      } else return <td>{row[item].toString()}</td>;
+                      } else
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row[item].toString()}
+                          </td>
+                        );
                     })}
                   </tr>
                 );

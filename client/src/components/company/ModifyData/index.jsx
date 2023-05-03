@@ -145,17 +145,27 @@ const ModifyData = () => {
   }, []);
 
   useEffect(() => {
-    fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
-    )
-      .then(response => response.json())
-      .then(data => setMaticPrice(data["matic-network"].inr))
-      .catch(error => console.error(error));
+    axios
+      .get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+      )
+      .then(res => {
+        setMaticPrice(res.data["matic-network"].inr);
+      })
+      .catch(error => {console.error(error)
+        setVerificationError("Try after sometime to get estimated transaction price in INR")});
   }, []);
 
   useEffect(() => {
     getList(currentPage);
   }, [currentPage]);
+
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      setCurrentPage(1);
+      getList(currentPage);
+    }
+  };
 
   const getList = page => {
     setLoading(true);
@@ -302,6 +312,7 @@ const ModifyData = () => {
               type="text"
               placeholder={selectedType.search_text}
               onChange={e => setSearchText(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
             <Button
               text={loading ? "...LOADING" : "SEARCH"}

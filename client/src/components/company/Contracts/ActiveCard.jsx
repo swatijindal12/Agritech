@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
 import NFTPopup from "../../common/NFTPopup";
 import VerificationPopup from "../../common/VerificationPopup";
+import TransactionFee from "../../../utils/estimateBlockchainPrice";
+
 import axios from "axios";
 
 const Container = styled.div`
@@ -77,6 +79,28 @@ const ActiveCard = ({ data }) => {
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState("");
   const user = useSelector(store => store.auth.user);
+  const [txPrice, setTxPrice] = useState(false);
+  const [maticPrice, setMaticPrice] = useState(null);
+
+  useEffect(() => {
+    async function getGasPrice() {
+      const gasPrice = await TransactionFee(54073);
+      setTxPrice(gasPrice);
+    }
+    getGasPrice();
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+      )
+      .then(res => {
+        setMaticPrice(res.data["matic-network"].inr);
+      })
+      .catch(error => {console.error(error)
+      setShowVerificationError("Try after sometime to get estimated transaction price in INR")});
+  }, []);
 
   const togglePopup = nftId => {
     if (selectedNFTId === nftId) {
@@ -115,6 +139,11 @@ const ActiveCard = ({ data }) => {
           togglePopup={() => setShowVerificationPopup(false)}
           onSubmit={password => closeContract(password)}
           error={showVerificationError}
+          warning={`Approx cost of close contract will be ${txPrice.toFixed(
+            3
+          )} matic or Rs.${(txPrice * maticPrice).toFixed(
+            2
+          )} Are you sure you want to proceed?`}
         />
       )}
 

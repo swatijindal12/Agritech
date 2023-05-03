@@ -76,7 +76,7 @@ const MarketPlace = () => {
 
   const handleKeyPress = event => {
     if (event.key === "Enter") {
-      getList();
+      getList(currentPage);
     }
   };
 

@@ -19,9 +19,10 @@ const ListItem = styled.div`
 const ApproveList = ({ data, setSelectedItem, setSelectedItemName }) => {
   return (
     <Container>
-      {data?.map(item => {
+      {data?.map((item, index) => {
         return (
           <ListItem
+          key={index}
             onClick={() => {
               setSelectedItem(item?.data);
               setSelectedItemName(item.name);
