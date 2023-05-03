@@ -8,6 +8,7 @@ import ClosedCard from "./ClosedCard";
 import EmptyIcon from "../../../assets/empty-box.svg";
 import Button from "../../common/Button";
 import Pagination from "../../common/Pagination";
+import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
   padding: 1rem;
@@ -79,29 +80,35 @@ const Contracts = () => {
   const [active, setActive] = useState([]);
   const [closed, setClosed] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  let [searchText, setSearchText] = useState("");
   const [totalPage, setTotalPage] = useState(2);
   const [currentPageNum, setCurrentPageNum] = useState(1);
 
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    getList();
-    setSearchText("");
+    getList(currentPageNum);
   }, [currentPage, currentPageNum]);
 
   const handleKeyPress = event => {
     if (event.key === "Enter") {
-      getList();
+      setCurrentPageNum(1);
+      getList(currentPageNum);
     }
   };
 
-  const getList = () => {
+  const location = useLocation();
+  const NFTIdSearch = new URLSearchParams(location.search).get("search");
+
+  const getList = page => {
     setLoading(true);
+    if (NFTIdSearch) {
+      searchText = NFTIdSearch;
+    }
     axios
       .get(
         user?.data.role === "admin"
-          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${currentPageNum}&limit=5`
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${page}&limit=5`
           : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement?search=${searchText}`,
         {
           headers: {
@@ -111,7 +118,6 @@ const Contracts = () => {
       )
       .then(res => {
         setLoading(false);
-        console.log("response is ", res);
         if (user?.data.role === "admin") {
           setActive(res.data.data.active[0].data);
           setClosed(res.data.data.close[0].data);
@@ -146,7 +152,10 @@ const Contracts = () => {
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
             margin="0 1rem"
-            onClick={getList}
+            onClick={() => {
+              setCurrentPageNum(1);
+              getList(1);
+            }}
             disabled={loading}
           />
         </InputContainer>

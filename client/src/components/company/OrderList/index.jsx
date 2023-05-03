@@ -109,13 +109,13 @@ const OrderList = () => {
   const setEmailOrPhone = () => {
     if (!isNaN(searchText)) {
       setSearchPhoneText(searchText);
-    } else if (searchText.length != 10) {
+    } else if (searchText.length !== 10) {
       setSearchEmailText(searchText);
     }
   };
 
   useEffect(() => {
-    setEmailOrPhone();
+        setEmailOrPhone();
   });
 
   const handleKeyPress = event => {
@@ -125,6 +125,7 @@ const OrderList = () => {
   };
 
   const getOrderList = page => {
+    console.log("PAGE IS", page)
     setLoading(true);
     axios
       .get(
@@ -169,6 +170,19 @@ const OrderList = () => {
         setLoading(false);
         // console.log("error in fetching list ", err);
       });
+  };
+
+  const redirectHandler = NFTId => {
+    console.log("INSIDE REDIRECT HANDLER");
+    window.location.href =`http://localhost:3000/contracts-admin?search=${NFTId}`;
+    axios.get(
+      `${process.env.REACT_APP_BASE_URL}/admin/agreement?page=1&limit=8&search=${NFTId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + user?.data.token,
+        },
+      }
+    );
   };
 
   return (
@@ -234,10 +248,23 @@ const OrderList = () => {
                           </td>
                         );
                       }
+
                       if (item === "itemList") {
                         return (
-                          <td key={`${index}-${item}`}>
-                            {row[item].join(", ")}
+                          <td>
+                            {row[item].map((item, index) => (
+                              <a
+                                onClick={() => {
+                                  redirectHandler(item);
+                                }}
+                                // href={"http://localhost:3000/contracts-admin"} //{`${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${item}&page=1&limit=5`}
+                                key={index}
+                              >
+                                <span key={index}>
+                                  {(index ? ", " : "") + item}
+                                </span>
+                              </a>
+                            ))}
                           </td>
                         );
                       }
