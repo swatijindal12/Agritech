@@ -7,6 +7,7 @@ import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
 import Lottie from "lottie-react";
 import LoadingLottie from "../../../assets/lottie/loader.json";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   padding: 1rem;
@@ -171,7 +172,7 @@ const OrderList = () => {
   };
 
   const redirectHandler = NFTId => {
-    window.location.href = `http://localhost:3000/contracts-admin?search=${NFTId}`;
+    window.location.href = `http://agritrustfrontend.s3-website-ap-northeast-1.amazonaws.com/contracts-admin?search=${NFTId}`;
     axios.get(
       `${process.env.REACT_APP_BASE_URL}/admin/agreement?page=1&limit=8&search=${NFTId}`,
       {
@@ -250,7 +251,7 @@ const OrderList = () => {
                         return (
                           <td>
                             {row[item].map((item, index) => (
-                              <a
+                              <Link
                                 onClick={() => {
                                   redirectHandler(item);
                                 }}
@@ -259,7 +260,7 @@ const OrderList = () => {
                                 <span key={index}>
                                   {(index ? ", " : "") + item}
                                 </span>
-                              </a>
+                              </Link>
                             ))}
                           </td>
                         );
