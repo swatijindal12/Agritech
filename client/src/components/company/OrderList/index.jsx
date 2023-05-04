@@ -51,12 +51,6 @@ const Table = styled.table`
   }
 `;
 
-const UrlTd = styled.td`
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-`;
-
 const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
@@ -99,9 +93,6 @@ const OrderList = () => {
   const [searchPhoneText, setSearchPhoneText] = useState("");
   const [searchText, setSearchText] = useState("");
   const user = useSelector(store => store.auth.user);
-  const selectedType = JSON.parse(
-    localStorage.getItem("current-new-upload-data")
-  );
 
   useEffect(() => {
     getOrderList(currentPage);
@@ -140,7 +131,9 @@ const OrderList = () => {
         let data = res.data.data.data.map(item => {
           return {
             ...item,
-            orderId: item._id, // Change the field name here
+            order_Id: item._id, // Change the field name here
+            Contract_NFT_ID: item.itemList, // Change the field name here
+            Payment_status: item.status,
           };
         });
 
@@ -156,7 +149,12 @@ const OrderList = () => {
             tempArr.push(key);
           }
           for (const key in data[0]) {
-            if (key === "customer_id" || key === "_id") {
+            if (
+              key === "customer_id" ||
+              key === "_id" ||
+              key === "itemList" ||
+              key === "status"
+            ) {
               continue;
             }
             tempArr.push(key);
@@ -247,11 +245,12 @@ const OrderList = () => {
                         );
                       }
 
-                      if (item === "itemList") {
+                      if (item === "Contract_NFT_ID") {
                         return (
                           <td>
                             {row[item].map((item, index) => (
                               <Link
+                                style={{ cursor: "pointer" , textDecoration: "none"}}
                                 onClick={() => {
                                   redirectHandler(item);
                                 }}
@@ -266,10 +265,12 @@ const OrderList = () => {
                         );
                       }
                       if (row[item] === true)
-                        return <td key={`${index}-${item}`}>1</td>;
+                        return <td key={`${index}-${item}`}>Done</td>;
                       else
                         return (
-                          <td key={`${index}-${item}`}>{row[item] || 0}</td>
+                          <td key={`${index}-${item}`}>
+                            {row[item] || "Not Done"}
+                          </td>
                         );
                     })}
                   </tr>
