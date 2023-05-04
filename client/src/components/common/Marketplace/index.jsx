@@ -84,7 +84,7 @@ const MarketPlace = () => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=5`,
+        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=6`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
