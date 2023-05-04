@@ -128,6 +128,7 @@ const OrderList = () => {
         }
       )
       .then(res => {
+        console.log("DATA IS", res.data.data.data);
         let data = res.data.data.data.map(item => {
           return {
             ...item,
@@ -250,7 +251,10 @@ const OrderList = () => {
                           <td>
                             {row[item].map((item, index) => (
                               <Link
-                                style={{ cursor: "pointer" , textDecoration: "none"}}
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "none",
+                                }}
                                 onClick={() => {
                                   redirectHandler(item);
                                 }}
@@ -266,6 +270,8 @@ const OrderList = () => {
                       }
                       if (row[item] === true)
                         return <td key={`${index}-${item}`}>Done</td>;
+                      else if (row[item] === 0)
+                        return <td key={`${index}-${item}`}>0</td>;
                       else
                         return (
                           <td key={`${index}-${item}`}>
