@@ -41,6 +41,8 @@ describe('Marketplace', function () {
 			agreementNFT.address,
 		])
 
+		await agreementNFT.changeOwnership(marketplace.address)
+
 		return {
 			farmNFT,
 			agreementNFT,
@@ -78,7 +80,7 @@ describe('Marketplace', function () {
 			} = await loadFixture(deployNFT)
 			await farmNFT.connect(owner).mint(farmer1.address, farm1IPFSURL)
 			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
-			await marketplace.connect(owner).putContractOnSell(
+			await marketplace.putContractOnSell(
 				farmer1.address,
 				1,
 				10,
@@ -136,16 +138,14 @@ describe('Marketplace', function () {
 
 			await farmNFT.connect(owner).approve(marketplace.address, 1)
 			await expect(
-				marketplace
-					.connect(owner)
-					.putContractOnSell(
-						farmer1.address,
-						1,
-						10,
-						1684549243,
-						1673250841,
-						agreementIPFSURI
-					)
+				marketplace.putContractOnSell(
+					farmer1.address,
+					1,
+					10,
+					1684549243,
+					1673250841,
+					agreementIPFSURI
+				)
 			).to.be.revertedWith('end date should not be less')
 		})
 
@@ -164,26 +164,22 @@ describe('Marketplace', function () {
 
 			await farmNFT.connect(owner).approve(marketplace.address, 1)
 			await farmNFT.connect(owner).approve(marketplace.address, 2)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer2.address,
-					2,
-					23,
-					1674181243,
-					1684549243,
-					agreementIPFSURI2
-				)
+			await marketplace.putContractOnSell(
+				farmer1.address,
+				1,
+				10,
+				1674181243,
+				1684549243,
+				agreementIPFSURI
+			)
+			await marketplace.putContractOnSell(
+				farmer2.address,
+				2,
+				23,
+				1674181243,
+				1684549243,
+				agreementIPFSURI2
+			)
 
 			const sellvalue = await marketplace.getSellDetailByTokenId([1, 2])
 
@@ -236,16 +232,14 @@ describe('Marketplace', function () {
 			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
 
 			await farmNFT.connect(owner).approve(marketplace.address, 1)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
+			await marketplace.putContractOnSell(
+				farmer1.address,
+				1,
+				10,
+				1674181243,
+				1684549243,
+				agreementIPFSURI
+			)
 
 			expect(await agreementNFT.tokenURI(1)).to.be.equal(agreementIPFSURI)
 			await marketplace.buyContract(buyer1.address, [1], 'TID1', [
@@ -307,16 +301,14 @@ describe('Marketplace', function () {
 			expect(await farmNFT.balanceOf(owner.address)).to.be.equal('1')
 
 			await farmNFT.connect(owner).approve(marketplace.address, 1)
-			await marketplace
-				.connect(owner)
-				.putContractOnSell(
-					farmer1.address,
-					1,
-					10,
-					1674181243,
-					1684549243,
-					agreementIPFSURI
-				)
+			await marketplace.putContractOnSell(
+				farmer1.address,
+				1,
+				10,
+				1674181243,
+				1684549243,
+				agreementIPFSURI
+			)
 
 			await marketplace.buyContract(buyer1.address, [1], 'TID1', [
 				'updatedTokenURI',

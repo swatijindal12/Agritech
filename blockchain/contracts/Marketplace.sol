@@ -133,7 +133,7 @@ contract Marketplace is OwnableUpgradeable {
         uint256[] memory agreementNftId_,
         string memory transactionId,
         string[] memory updateTokenURI
-    ) external {
+    ) external onlyOwner{
         require(buyerAddr != address(0), "Zero address");
         require(
             agreementNftId_.length == updateTokenURI.length,
@@ -166,10 +166,14 @@ contract Marketplace is OwnableUpgradeable {
     Emits a {ClosedContractNFT} event.
      */
 
-    function closeContractNFT(uint256 agreementNftId_) external {
+    function closeContractNFT(uint256 agreementNftId_) external onlyOwner{
        agreementDetails[agreementNftId_].isClosedContract = true;
 
         emit ClosedContractNFT(agreementNftId_);
+    }
+
+     function transferAgreementOwnership(address owner_) external onlyOwner{
+        IAgreementNFT(agreementNFT).changeOwnership(owner_);
     }
 
     /**
