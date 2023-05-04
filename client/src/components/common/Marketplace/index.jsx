@@ -26,7 +26,7 @@ const CardsContainer = styled.div`
 
 const InputContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 0;
     margin: 0 auto 1rem;
   }
@@ -84,7 +84,7 @@ const MarketPlace = () => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=5`,
+        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=6`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,

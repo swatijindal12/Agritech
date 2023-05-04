@@ -40,7 +40,7 @@ const InputContainer = styled(Flexbox)`
 
 const SearchContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 1rem;
     margin: 0 auto 1rem;
     flex-direction: row;
