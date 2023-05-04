@@ -128,7 +128,7 @@ const OrderList = () => {
         }
       )
       .then(res => {
-        console.log("DATA IS", res.data.data.data);
+        // console.log("DATA IS", res.data.data.data);
         let data = res.data.data.data.map(item => {
           return {
             ...item,
