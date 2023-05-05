@@ -377,7 +377,7 @@ describe('Marketplace', function () {
 				'updatedIPFSURL',
 			])
 
-			await marketplace.connect(buyer1).closeContractNFT(1)
+			await marketplace.closeContractNFT(1)
 		})
 	})
 
