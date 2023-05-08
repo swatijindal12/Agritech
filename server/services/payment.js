@@ -28,8 +28,21 @@ const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 
-const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
-const web3 = new Web3(provider);
+// const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
+// const web3 = new Web3(provider);
+//--------
+const newProvider = () =>
+  new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
+    reconnect: {
+      auto: true,
+      delay: 5000, // ms
+      maxAttempts: 5,
+      onTimeout: false,
+    },
+  });
+
+const web3 = new Web3(newProvider());
+//--------
 
 const marketplaceContract = new web3.eth.Contract(
   marketplaceContractABI,
