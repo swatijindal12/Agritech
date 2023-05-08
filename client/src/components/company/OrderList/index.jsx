@@ -55,6 +55,11 @@ const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem 1rem 5rem 1rem;
+  min-height: auto;
+  @media screen and (max-width: 990px) {
+    padding: 1rem 1rem 1rem 1rem;
+  }
 `;
 
 const TopContainer = styled(Flexbox)`

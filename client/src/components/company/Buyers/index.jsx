@@ -7,7 +7,7 @@ import Title from "../../common/Title";
 import Card from "./Card";
 
 const Container = styled.div`
-  padding: 1rem 1rem 3rem 1rem;
+  padding: 1rem 1rem 5rem 1rem;
   min-height: auto;
 `;
 
