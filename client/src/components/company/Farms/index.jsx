@@ -10,7 +10,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 3rem 1rem;
+  min-height: auto;
 `;
 
 const FilterContainer = styled.div`

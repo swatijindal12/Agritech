@@ -10,7 +10,8 @@ import Button from "../../common/Button";
 import axios from "axios";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 3rem 1rem;
+  min-height: auto;
 `;
 
 const FilterContainer = styled.div`
