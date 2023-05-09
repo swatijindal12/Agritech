@@ -35,6 +35,9 @@ const ArrowImage = styled.img`
 const TableContainer = styled.div`
   max-width: 100vw;
   overflow-x: auto;
+  min-height: auto;
+  padding-bottom: 5rem;
+  /* height: calc(100vh-4rem); */
 `;
 
 const Table = styled.table`

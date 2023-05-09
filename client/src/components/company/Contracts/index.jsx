@@ -73,6 +73,8 @@ const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: auto;
+  padding-bottom: 3rem;
 `;
 
 const Contracts = () => {

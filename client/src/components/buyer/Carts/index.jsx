@@ -24,7 +24,11 @@ const Box = styled.div`
   bottom: 0;
   background: #ffffff;
   border-top: 1px solid #000000;
-  padding: 1rem;
+  padding: 1rem 1rem 5rem 1rem;
+  min-height: auto;
+  @media only screen and (max-width: 990px) {
+    padding: 1rem;
+  }
 `;
 
 const FinalAmount = styled.p`
@@ -121,8 +125,8 @@ const Cart = () => {
         }
       );
       // console.log("order data", order.data)
-      if(order.data.error){
-        setError(order.data.error)
+      if (order.data.error) {
+        setError(order.data.error);
       }
     } catch (err) {
       // console.log("error while buy contract", err);
