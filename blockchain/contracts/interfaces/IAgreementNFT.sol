@@ -11,4 +11,6 @@ interface IAgreementNFT is IERC721 {
     function closeAgreement(address _buyerAddr, uint256 _agreementId) external;
  
     function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external;
+
+    function changeOwnership(address newOwner) external;
 }

@@ -4,8 +4,9 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeable {
+contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private agreementTokenId;
@@ -21,6 +22,7 @@ contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeabl
         __ERC721_init("AgreementNFTToken", "ATK");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
+        __Ownable_init();
     }
     /**
     @dev mint farm NFT & set token URI.
@@ -31,7 +33,7 @@ contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeabl
     function createAgreement(
         address _farmerAddr,
         string memory _tokenURI
-    ) external returns (uint256) {
+    ) external onlyOwner returns (uint256) {
         agreementTokenId.increment();
         uint256 agreementId = agreementTokenId.current();
 
@@ -42,10 +44,13 @@ contract AgreementNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeabl
         return agreementId;
     }
 
-    function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external{
+    function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external onlyOwner{
         _setTokenURI(agreementNFTId, updateTokenURI);
     }
 
+    function changeOwnership(address newOwner) external{
+        transferOwnership(newOwner);
+    }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
         internal
