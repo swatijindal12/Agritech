@@ -11,9 +11,13 @@ export const navigationData = [
     type: "agreement",
     search_text: "Search by crop and name",
     video_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/ContractVideo.mp4",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/ContractVideo.mp4"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/videos/HowToUpload/Contracts/ContractVideo.mp4",
     csv_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/AgreementsTemplate.csv"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/files/DownLoadTemplate/AgreementsTemplate.csv",
   },
   {
     name: "Farmers",
@@ -27,9 +31,13 @@ export const navigationData = [
     type: "farmer",
     search_text: "Search by phone number, name and pin",
     video_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmerVideo.mp4",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmerVideo.mp4"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/videos/HowToUpload/Farmer/FarmerVideo.mp4",
     csv_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/FarmerTemplate.csv"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/files/DownLoadTemplate/FarmerTemplate.csv",
   },
   {
     name: "Farms",
@@ -43,8 +51,12 @@ export const navigationData = [
     type: "farm",
     search_text: "Search by name and pin",
     video_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmVideo.mp4",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/VideoTemplate/FarmVideo.mp4"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/videos/HowToUpload/Farm/FarmVideo.mp4",
     csv_url:
-      "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv",
+      process.env.REACT_APP_ENV == "development"
+        ? "https://samplevideoyoutube.s3.ap-northeast-1.amazonaws.com/ImportTemplate/farmTemplate.csv"
+        : "https://agritrust.s3.ap-south-1.amazonaws.com/files/DownLoadTemplate/farmTemplate.csv",
   },
 ];
