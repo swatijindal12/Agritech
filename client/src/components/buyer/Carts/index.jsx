@@ -13,12 +13,15 @@ import Logo from "../../../assets/logo.png";
 
 const Container = styled.div`
   padding: 1rem 1rem 10rem;
+  @media only screen and (max-width: 990px) {
+    padding: 1rem;
+  }
 `;
 
 const Box = styled.div`
   box-sizing: border-box;
   position: fixed;
-  width: 100vw;
+  width: 100%;
   height: fit-content;
   left: 0px;
   bottom: 0;
@@ -28,6 +31,7 @@ const Box = styled.div`
   min-height: auto;
   @media only screen and (max-width: 990px) {
     padding: 1rem;
+    position: static;
   }
 `;
 
