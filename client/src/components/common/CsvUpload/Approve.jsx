@@ -8,7 +8,7 @@ import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
-import VerificationPopup from "../VerificationPopup";
+// import VerificationPopup from "../VerificationPopup";
 import TransactionFee from "../../../utils/estimateBlockchainPrice";
 
 const Container = styled.div`
@@ -36,7 +36,7 @@ const TableContainer = styled.div`
   max-width: 100vw;
   overflow-x: auto;
   min-height: auto;
-  padding-bottom: 5rem;
+  /* padding-bottom: 5rem; */
   /* height: calc(100vh-4rem); */
 `;
 
@@ -168,7 +168,8 @@ const Approve = ({ setBackgroundColor }) => {
       });
   }, []);
 
-  const handleUploadClick = adminPassword => {
+  const handleUploadClick = () => {
+    alert("CLICK ON ADD");
     axios
       .post(
         `${process.env.REACT_APP_BASE_URL}/${selectedType?.final_upload_url}`,
@@ -176,7 +177,6 @@ const Approve = ({ setBackgroundColor }) => {
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
-            password: adminPassword,
           },
         }
       )
@@ -202,10 +202,28 @@ const Approve = ({ setBackgroundColor }) => {
       {showPopup && (
         <Popup
           toggle={() => setShowPopup(!showPopup)}
-          addToList={() => setShowVerificationPopup(true)}
+          addToList={() => handleUploadClick()}
+          error={showVerificationError}
+          selectedEntity={selectedType.name}
+          warning={
+            selectedType.name === "Farms"
+              ? `Approx cost of creating farm will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
+              : selectedType.name === "Contracts"
+              ? `Approx cost of creating contract will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
+              : false
+          }
+          // addToList={() => setShowVerificationPopup(true)}
         />
       )}
-      {showVerificationPopup && (
+      {/* {showVerificationPopup && (
         <VerificationPopup
           togglePopup={() => setShowVerificationPopup(false)}
           onSubmit={password => handleUploadClick(password)}
@@ -229,7 +247,7 @@ const Approve = ({ setBackgroundColor }) => {
               : false
           }
         />
-      )}
+      )} */}
       <Container>
         <Heading>{`Approve ${selectedType.name}`}</Heading>
         <Flexbox>
