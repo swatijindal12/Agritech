@@ -43,7 +43,7 @@ const Address = styled.p`
 const TypeBox = styled(Flexbox)`
   margin: 1rem 0;
   padding: 1rem;
-  background-color: #dde5b6;
+  background-color:  #dde5b654;
   justify-content: space-between;
 `;
 

@@ -12,7 +12,8 @@ import Modal from "./Modal";
 import Logo from "../../../assets/logo.png";
 
 const Container = styled.div`
-  padding: 1rem 1rem 10rem;
+  padding: 1rem 1rem 12rem;
+  height: auto;
   @media only screen and (max-width: 990px) {
     padding: 1rem;
   }
@@ -20,11 +21,12 @@ const Container = styled.div`
 
 const Box = styled.div`
   box-sizing: border-box;
-  position: fixed;
+  position: relative;
   width: 100%;
   height: fit-content;
   left: 0px;
-  bottom: 0;
+  /* bottom: 0; */
+  top:12rem;
   background: #ffffff;
   border-top: 1px solid #000000;
   padding: 1rem 1rem 5rem 1rem;
@@ -188,7 +190,6 @@ const Cart = () => {
   return (
     <>
       {showSuccessModal && <Modal />}
-
       <Container>
         <Flexbox justify="space-between">
           <Title>My Cart</Title>
