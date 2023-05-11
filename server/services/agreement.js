@@ -222,17 +222,17 @@ exports.createAgreement = async (req) => {
   };
 
   // Checking password header
-  const password = req.headers["password"];
-  const envPassword = process.env.MASTER_PASSWORD; // get the password
+  // const password = req.headers["password"];
+  // const envPassword = process.env.MASTER_PASSWORD; // get the password
   // Getting private From aws params store
   const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
 
-  if (!password || password != envPassword) {
-    response.error = `Invalid password`;
-    response.httpStatus = 401;
-    logger.log("info", "Invalid password");
-    return response;
-  }
+  // if (!password || password != envPassword) {
+  //   response.error = `Invalid password`;
+  //   response.httpStatus = 401;
+  //   logger.log("info", "Invalid password");
+  //   return response;
+  // }
 
   try {
     const data = req.body;
