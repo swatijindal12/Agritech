@@ -8,8 +8,9 @@ import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
-// import VerificationPopup from "../VerificationPopup";
 import TransactionFee from "../../../utils/estimateBlockchainPrice";
+import Lottie from "lottie-react";
+import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   padding: 1rem;
@@ -94,6 +95,32 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
+const Message = styled.p`
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #adc178;
+  margin-bottom: 1rem;
+`;
+
+const LoaderContainer = styled.div`
+  position: fixed;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+`;
+
+const InnerContianer = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+`;
 const Approve = ({ setBackgroundColor }) => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
@@ -101,10 +128,10 @@ const Approve = ({ setBackgroundColor }) => {
   const [selectedItemName, setSelectedItemName] = useState("");
   const [tableHeading, setTableHeading] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState(false);
   const [txPrice, setTxPrice] = useState();
   const [maticPrice, setMaticPrice] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -169,7 +196,10 @@ const Approve = ({ setBackgroundColor }) => {
   }, []);
 
   const handleUploadClick = () => {
-    alert("CLICK ON ADD");
+    if (selectedType.name === "Farms" || selectedType.name === "Contracts") {
+      console.log("showing loader", selectedType.name);
+      setIsLoading(true);
+    }
     axios
       .post(
         `${process.env.REACT_APP_BASE_URL}/${selectedType?.final_upload_url}`,
@@ -181,6 +211,7 @@ const Approve = ({ setBackgroundColor }) => {
         }
       )
       .then(res => {
+        setIsLoading(false);
         if (res.data.error) {
           setShowVerificationError(res.data.error);
         } else {
@@ -191,11 +222,32 @@ const Approve = ({ setBackgroundColor }) => {
           window.location.href = selectedType?.redirection_url;
           console.log("posted Successfully ", res.data);
         }
+      })
+      .catch(err => {
+        setIsLoading(false);
+        console.log();
       });
     setSelectedItem(null);
     setShowList(false);
     setShowPopup(false);
   };
+
+  if (!showVerificationError && isLoading)
+    return (
+      <LoaderContainer>
+        <InnerContianer>
+          <Lottie
+            animationData={LoadingLottie}
+            loop={true}
+            style={{ height: "100px" }}
+          />
+          <Message>
+            Blockchain transactions usually take time (may be more than a
+            minute). So please wait while the transaction succeeds.
+          </Message>
+        </InnerContianer>
+      </LoaderContainer>
+    );
 
   return (
     <>
@@ -220,34 +272,8 @@ const Approve = ({ setBackgroundColor }) => {
                 )} Are you sure you want to proceed?`
               : false
           }
-          // addToList={() => setShowVerificationPopup(true)}
         />
       )}
-      {/* {showVerificationPopup && (
-        <VerificationPopup
-          togglePopup={() => setShowVerificationPopup(false)}
-          onSubmit={password => handleUploadClick(password)}
-          error={showVerificationError}
-          setError={setShowVerificationError}
-          selectedEntity={selectedType.name}
-          selectedModelType="Approve"
-          warning={
-            selectedType.name === "Farms"
-              ? `Approx cost of creating farm will be ${txPrice.toFixed(
-                  3
-                )} matic or Rs.${(txPrice * maticPrice).toFixed(
-                  2
-                )} Are you sure you want to proceed?`
-              : selectedType.name === "Contracts"
-              ? `Approx cost of creating contract will be ${txPrice.toFixed(
-                  3
-                )} matic or Rs.${(txPrice * maticPrice).toFixed(
-                  2
-                )} Are you sure you want to proceed?`
-              : false
-          }
-        />
-      )} */}
       <Container>
         <Heading>{`Approve ${selectedType.name}`}</Heading>
         <Flexbox>

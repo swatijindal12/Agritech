@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import Button from "../Button";
 import Flexbox from "../Flexbox";
-import Lottie from "lottie-react";
-import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   position: fixed;
@@ -50,48 +48,24 @@ const Error = styled.p`
   margin: 1rem 0;
 `;
 
-const Popup = ({ toggle, addToList, error, warning, selectedEntity }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async () => {
-    await addToList();
-    if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
-      setIsSubmitting(true);
-    } else {
-      setIsSubmitting(false);
-    }
+const Popup = ({ toggle, addToList, error, warning }) => {
+  const handleSubmit = () => {
+    addToList();
   };
 
   return (
     <Container>
       <InnerContianer>
-        {!error && isSubmitting ? (
-          <>
-            {console.log("SHOW LOADER", error, isSubmitting)}
-            <Lottie
-              animationData={LoadingLottie}
-              loop={true}
-              style={{ height: "100px" }}
-            />
-            <Message>
-              Blockchain transactions usually take time (may be more than a
-              minute). So please wait while the transaction succeeds.
-            </Message>
-          </>
-        ) : (
-          <>
-            <Message>Approve</Message>
-            <Description>
-              Are you sure you want to Add this data to the existing list?
-            </Description>
-            {error && <Error>Error: {error}</Error>}
-            <WarningMessage>{warning}</WarningMessage>
-            <Flexbox justify="center">
-              <Button text="ADD" onClick={handleSubmit} margin="0.3rem 1rem" />
-              <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
-            </Flexbox>
-          </>
-        )}
+        <Message>Approve</Message>
+        <Description>
+          Are you sure you want to Add this data to the existing list?
+        </Description>
+        {error && <Error>Error: {error}</Error>}
+        <WarningMessage>{warning}</WarningMessage>
+        <Flexbox justify="center">
+          <Button text="ADD" onClick={handleSubmit} margin="0.3rem 1rem" />
+          <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
+        </Flexbox>
       </InnerContianer>
     </Container>
   );
