@@ -63,7 +63,7 @@ const Popup = ({ toggle, addToList, error, warning }) => {
         {error && <Error>Error: {error}</Error>}
         <WarningMessage>{warning}</WarningMessage>
         <Flexbox justify="center">
-          <Button text="ADD" onClick={handleSubmit} margin="0.3rem 1rem" />
+          <Button text="ADD" onClick={handleSubmit} margin="0.3rem 2rem" />
           <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
         </Flexbox>
       </InnerContianer>
