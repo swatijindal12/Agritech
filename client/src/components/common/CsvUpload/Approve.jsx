@@ -14,7 +14,7 @@ import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   padding: 1rem;
-  height: calc(100vh - 4rem);
+  height: auto;
 `;
 
 const Selector = styled.div`
@@ -37,8 +37,6 @@ const TableContainer = styled.div`
   max-width: 100vw;
   overflow-x: auto;
   min-height: auto;
-  /* padding-bottom: 5rem; */
-  /* height: calc(100vh-4rem); */
 `;
 
 const Table = styled.table`
