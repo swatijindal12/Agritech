@@ -26,22 +26,22 @@ contract FarmNFT is ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeable, Ow
 
     /**
     @dev mint farm NFT
-    @param farmerAddr address of farmer
-    @param _tokenURI Ipfs URL of farm
+    @param farmerAddr_ address of farmer
+    @param tokenURI_ Ipfs URL of farm
     * emits a {Mint} event.
      */
     function mint(
-        address farmerAddr,
-        string memory _tokenURI
+        address farmerAddr_,
+        string memory tokenURI_
     ) external onlyOwner {
         _tokenIdCounter.increment();
         uint256 farmId = _tokenIdCounter.current();
 
-        emit Mint(farmerAddr, farmId, _tokenURI);
+        emit Mint(farmerAddr_, farmId, tokenURI_);
 
         _safeMint(msg.sender, farmId);
-        farmList[farmerAddr].push(farmId);
-        _setTokenURI(farmId, _tokenURI);
+        farmList[farmerAddr_].push(farmId);
+        _setTokenURI(farmId, tokenURI_);
     }
 
     function updateFarm(uint256 farmId, string memory _updateTokenUri) external onlyOwner{
