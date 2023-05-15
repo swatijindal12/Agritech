@@ -147,7 +147,7 @@ exports.paymentVerification = async (req) => {
 
   // console.log("filterUser", filterUser);
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getPrivateKeyAWS("agritech-private-key"); //
 
   // General response format
   let response = {

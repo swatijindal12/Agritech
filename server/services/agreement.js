@@ -225,7 +225,7 @@ exports.createAgreement = async (req) => {
   // const password = req.headers["password"];
   // const envPassword = process.env.MASTER_PASSWORD; // get the password
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getPrivateKeyAWS("agritech-private-key"); //
 
   // if (!password || password != envPassword) {
   //   response.error = `Invalid password`;
