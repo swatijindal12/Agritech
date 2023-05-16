@@ -7,7 +7,7 @@ const config = {
 	solidity: '0.8.17',
 	networks: {
 		matic: {
-			url: process.env.MUMBAI_RPC_URL,
+			url: 'https://polygon-mumbai.g.alchemy.com/v2/', 
 			accounts: [],
 			chainId: 80001,
 		},
@@ -23,12 +23,17 @@ const config = {
 async function getPrivateKey() {
 	try {
 		const privateKeyValue = await private_key.getEnvVariable()
-		const MATIC_KEY = `0x${privateKeyValue['agritect-private-key']}`
-		// console.log('MATIC KEY', MATIC_KEY)
+		const MATIC_KEY = `0x${privateKeyValue['POLYGON_PRIVATE_KEY']}`
+		const RPC_URL = `https://polygon-mumbai.g.alchemy.com/v2/${privateKeyValue['ALCHEMY_KEY']}`
+		
 		config.networks.matic.accounts = [MATIC_KEY]
-
+		config.networks.matic.url = [RPC_URL]
 		// config.networks.matic.accounts.push(MATIC_KEY)
-		// console.log('account address', config.networks.matic.accounts)
+		// console.log(
+		// 	'account address',
+		// 	config.networks.matic.accounts,
+		// 	config.networks.matic.url
+		// )
 	} catch (err) {
 		console.log(err)
 	}

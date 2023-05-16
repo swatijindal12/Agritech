@@ -39,8 +39,8 @@ const getParamaterValueFromAwsParameters = async (parameters) => {
 let privateKeyValue
 const getEnvVariable = async () => {
 	privateKeyValue = await getParamaterValueFromAwsParameters([
-		'agritech-private-key',
-		'adminAddress',
+		'POLYGON_PRIVATE_KEY',
+		'ALCHEMY_KEY',
 	])
 	return privateKeyValue
 }
