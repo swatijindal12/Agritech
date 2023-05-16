@@ -17,13 +17,12 @@ const getEnvVariable = require("../config/privateketAWS");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
-// Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName);
+// Calling function to get the Key from aws params storage
+async function getKeyFromAWS(keyName) {
+  const awsKeyValue = await getEnvVariable(keyName);
   // return
-  return privateKeyValue[`${keyName}`];
+  return awsKeyValue[`${keyName}`];
 }
-
 // Importing for Blockchain
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
@@ -44,6 +43,7 @@ const newProvider = () =>
   });
 
 const web3 = new Web3(newProvider());
+
 //--------
 
 const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
@@ -225,7 +225,7 @@ exports.createAgreement = async (req) => {
   // const password = req.headers["password"];
   // const envPassword = process.env.MASTER_PASSWORD; // get the password
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritech-private-key"); //
+  const Private_Key = await getPrivateKeyAWS("POLYGON_PRIVATE_KEY"); //
 
   // if (!password || password != envPassword) {
   //   response.error = `Invalid password`;

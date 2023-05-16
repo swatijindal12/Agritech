@@ -3,10 +3,24 @@ const validator = require("validator");
 const User = require("../models/users");
 const sendToken = require("../utils/jwtToken");
 const emailTransporter = require("../utils/emailTransporter");
+const getEnvVariable = require("../config/privateketAWS");
+
+// Calling function to get the privateKey from aws params storage
+async function getKeyFromAWS(keyName) {
+  const awsKeyValue = await getEnvVariable(keyName);
+  // return
+  return awsKeyValue[`${keyName}`];
+}
 
 // Twilio setup start
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
+// const authToken = process.env.TWILIO_AUTH_TOKEN;
+let authToken = "";
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  authToken = await getKeyFromAWS("TWILIO_AUTH_TOKEN");
+})();
+
 const serviceId = process.env.TWILIO_SERVICE_ID;
 const client = require("twilio")(accountSid, authToken);
 // Twilio setup end
@@ -258,26 +272,26 @@ exports.login = async (req) => {
     }
 
     // Twilio send OTP service
-    client.verify.v2
-      .services(serviceId)
-      .verifications.create({
-        to: "+91" + user.phone,
-        channel: "sms",
-      })
-      .then(
-        (verification) => (response.httpStatus = 200),
-        (response.message = `OTP sent to your number`),
-        (response.httpStatus = 200),
-        logger.log("info", "OTP sent to your number")
-      )
-      .catch((error) => {
-        (response.httpStatus = 400),
-          (response.error = `failed operation ${error}`);
-        errorLog(req, error);
-      });
+    // client.verify.v2
+    //   .services(serviceId)
+    //   .verifications.create({
+    //     to: "+91" + user.phone,
+    //     channel: "sms",
+    //   })
+    //   .then(
+    //     (verification) => (response.httpStatus = 200),
+    //     (response.message = `OTP sent to your number`),
+    //     (response.httpStatus = 200),
+    //     logger.log("info", "OTP sent to your number")
+    //   )
+    //   .catch((error) => {
+    //     (response.httpStatus = 400),
+    //       (response.error = `failed operation ${error}`);
+    //     errorLog(req, error);
+    //   });
     //Uncomment for Dev
-    // response.message = `OTP sent to your number`;
-    // response.httpStatus = 200;
+    response.message = `OTP sent to your number`;
+    response.httpStatus = 200;
   } catch (error) {
     response.httpStatus = 404;
     response.error = `User not found`;

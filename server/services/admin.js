@@ -20,15 +20,28 @@ const { errorLog } = require("../utils/commonError");
 const getEnvVariable = require("../config/privateketAWS");
 
 // Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName);
+async function getKeyFromAWS(keyName) {
+  const awsKeyValue = await getEnvVariable(keyName);
   // return
-  return privateKeyValue[`${keyName}`];
+  return awsKeyValue[`${keyName}`];
 }
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+
+let pinata = "";
+let ALCHEMY_KEY = "";
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+  ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
+})();
+
+// console.log("Pinata Outside", pinata);
+
 const epocTimeConv = require("../utils/epocTimeConv");
 const validator = require("validator");
 
@@ -47,6 +60,19 @@ const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 
 // const web3 = new Web3(provider);
 //--------
+// const newProvider = () =>
+//   new Web3.providers.WebsocketProvider(
+//     `wss://polygon-mumbai.g.alchemy.com/v2${ALCHEMY_KEY}`,
+//     {
+//       reconnect: {
+//         auto: true,
+//         delay: 5000, // ms
+//         maxAttempts: 5,
+//         onTimeout: false,
+//       },
+//     }
+//   );
+
 const newProvider = () =>
   new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
     reconnect: {
@@ -58,6 +84,7 @@ const newProvider = () =>
   });
 
 const web3 = new Web3(newProvider());
+
 //--------
 
 const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
@@ -433,7 +460,7 @@ exports.updateAgreement = async (req) => {
 
   const { id } = req.params;
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -1754,7 +1781,7 @@ exports.createFarm = async (req) => {
   // const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritech-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // if (!password || password != envPassword) {
   //   response.error = `Invalid password`;
@@ -1764,7 +1791,7 @@ exports.createFarm = async (req) => {
 
   const data = req.body;
   const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
-  console.log("farmer", farmer);
+
   // status setting stage table
   data.map(async (farm) => {
     await StageFarm.updateOne(
@@ -1994,7 +2021,6 @@ exports.updateFarm = async (req) => {
   const userLogged = req.user;
   const userId = userLogged._id;
 
-  console.log("req", req.body);
   // General response format
   let response = {
     error: null,
@@ -2005,7 +2031,7 @@ exports.updateFarm = async (req) => {
 
   const { id } = req.params;
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -2670,7 +2696,7 @@ exports.closeAgreement = async (req) => {
   const { id } = req.params; // Agreement Id agreement to Update
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // General response format
   let response = {
@@ -2899,7 +2925,6 @@ exports.getAudit = async (req) => {
       response.httpStatus = 200;
       logger.log("info", "Data fetch is successful");
     } else if (req.params.table == "agreement" && page && limit) {
-      console.log("agreement query ...");
       // let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
       // let totalDocuments = await Audit.countDocuments(auditQuery);
 
