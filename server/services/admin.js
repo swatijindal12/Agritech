@@ -17,27 +17,26 @@ const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
-const getEnvVariable = require("../config/privateketAWS");
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 
 // Calling function to get the privateKey from aws params storage
-async function getKeyFromAWS(keyName) {
-  const awsKeyValue = await getEnvVariable(keyName);
-  // return
-  return awsKeyValue[`${keyName}`];
-}
+// async function getKeyFromAWS(keyName) {
+//   const awsKeyValue = await getEnvVariable(keyName);
+//   // return
+//   return awsKeyValue[`${keyName}`];
+// }
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 // const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 
 let pinata = "";
-let ALCHEMY_KEY = "";
+
 // Initialize the pinata object using an asynchronous IIFE
 (async () => {
   pinata = new pinataSDK({
     pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
   });
-  ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
 })();
 
 // console.log("Pinata Outside", pinata);
@@ -60,39 +59,35 @@ const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 
 // const web3 = new Web3(provider);
 //--------
-// const newProvider = () =>
-//   new Web3.providers.WebsocketProvider(
-//     `wss://polygon-mumbai.g.alchemy.com/v2${ALCHEMY_KEY}`,
-//     {
-//       reconnect: {
-//         auto: true,
-//         delay: 5000, // ms
-//         maxAttempts: 5,
-//         onTimeout: false,
-//       },
-//     }
-//   );
+let web3;
+let marketplaceContract;
+let farmNFTContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
 
-const newProvider = () =>
-  new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
-    reconnect: {
-      auto: true,
-      delay: 5000, // ms
-      maxAttempts: 5,
-      onTimeout: false,
-    },
-  });
+  const provider = new Web3.providers.WebsocketProvider(
+    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
 
-const web3 = new Web3(newProvider());
+  farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
 
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
 //--------
-
-const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
-
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
 
 // Validate the agreement
 exports.validate = async (req) => {

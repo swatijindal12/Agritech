@@ -13,6 +13,7 @@ require("dotenv").config({ path: "./config/config.env" });
 
 // Importing database.
 const connectDatabase = require("./config/database");
+// const awsParamsFetcher = require("./config/awsParamsFetcher");
 
 // Connecting to databse.
 connectDatabase();

@@ -13,16 +13,10 @@ const csvToJson = require("../utils/csvToJson");
 const pinataSDK = require("@pinata/sdk");
 const stageAgreement = require("../models/stageAgreement");
 const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
-const getEnvVariable = require("../config/privateketAWS");
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
-// Calling function to get the Key from aws params storage
-async function getKeyFromAWS(keyName) {
-  const awsKeyValue = await getEnvVariable(keyName);
-  // return
-  return awsKeyValue[`${keyName}`];
-}
 // Importing for Blockchain
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
@@ -31,26 +25,38 @@ const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 
 // const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 // const web3 = new Web3(provider);
-//--------
-const newProvider = () =>
-  new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
-    reconnect: {
-      auto: true,
-      delay: 5000, // ms
-      maxAttempts: 5,
-      onTimeout: false,
-    },
-  });
-
-const web3 = new Web3(newProvider());
 
 //--------
+let web3;
+let marketplaceContract;
+let farmNFTContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
+  console.log("ALCHEMY_KEY 123", ALCHEMY_KEY);
+  const provider = new Web3.providers.WebsocketProvider(
+    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
 
-const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
+  farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
+
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
+
+//--------
 
 exports.getFarmById = async (req) => {
   const { id } = req.params;
@@ -225,7 +231,7 @@ exports.createAgreement = async (req) => {
   // const password = req.headers["password"];
   // const envPassword = process.env.MASTER_PASSWORD; // get the password
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("POLYGON_PRIVATE_KEY"); //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
 
   // if (!password || password != envPassword) {
   //   response.error = `Invalid password`;
@@ -244,7 +250,6 @@ exports.createAgreement = async (req) => {
     const farm = await Farm.findOne({ farm_id: data.farm_id });
     // const agreement = await Agreement.findOne({ _id: data._id })
 
-    // console.log(agreement)
     // // Read the req.body and add ipfs_url to json data
     const updatedData = await Promise.all(
       data.map(async (contract) => {

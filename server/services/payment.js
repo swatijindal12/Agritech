@@ -6,17 +6,17 @@ const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 const Farm = require("../models/farms");
-const getEnvVariable = require("../config/privateketAWS");
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const emailTransporter = require("../utils/emailTransporter");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
 // Calling function to get the privateKey from aws params storage
-async function getKeyFromAWS(keyName) {
-  const awsKeyValue = await getEnvVariable(keyName);
-  // return
-  return awsKeyValue[`${keyName}`];
-}
+// async function getKeyFromAWS(keyName) {
+//   const awsKeyValue = await getEnvVariable(keyName);
+//   // return
+//   return awsKeyValue[`${keyName}`];
+// }
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -24,7 +24,9 @@ const pinataSDK = require("@pinata/sdk");
 
 let pinata = "";
 let instance = "";
+
 // Initialize the pinata and instance object using an asynchronous IIFE
+// Creating RazorPay Instance
 (async () => {
   pinata = new pinataSDK({
     pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
@@ -33,7 +35,33 @@ let instance = "";
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: await getKeyFromAWS("RAZORPAY_SECRET_KEY"),
   });
+  await getKeyFromAWS("IPFS_BEARER_TOKEN");
 })();
+
+let web3;
+let marketplaceContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
+  console.log("ALCHEMY_KEY 123", ALCHEMY_KEY);
+  const provider = new Web3.providers.WebsocketProvider(
+    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
 
 //Import Blockchain
 const marketplaceContractABI = require("../web3/marketPlaceABI");
@@ -45,44 +73,10 @@ const adminAddr = process.env.ADMIN_ADDR;
 // const web3 = new Web3(provider);
 //--------
 
-// let newProvider;
-// (newProvider = async () => {
-//   new Web3.providers.WebsocketProvider(
-//     `wss://polygon-mumbai.g.alchemy.com/v2/KXPpKpnY-YEn_ySaccp_dfEhuBe6uTiO`,
-//     {
-//       reconnect: {
-//         auto: true,
-//         delay: 5000, // ms
-//         maxAttempts: 5,
-//         onTimeout: false,
-//       },
-//     }
-//   );
-// })();
+// Your code that uses web3 goes here outside the async function
+// You can access the web3 object here
 
-const newProvider = () =>
-  new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
-    reconnect: {
-      auto: true,
-      delay: 5000, // ms
-      maxAttempts: 5,
-      onTimeout: false,
-    },
-  });
-
-const web3 = new Web3(newProvider());
-
-console.log("web3 :- ", web3);
 //--------
-
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
-
-// Creating RazorPay Instance
-
-console.log("Instance", instance);
 
 exports.getKeyId = async (req) => {
   console.log("getKeyId services ");
