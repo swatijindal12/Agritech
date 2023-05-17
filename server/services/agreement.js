@@ -1,6 +1,5 @@
 const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
-const User = require("../models/users");
 
 const StageAgreement = require("../models/stageAgreement");
 const epocTimeConv = require("../utils/epocTimeConv");
@@ -419,7 +418,6 @@ exports.createAgreement = async (req) => {
   return response;
 };
 
-// Marketplace both customer & admin
 // exports.getAgreements = async (req) => {
 //   const searchString = req.query.search;
 //   // General response format
@@ -480,6 +478,8 @@ exports.createAgreement = async (req) => {
 
 //   return response;
 // };
+
+// Marketplace both customer & admin
 
 exports.getAgreements = async (req) => {
   const searchString = req.query.search;
@@ -560,71 +560,3 @@ exports.getAgreements = async (req) => {
 
   return response;
 };
-
-//Without Pagination
-// exports.getAgreements = async (req) => {
-//   const searchString = req.query.search;
-//   // General response format
-//   let response = {
-//     error: null,
-//     message: null,
-//     httpStatus: null,
-//     data: null,
-//   };
-
-//   try {
-//     //
-//     let match = { sold_status: false };
-
-//     let searchQuery = {};
-//     if (searchString) {
-//       searchQuery["$or"] = [
-//         { farmer_name: { $regex: new RegExp(searchString, "i") } },
-//         { crop: { $regex: new RegExp(searchString, "i") } },
-//       ];
-//     }
-
-//     match = { $and: [match, searchQuery] };
-
-//     const result = await Agreement.aggregate([
-//       { $match: match },
-//       {
-//         $group: {
-//           _id: {
-//             crop: "$crop",
-//             start_date: "$start_date",
-//             end_date: "$end_date",
-//             price: "$price",
-//             area: "$area",
-//             farm_id: "$farm_id",
-//           },
-//           address: { $first: "$address" },
-//           farmer_name: { $first: "$farmer_name" },
-//           agreements: { $push: "$_id" },
-//           ipfs_url: { $push: "$ipfs_url" },
-//           tx_hash: { $push: "$tx_hash" },
-//           agreement_nft_id: { $push: "$agreement_nft_id" },
-//           unit_available: { $sum: 1 },
-//         },
-//       },
-//       {
-//         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
-//       },
-//       {
-//         $sort: {
-//           "_id.start_date": 1,
-//           "_id.crop": 1,
-//         },
-//       },
-//     ]);
-
-//     response.data = result;
-//     response.httpStatus = 200;
-//     logger.log("info", "Data fetch is successful");
-//   } catch (err) {
-//     response.error = "failed operation";
-//     errorLog(req, err);
-//   }
-
-//   return response;
-// };

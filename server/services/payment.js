@@ -11,13 +11,6 @@ const emailTransporter = require("../utils/emailTransporter");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
-// Calling function to get the privateKey from aws params storage
-// async function getKeyFromAWS(keyName) {
-//   const awsKeyValue = await getEnvVariable(keyName);
-//   // return
-//   return awsKeyValue[`${keyName}`];
-// }
-
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 // const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
@@ -25,24 +18,23 @@ const pinataSDK = require("@pinata/sdk");
 let pinata = "";
 let instance = "";
 
-// Initialize the pinata and instance object using an asynchronous IIFE
+// Initialize the pinata and instance object RazorPay using an asynchronous IIFE
 // Creating RazorPay Instance
 (async () => {
   pinata = new pinataSDK({
     pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
   });
   instance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
+    key_id: await getKeyFromAWS("RAZORPAY_KEY_ID"),
     key_secret: await getKeyFromAWS("RAZORPAY_SECRET_KEY"),
   });
-  await getKeyFromAWS("IPFS_BEARER_TOKEN");
 })();
 
+// web3 object here
 let web3;
 let marketplaceContract;
 const newProvider = async () => {
   const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
-  console.log("ALCHEMY_KEY 123", ALCHEMY_KEY);
   const provider = new Web3.providers.WebsocketProvider(
     `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
     {
@@ -71,15 +63,8 @@ const adminAddr = process.env.ADMIN_ADDR;
 
 // const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
 // const web3 = new Web3(provider);
-//--------
-
-// Your code that uses web3 goes here outside the async function
-// You can access the web3 object here
-
-//--------
 
 exports.getKeyId = async (req) => {
-  console.log("getKeyId services ");
   // General response format
   let response = {
     error: null,

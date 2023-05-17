@@ -5,13 +5,6 @@ const sendToken = require("../utils/jwtToken");
 const emailTransporter = require("../utils/emailTransporter");
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 
-// Calling function to get the privateKey from aws params storage
-// async function getKeyFromAWS(keyName) {
-//   const awsKeyValue = await getEnvVariable(keyName);
-//   // return
-//   return awsKeyValue[`${keyName}`];
-// }
-
 // Twilio setup start
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 // const authToken = process.env.TWILIO_AUTH_TOKEN;

@@ -14,17 +14,9 @@ const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 const mongoose = require("mongoose");
-const Razorpay = require("razorpay");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
-
-// Calling function to get the privateKey from aws params storage
-// async function getKeyFromAWS(keyName) {
-//   const awsKeyValue = await getEnvVariable(keyName);
-//   // return
-//   return awsKeyValue[`${keyName}`];
-// }
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -39,8 +31,6 @@ let pinata = "";
   });
 })();
 
-// console.log("Pinata Outside", pinata);
-
 const epocTimeConv = require("../utils/epocTimeConv");
 const validator = require("validator");
 
@@ -49,15 +39,13 @@ const Web3 = require("web3");
 const farmNFTContractABI = require("../web3/farmContractABI");
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 
-// const mintFarm = require("../web3/mintFarm");
-
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 // const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
-
 // const web3 = new Web3(provider);
+
 //--------
 let web3;
 let marketplaceContract;
@@ -85,7 +73,6 @@ const newProvider = async () => {
     marketplaceAddr
   );
 };
-
 newProvider();
 //--------
 
