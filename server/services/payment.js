@@ -25,7 +25,7 @@ let instance = "";
     pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
   });
   instance = new Razorpay({
-    key_id: await getKeyFromAWS("RAZORPAY_KEY_ID"),
+    key_id: `${await getKeyFromAWS("RAZORPAY_KEY_ID")}`,
     key_secret: await getKeyFromAWS("RAZORPAY_SECRET_KEY"),
   });
 })();
