@@ -29,6 +29,7 @@ async function main() {
 	// await farmNFT.initialize()
 	// await agreementNFT.initialize()
 	// await marketplace.initialize(farmNFT.address, agreementNFT.address)
+	await agreementNFT.changeOwnership(marketplace.address)
 }
 
 main().catch((error) => {
