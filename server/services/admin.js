@@ -772,8 +772,8 @@ exports.validateFarmers = async (req) => {
         if (
           !item.phone ||
           !/^\d+$/.test(item.phone) ||
-          item.phone?.length < 10 ||
-          item.phone?.length > 10
+          item.phone.length < 10 ||
+          item.phone.length > 10
         ) {
           phoneError = true;
           errors.phone =
