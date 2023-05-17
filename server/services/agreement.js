@@ -31,7 +31,6 @@ let marketplaceContract;
 let farmNFTContract;
 const newProvider = async () => {
   const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
-  console.log("ALCHEMY_KEY 123", ALCHEMY_KEY);
   const provider = new Web3.providers.WebsocketProvider(
     `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
     {

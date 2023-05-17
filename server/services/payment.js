@@ -80,7 +80,6 @@ exports.getKeyId = async (req) => {
 
 // create service
 exports.createOrder = async (req) => {
-  console.log("Inside CreateOrder");
   const agreements = req.body.agreements;
   const price = req.body.price;
   const length = agreements.length;
@@ -100,7 +99,6 @@ exports.createOrder = async (req) => {
     };
 
     const order = await instance.orders.create(options);
-    console.log("Order :- ", order);
 
     // Inserting orderDetail in Order table
     const orderCreated = await Order.create({
