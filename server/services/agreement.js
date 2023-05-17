@@ -32,7 +32,7 @@ let farmNFTContract;
 const newProvider = async () => {
   const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
   const provider = new Web3.providers.WebsocketProvider(
-    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
     {
       reconnect: {
         auto: true,
@@ -296,7 +296,7 @@ exports.createAgreement = async (req) => {
 
     // Blockchain Integration
     const mintPromises = [];
-    const Tran = "https://mumbai.polygonscan.com/tx";
+    const Tran = process.env.POLYGON_TRAN_URL;
     for (let index = 0; index < updatedData.length; index++) {
       const contract = updatedData[index];
       contract.agreement_nft_id = "";

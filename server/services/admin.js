@@ -54,7 +54,7 @@ const newProvider = async () => {
   const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
 
   const provider = new Web3.providers.WebsocketProvider(
-    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
     {
       reconnect: {
         auto: true,
@@ -550,7 +550,7 @@ exports.updateAgreement = async (req) => {
         ? req.body.end_date
         : agreement.end_date;
 
-      const Tran = "https://mumbai.polygonscan.com/tx";
+      const Tran = process.env.POLYGON_TRAN_URL;
       const agreement_nftId = agreement.agreement_nft_id;
 
       const gasLimit = await marketplaceContract.methods
@@ -1824,7 +1824,8 @@ exports.createFarm = async (req) => {
 
   // BlockChain Start
   const mintPromises = [];
-  const Tran = "https://mumbai.polygonscan.com/tx";
+  const Tran = process.env.POLYGON_TRAN_URL;
+
   for (let index = 0; index < updatedData.length; index++) {
     const farm = updatedData[index];
     farm.farm_nft_id = "";
@@ -2268,7 +2269,7 @@ exports.updateFarm = async (req) => {
 
       await farm.save();
 
-      const Tran = "https://mumbai.polygonscan.com/tx";
+      const Tran = process.env.POLYGON_TRAN_URL;
 
       //BLOCKCHAIN TRANSACTION-------
       const gasLimit = await farmNFTContract.methods
@@ -2731,7 +2732,7 @@ exports.closeAgreement = async (req) => {
 
     // IPFS END------------------------------------
 
-    const Tran = "https://mumbai.polygonscan.com/tx";
+    const Tran = process.env.POLYGON_TRAN_URL;
 
     //Blockchain Transaction ---------------------
     const gasLimit = await marketplaceContract.methods

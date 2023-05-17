@@ -139,10 +139,10 @@ const marketplaceContractABI = [
   },
   {
     inputs: [
-      { internalType: "address", name: "buyerAddr", type: "address" },
+      { internalType: "address", name: "buyerAddr_", type: "address" },
       { internalType: "uint256[]", name: "agreementNftId_", type: "uint256[]" },
-      { internalType: "string", name: "transactionId", type: "string" },
-      { internalType: "string[]", name: "updateTokenURI", type: "string[]" },
+      { internalType: "string", name: "transactionId_", type: "string" },
+      { internalType: "string[]", name: "updateTokenURI_", type: "string[]" },
     ],
     name: "buyContract",
     outputs: [],
@@ -167,7 +167,7 @@ const marketplaceContractABI = [
   },
   {
     inputs: [
-      { internalType: "uint256[]", name: "agreementNFTId", type: "uint256[]" },
+      { internalType: "uint256[]", name: "agreementNFTId_", type: "uint256[]" },
     ],
     name: "getSellDetailByTokenId",
     outputs: [
@@ -230,6 +230,13 @@ const marketplaceContractABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "owner_", type: "address" }],
+    name: "transferAgreementOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
     outputs: [],
@@ -238,11 +245,11 @@ const marketplaceContractABI = [
   },
   {
     inputs: [
-      { internalType: "uint256", name: "agreementNftId", type: "uint256" },
+      { internalType: "uint256", name: "agreementNftId_", type: "uint256" },
       { internalType: "uint256", name: "price_", type: "uint256" },
       { internalType: "uint256", name: "startDate_", type: "uint256" },
       { internalType: "uint256", name: "endDate_", type: "uint256" },
-      { internalType: "string", name: "updateTokenURI", type: "string" },
+      { internalType: "string", name: "updateTokenURI_", type: "string" },
     ],
     name: "updateAgreementData",
     outputs: [],

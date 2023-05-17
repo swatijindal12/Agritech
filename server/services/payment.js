@@ -36,7 +36,7 @@ let marketplaceContract;
 const newProvider = async () => {
   const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
   const provider = new Web3.providers.WebsocketProvider(
-    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
     {
       reconnect: {
         auto: true,
@@ -242,7 +242,7 @@ exports.paymentVerification = async (req) => {
 
             // Blockchain Transaction start ...
             const buyerAddr = process.env.BUYER_ADDR;
-            const Tran = "https://mumbai.polygonscan.com/tx";
+            const Tran = process.env.POLYGON_TRAN_URL;
 
             // const privateKeyBuyer = filterUser[0].private_key;
             const gasLimit = await marketplaceContract.methods
@@ -255,7 +255,6 @@ exports.paymentVerification = async (req) => {
               Number(gasLimit) + Number(gasLimit) * Number(0.2)
             );
 
-            console.log("bufferedGasLimit  123 ", bufferedGasLimit);
             const sell = await marketplaceContract.methods
               .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
                 ipfs_hash,
@@ -276,7 +275,6 @@ exports.paymentVerification = async (req) => {
               tx,
               Private_Key
             );
-            console.log("signedTx : ", signedTx);
 
             const transaction = await web3.eth.sendSignedTransaction(
               signedTx.rawTransaction
