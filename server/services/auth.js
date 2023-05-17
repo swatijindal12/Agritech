@@ -8,14 +8,16 @@ const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 // Twilio setup start
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 // const authToken = process.env.TWILIO_AUTH_TOKEN;
+let client;
 let authToken = "";
 // Initialize the pinata object using an asynchronous IIFE
 (async () => {
   authToken = await getKeyFromAWS("TWILIO_AUTH_TOKEN");
+  client = require("twilio")(accountSid, authToken);
 })();
 
 const serviceId = process.env.TWILIO_SERVICE_ID;
-const client = require("twilio")(accountSid, authToken);
+//client = require("twilio")(accountSid, authToken);
 // Twilio setup end
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
