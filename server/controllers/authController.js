@@ -4,13 +4,6 @@ const sendToken = require("../utils/jwtToken");
 const emailTransporter = require("../utils/emailTransporter");
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 
-// Calling function to get the privateKey from aws params storage
-// async function getKeyFromAWS(keyName) {
-//   const awsKeyValue = await getEnvVariable(keyName);
-//   // return
-//   return awsKeyValue[`${keyName}`];
-// }
-
 let authToken = "";
 // Initialize the pinata object using an asynchronous IIFE
 (async () => {
@@ -174,35 +167,35 @@ exports.verifyUser = async (req, res, next) => {
   }
 
   // verifying otp with twilio service .
-  // client.verify
-  //   .services(serviceId)
-  //   .verificationChecks.create({ to: "+91" + phone, code: otp })
-  //   .then((verification_check) => {
-  //     if (verification_check.status === "approved") {
-  //       // Create JSON Web token
-  //       logger.log("info", "verified in twilio");
-  //       sendToken(user, res);
-  //     } else {
-  //       logger.log("info", "User not found");
-  //       return res.status(400).json({
-  //         error: "failed operation",
-  //         message: null,
-  //         httpStatus: 400,
-  //         data: null,
-  //       });
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     errorLog(req, error);
-  //     return res.status(500).json({
-  //       error: `failed operation ${error}`,
-  //       message: null,
-  //       httpStatus: 500,
-  //       data: null,
-  //     });
-  //   });
+  client.verify
+    .services(serviceId)
+    .verificationChecks.create({ to: "+91" + phone, code: otp })
+    .then((verification_check) => {
+      if (verification_check.status === "approved") {
+        // Create JSON Web token
+        logger.log("info", "verified in twilio");
+        sendToken(user, res);
+      } else {
+        logger.log("info", "User not found");
+        return res.status(400).json({
+          error: "failed operation",
+          message: null,
+          httpStatus: 400,
+          data: null,
+        });
+      }
+    })
+    .catch((error) => {
+      errorLog(req, error);
+      return res.status(500).json({
+        error: `failed operation ${error}`,
+        message: null,
+        httpStatus: 500,
+        data: null,
+      });
+    });
 
-  sendToken(user, res); // uncomment for withoutotp
+  // sendToken(user, res); // uncomment for withoutotp
   next();
 };
 

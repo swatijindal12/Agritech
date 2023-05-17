@@ -265,26 +265,26 @@ exports.login = async (req) => {
     }
 
     // Twilio send OTP service
-    // client.verify.v2
-    //   .services(serviceId)
-    //   .verifications.create({
-    //     to: "+91" + user.phone,
-    //     channel: "sms",
-    //   })
-    //   .then(
-    //     (verification) => (response.httpStatus = 200),
-    //     (response.message = `OTP sent to your number`),
-    //     (response.httpStatus = 200),
-    //     logger.log("info", "OTP sent to your number")
-    //   )
-    //   .catch((error) => {
-    //     (response.httpStatus = 400),
-    //       (response.error = `failed operation ${error}`);
-    //     errorLog(req, error);
-    //   });
+    client.verify.v2
+      .services(serviceId)
+      .verifications.create({
+        to: "+91" + user.phone,
+        channel: "sms",
+      })
+      .then(
+        (verification) => (response.httpStatus = 200),
+        (response.message = `OTP sent to your number`),
+        (response.httpStatus = 200),
+        logger.log("info", "OTP sent to your number")
+      )
+      .catch((error) => {
+        (response.httpStatus = 400),
+          (response.error = `failed operation ${error}`);
+        errorLog(req, error);
+      });
     //Uncomment for Dev
-    response.message = `OTP sent to your number`;
-    response.httpStatus = 200;
+    // response.message = `OTP sent to your number`;
+    // response.httpStatus = 200;
   } catch (error) {
     response.httpStatus = 404;
     response.error = `User not found`;
