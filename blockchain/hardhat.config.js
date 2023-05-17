@@ -6,14 +6,19 @@ const private_key = require('./awsKey')
 const config = {
 	solidity: '0.8.17',
 	networks: {
-		matic: {
-			url: 'https://polygon-mumbai.g.alchemy.com/v2/', 
+		mumbai_matic: {
+			url: 'https://polygon-mumbai.g.alchemy.com/v2/',
 			accounts: [],
 			chainId: 80001,
 		},
+		polygon_mainnet: {
+			url: 'https://polygon-mainnet.g.alchemy.com/v2/',
+			accounts: [],
+			chainId: 137,
+		},
 	},
 	etherscan: {
-		apiKey: process.env.MATIC_API_KEY, //for polygonscan (mumbai)
+		apiKey: process.env.MATIC_API_KEY,
 	},
 	gasReporter: {
 		enabled: true,
@@ -25,7 +30,7 @@ async function getPrivateKey() {
 		const privateKeyValue = await private_key.getEnvVariable()
 		const MATIC_KEY = `0x${privateKeyValue['POLYGON_PRIVATE_KEY']}`
 		const RPC_URL = `https://polygon-mumbai.g.alchemy.com/v2/${privateKeyValue['ALCHEMY_KEY']}`
-		
+
 		config.networks.matic.accounts = [MATIC_KEY]
 		config.networks.matic.url = [RPC_URL]
 		// config.networks.matic.accounts.push(MATIC_KEY)
