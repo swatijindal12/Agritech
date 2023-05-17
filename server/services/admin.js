@@ -14,21 +14,23 @@ const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 const mongoose = require("mongoose");
-const Razorpay = require("razorpay");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
-const getEnvVariable = require("../config/privateketAWS");
-
-// Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName);
-  // return
-  return privateKeyValue[`${keyName}`];
-}
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+
+let pinata = "";
+
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+})();
+
 const epocTimeConv = require("../utils/epocTimeConv");
 const validator = require("validator");
 
@@ -37,35 +39,43 @@ const Web3 = require("web3");
 const farmNFTContractABI = require("../web3/farmContractABI");
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 
-// const mintFarm = require("../web3/mintFarm");
-
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 // const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
-
 // const web3 = new Web3(provider);
+
 //--------
-const newProvider = () =>
-  new Web3.providers.WebsocketProvider(process.env.RPC_URL, {
-    reconnect: {
-      auto: true,
-      delay: 5000, // ms
-      maxAttempts: 5,
-      onTimeout: false,
-    },
-  });
+let web3;
+let marketplaceContract;
+let farmNFTContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
 
-const web3 = new Web3(newProvider());
+  const provider = new Web3.providers.WebsocketProvider(
+    `wss://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
+
+  farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
+
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
 //--------
-
-const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
-
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
 
 // Validate the agreement
 exports.validate = async (req) => {
@@ -433,7 +443,7 @@ exports.updateAgreement = async (req) => {
 
   const { id } = req.params;
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -1754,7 +1764,7 @@ exports.createFarm = async (req) => {
   // const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritech-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // if (!password || password != envPassword) {
   //   response.error = `Invalid password`;
@@ -1764,7 +1774,7 @@ exports.createFarm = async (req) => {
 
   const data = req.body;
   const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
-  console.log("farmer", farmer);
+
   // status setting stage table
   data.map(async (farm) => {
     await StageFarm.updateOne(
@@ -1994,7 +2004,6 @@ exports.updateFarm = async (req) => {
   const userLogged = req.user;
   const userId = userLogged._id;
 
-  console.log("req", req.body);
   // General response format
   let response = {
     error: null,
@@ -2005,7 +2014,7 @@ exports.updateFarm = async (req) => {
 
   const { id } = req.params;
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // Checking Header for password
   const password = req.headers["password"];
@@ -2670,7 +2679,7 @@ exports.closeAgreement = async (req) => {
   const { id } = req.params; // Agreement Id agreement to Update
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key");
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // General response format
   let response = {
@@ -2899,7 +2908,6 @@ exports.getAudit = async (req) => {
       response.httpStatus = 200;
       logger.log("info", "Data fetch is successful");
     } else if (req.params.table == "agreement" && page && limit) {
-      console.log("agreement query ...");
       // let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
       // let totalDocuments = await Audit.countDocuments(auditQuery);
 

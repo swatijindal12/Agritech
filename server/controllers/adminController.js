@@ -12,7 +12,7 @@ exports.validateData = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -32,7 +32,7 @@ exports.stagedAgreements = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -52,7 +52,7 @@ exports.getStagedAgreements = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -70,7 +70,7 @@ exports.deleteAgreements = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -88,7 +88,7 @@ exports.updateAgreement = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -107,7 +107,7 @@ exports.listAgreements = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -127,7 +127,7 @@ exports.validateFarmers = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -147,7 +147,7 @@ exports.stagedFarmers = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -167,7 +167,7 @@ exports.getStagedFarmers = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -187,7 +187,7 @@ exports.createFarmer = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
@@ -207,7 +207,7 @@ exports.updateFarmer = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation  ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,
