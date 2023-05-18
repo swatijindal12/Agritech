@@ -8,6 +8,7 @@ import Flexbox from "../Flexbox";
 import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
+import VerificationPopup from "../VerificationPopup";
 import TransactionFee from "../../../utils/estimateBlockchainPrice";
 import Lottie from "lottie-react";
 import LoadingLottie from "../../../assets/lottie/loader.json";
@@ -126,6 +127,7 @@ const Approve = ({ setBackgroundColor }) => {
   const [selectedItemName, setSelectedItemName] = useState("");
   const [tableHeading, setTableHeading] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState(false);
   const [txPrice, setTxPrice] = useState();
   const [maticPrice, setMaticPrice] = useState(null);
@@ -193,11 +195,7 @@ const Approve = ({ setBackgroundColor }) => {
       });
   }, []);
 
-  const handleUploadClick = () => {
-    if (selectedType.name === "Farms" || selectedType.name === "Contracts") {
-      console.log("showing loader", selectedType.name);
-      setIsLoading(true);
-    }
+  const handleUploadClick = adminPassword => {
     axios
       .post(
         `${process.env.REACT_APP_BASE_URL}/${selectedType?.final_upload_url}`,
@@ -205,11 +203,11 @@ const Approve = ({ setBackgroundColor }) => {
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
+            password: adminPassword,
           },
         }
       )
       .then(res => {
-        setIsLoading(false);
         if (res.data.error) {
           setShowVerificationError(res.data.error);
         } else {
@@ -220,41 +218,28 @@ const Approve = ({ setBackgroundColor }) => {
           window.location.href = selectedType?.redirection_url;
           console.log("posted Successfully ", res.data);
         }
-      })
-      .catch(err => {
-        setIsLoading(false);
-        console.log();
       });
     setSelectedItem(null);
     setShowList(false);
     setShowPopup(false);
   };
 
-  if (!showVerificationError && isLoading)
-    return (
-      <LoaderContainer>
-        <InnerContianer>
-          <Lottie
-            animationData={LoadingLottie}
-            loop={true}
-            style={{ height: "100px" }}
-          />
-          <Message>
-            Blockchain transactions usually take time (may be more than a
-            minute). So please wait while the transaction succeeds.
-          </Message>
-        </InnerContianer>
-      </LoaderContainer>
-    );
-
   return (
     <>
       {showPopup && (
         <Popup
           toggle={() => setShowPopup(!showPopup)}
-          addToList={() => handleUploadClick()}
+          addToList={() => setShowVerificationPopup(true)}
+        />
+      )}
+      {showVerificationPopup && (
+        <VerificationPopup
+          togglePopup={() => setShowVerificationPopup(false)}
+          onSubmit={password => handleUploadClick(password)}
           error={showVerificationError}
+          setError={setShowVerificationError}
           selectedEntity={selectedType.name}
+          selectedModelType="Approve"
           warning={
             selectedType.name === "Farms"
               ? `Approx cost of creating farm will be ${txPrice.toFixed(
