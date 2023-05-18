@@ -1004,15 +1004,15 @@ exports.createFarmer = async (req) => {
   };
 
   // Checking Header for password
-  // const password = req.headers["password"];
-  // const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
-  // if (!password || password != envPassword) {
-  //   response.error = `Invalid password`;
-  //   response.httpStatus = 401;
-  //   logger.log("info", "Invalid Master Password");
-  //   return response;
-  // }
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    logger.log("info", "Invalid Master Password");
+    return response;
+  }
 
   // Save Farm data in mongoDB , skip id,s.no key in json
   try {
@@ -1760,17 +1760,17 @@ exports.createFarm = async (req) => {
 
   const { id } = req.params;
   // Checking Header for password
-  // const password = req.headers["password"];
-  // const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
 
   // Getting private From aws params store
   const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
-  // if (!password || password != envPassword) {
-  //   response.error = `Invalid password`;
-  //   response.httpStatus = 401;
-  //   return response;
-  // }
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
 
   const data = req.body;
   const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
