@@ -10,8 +10,6 @@ import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
 import VerificationPopup from "../VerificationPopup";
 import TransactionFee from "../../../utils/estimateBlockchainPrice";
-import Lottie from "lottie-react";
-import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   padding: 1rem;
@@ -94,32 +92,6 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
-const Message = styled.p`
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #adc178;
-  margin-bottom: 1rem;
-`;
-
-const LoaderContainer = styled.div`
-  position: fixed;
-  display: grid;
-  place-items: center;
-  z-index: 100;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
-`;
-
-const InnerContianer = styled.div`
-  background-color: white;
-  border-radius: 12px;
-  padding: 1rem;
-`;
 const Approve = ({ setBackgroundColor }) => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
@@ -131,7 +103,7 @@ const Approve = ({ setBackgroundColor }) => {
   const [showVerificationError, setShowVerificationError] = useState(false);
   const [txPrice, setTxPrice] = useState();
   const [maticPrice, setMaticPrice] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPopupFor, setShowPopupFor] = useState(false);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
@@ -223,6 +195,29 @@ const Approve = ({ setBackgroundColor }) => {
     setShowList(false);
     setShowPopup(false);
   };
+  const selectedName = selectedType.name;
+  const handleApproveDelete = adminPassword => {
+    axios
+      .delete(
+        `${process.env.REACT_APP_BASE_URL}/admin/stage/${encodeURIComponent(
+          selectedItemName
+        )}/${selectedName}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+            password: adminPassword,
+          },
+        }
+      )
+      .then(res => {
+        if (res.data.error) {
+          setShowVerificationError(res.data.error);
+        } else {
+          window.location.reload();
+          console.log("deleted Successfully ", res.data);
+        }
+      });
+  };
 
   return (
     <>
@@ -230,16 +225,20 @@ const Approve = ({ setBackgroundColor }) => {
         <Popup
           toggle={() => setShowPopup(!showPopup)}
           addToList={() => setShowVerificationPopup(true)}
+          deleteToList={() => setShowVerificationPopup(true)}
+          item={showPopupFor}
         />
       )}
       {showVerificationPopup && (
         <VerificationPopup
           togglePopup={() => setShowVerificationPopup(false)}
           onSubmit={password => handleUploadClick(password)}
+          onDelete={password => handleApproveDelete(password)}
           error={showVerificationError}
           setError={setShowVerificationError}
           selectedEntity={selectedType.name}
           selectedModelType="Approve"
+          entityType={showPopupFor}
           warning={
             selectedType.name === "Farms"
               ? `Approx cost of creating farm will be ${txPrice.toFixed(
@@ -261,7 +260,9 @@ const Approve = ({ setBackgroundColor }) => {
         <Heading>{`Approve ${selectedType.name}`}</Heading>
         <Flexbox>
           <Selector>
-            {selectedItem ? selectedItemName : `Select Contract To Review`}
+            {selectedItem
+              ? selectedItemName
+              : `Select ${selectedType.name} To Review`}
             <ArrowImage
               src={Arrow}
               reverse={showList}
@@ -277,7 +278,19 @@ const Approve = ({ setBackgroundColor }) => {
           </Selector>
           <Button
             text="APPROVE LIST"
-            onClick={() => setShowPopup(true)}
+            onClick={() => {
+              setShowPopup(true);
+              setShowPopupFor("Add");
+            }}
+            margin="0 1rem"
+            disabled={!selectedItem}
+          />
+          <Button
+            text="DELETE LIST"
+            onClick={() => {
+              setShowPopup(true);
+              setShowPopupFor("Delete");
+            }}
             margin="0 1rem"
             disabled={!selectedItem}
           />
