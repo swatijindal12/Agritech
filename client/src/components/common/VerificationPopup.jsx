@@ -107,6 +107,8 @@ const VerificationPopup = ({
       }
     } else if (entityType === "Delete") {
       await onDelete(password);
+    } else {
+      await onSubmit(password);
     }
   };
 

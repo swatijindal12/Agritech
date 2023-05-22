@@ -98,8 +98,12 @@ const ActiveCard = ({ data }) => {
       .then(res => {
         setMaticPrice(res.data["matic-network"].inr);
       })
-      .catch(error => {console.error(error)
-      setShowVerificationError("Try after sometime to get estimated transaction price in INR")});
+      .catch(error => {
+        console.error(error);
+        setShowVerificationError(
+          "Try after sometime to get estimated transaction price in INR"
+        );
+      });
   }, []);
 
   const togglePopup = nftId => {
