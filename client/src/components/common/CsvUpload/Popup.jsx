@@ -45,9 +45,14 @@ const Popup = ({ toggle, addToList, deleteToList, item }) => {
         ) : (
           <Message>Delete</Message>
         )}
-        <Description>
-          Are you sure you want to {item} this data to the existing list?
-        </Description>
+        {item === "Add" && (
+          <Description>
+            Are you sure you want to add this data to the existing list?
+          </Description>
+        )}
+        {item === "Delete" && (
+          <Description>Are you sure you want to delete this file?</Description>
+        )}
         <Flexbox justify="space-between">
           {item === "Add" ? (
             <Button text="ADD" onClick={addToList} margin="0 1rem 0 0" />
