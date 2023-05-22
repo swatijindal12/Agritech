@@ -15,6 +15,7 @@ const {
   validateFarmers,
   stagedFarmers,
   getStagedFarmers,
+  deleteStaged,
   createCustomer,
   deleteFarm,
   updateFarm,
@@ -130,6 +131,11 @@ router
 router
   .route("/farmer/stage")
   .post(isAuthenticatedUser, authorizeRoles("admin"), stagedFarmers);
+
+// Delete stagefarmer data from Stage DB.
+router
+  .route("/stage/:file/:type")
+  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteStaged);
 
 // Get farmer data into stage Table.
 router

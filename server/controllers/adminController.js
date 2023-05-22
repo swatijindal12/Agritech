@@ -156,6 +156,25 @@ exports.stagedFarmers = async (req, res, next) => {
   next();
 };
 
+// Route to      => api/v1/admin/stage : Delete
+//
+exports.deleteStaged = async (req, res, next) => {
+  adminService
+    .deleteStagedData(req)
+    .then((response) => {
+      res.json(response);
+    })
+    .catch((error) => {
+      errorLog(req, error);
+      res.status(400).json({
+        error: `failed operation`,
+        message: null,
+        httpStatus: 400,
+        data: null,
+      });
+    });
+};
+
 // Route to      => api/v1/admin/stage :: GET
 // get staged data
 exports.getStagedFarmers = async (req, res, next) => {
