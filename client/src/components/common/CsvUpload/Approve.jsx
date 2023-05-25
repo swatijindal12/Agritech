@@ -241,13 +241,13 @@ const Approve = ({ setBackgroundColor }) => {
           entityType={showPopupFor}
           warning={
             selectedType.name === "Farms"
-              ? `Approx cost of creating farm will be ${txPrice.toFixed(
+              ? `Approx cost of creating each farm NFT will be ${txPrice.toFixed(
                   3
                 )} matic or Rs.${(txPrice * maticPrice).toFixed(
                   2
                 )} Are you sure you want to proceed?`
               : selectedType.name === "Contracts"
-              ? `Approx cost of creating contract will be ${txPrice.toFixed(
+              ? `Approx cost of creating each contract NFT will be ${txPrice.toFixed(
                   3
                 )} matic or Rs.${(txPrice * maticPrice).toFixed(
                   2
