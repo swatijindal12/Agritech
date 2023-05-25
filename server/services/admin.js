@@ -1707,6 +1707,82 @@ exports.stagedFarms = async (req) => {
   return response;
 };
 
+//delete staged Data working...
+
+exports.deleteStagedData = async (req) => {
+  // const { fileName, entityType } = req.body
+  const { file: fileName, type: entityType } = req.params;
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  try {
+    //Find this file in staged table and delete this file
+    let fileExist;
+    if (entityType == "Farmers") {
+      fileExist = await StageFarmer.findOne({ file_name: fileName });
+    } else if (entityType == "Farms") {
+      fileExist = await StageFarm.findOne({ file_name: fileName });
+    } else if (entityType == "Contracts") {
+      fileExist = await StageAgreement.findOne({ file_name: fileName });
+    }
+
+    if (fileExist && entityType == "Farmers") {
+      //delete
+      const res = await StageFarmer.deleteMany({ file_name: fileName });
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else if (fileExist && entityType == "Farms") {
+      //delete
+      const res = await StageFarm.deleteMany({ file_name: fileName });
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else if (fileExist && entityType == "Contracts") {
+      //delete
+      const res = await StageAgreement.deleteMany({ file_name: fileName });
+
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else {
+      response.message = "file not found";
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.message = "failed operation";
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
 exports.getStagedFarms = async (req) => {
   // General response format
   let response = {
