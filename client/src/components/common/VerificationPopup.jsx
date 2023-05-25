@@ -81,26 +81,34 @@ const Message = styled.p`
 const VerificationPopup = ({
   togglePopup,
   onSubmit,
+  onDelete,
   error,
   setError,
   getReason,
   warning,
   selectedModelType,
   selectedEntity,
+  entityType,
 }) => {
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    await onSubmit(password, reason);
-
-    if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
-      if (selectedModelType === "update" || selectedModelType === "Approve") {
+    if (
+      selectedModelType === "update" ||
+      (selectedModelType === "Approve" && entityType === "Add")
+    ) {
+      await onSubmit(password, reason);
+      if (selectedEntity === "Farms" || selectedEntity === "Contracts") {
         setIsSubmitting(true);
+      } else {
+        setIsSubmitting(false);
       }
+    } else if (entityType === "Delete") {
+      await onDelete(password);
     } else {
-      setIsSubmitting(false);
+      await onSubmit(password);
     }
   };
 
@@ -143,7 +151,7 @@ const VerificationPopup = ({
                 />
               </>
             )}
-            <WarningMessage>{warning}</WarningMessage>
+            {entityType === "Add" && <WarningMessage>{warning}</WarningMessage>}
             <Flexbox justify="center">
               <Button
                 onClick={handleSubmit}

@@ -36,16 +36,29 @@ const Description = styled.p`
   max-width: 22rem;
 `;
 
-const Popup = ({ toggle, addToList }) => {
+const Popup = ({ toggle, addToList, deleteToList, item }) => {
   return (
     <Container>
       <InnerContianer>
-        <Message>Approve</Message>
-        <Description>
-          Are you sure you want to Add this data to the existing list?
-        </Description>
+        {item === "Add" ? (
+          <Message>Approve</Message>
+        ) : (
+          <Message>Delete</Message>
+        )}
+        {item === "Add" && (
+          <Description>
+            Are you sure you want to add this data to the existing list?
+          </Description>
+        )}
+        {item === "Delete" && (
+          <Description>Are you sure you want to delete this file?</Description>
+        )}
         <Flexbox justify="space-between">
-          <Button text="ADD" onClick={addToList} margin="0 1rem 0 0" />
+          {item === "Add" ? (
+            <Button text="ADD" onClick={addToList} margin="0 1rem 0 0" />
+          ) : (
+            <Button text="DELETE" onClick={deleteToList} margin="0 1rem 0 0" />
+          )}
           <Button text="CANCEL" color="#FCBF49" onClick={toggle} />
         </Flexbox>
       </InnerContianer>
