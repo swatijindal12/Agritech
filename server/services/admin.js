@@ -1633,6 +1633,7 @@ exports.validateFarms = async (req) => {
           logger.log("info", `validation successful`);
         }
       }
+      response.data = data;
     }
   }
   return response;
