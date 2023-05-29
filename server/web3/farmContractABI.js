@@ -182,8 +182,8 @@ const farmNFTContractABI = [
   },
   {
     inputs: [
-      { internalType: "address", name: "farmerAddr", type: "address" },
-      { internalType: "string", name: "_tokenURI", type: "string" },
+      { internalType: "address", name: "farmerAddr_", type: "address" },
+      { internalType: "string", name: "tokenURI_", type: "string" },
     ],
     name: "mint",
     outputs: [],

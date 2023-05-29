@@ -14,44 +14,68 @@ const farmerSchemaCheck = require("../utils/farmerSchemaCheck");
 const farmSchemaCheck = require("../utils/farmSchemaCheck");
 const agreementSchemaCheck = require("../utils/agreementSchemaCheck");
 const mongoose = require("mongoose");
-const Razorpay = require("razorpay");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
-const getEnvVariable = require("../config/privateketAWS");
-
-// Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName)
-  // return
-  return privateKeyValue[`${keyName}`]
-}
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 
 // Importig PinataSDK For IPFS
-const pinataSDK = require('@pinata/sdk')
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN })
-const epocTimeConv = require('../utils/epocTimeConv')
-const validator = require('validator')
+const pinataSDK = require("@pinata/sdk");
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+
+let pinata = "";
+
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+})();
+
+const epocTimeConv = require("../utils/epocTimeConv");
+const validator = require("validator");
 
 // Import for Blockchain
 const Web3 = require('web3')
 const farmNFTContractABI = require('../web3/farmContractABI')
 const marketplaceContractABI = require('../web3/marketPlaceABI')
 
-// const mintFarm = require("../web3/mintFarm");
-
 // const Private_Key = process.env.PRIVATE_KEY;
-const adminAddr = process.env.ADMIN_ADDR
-const farmNFTAddr = process.env.FARM_NFT_ADDR
-const marketplaceAddr = process.env.MARKETPLACE_ADDR
-const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL)
+const adminAddr = process.env.ADMIN_ADDR;
+const farmNFTAddr = process.env.FARM_NFT_ADDR;
+const marketplaceAddr = process.env.MARKETPLACE_ADDR;
+// const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
+// const web3 = new Web3(provider);
 
-const web3 = new Web3(provider)
-const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr)
+//--------
+let web3;
+let marketplaceContract;
+let farmNFTContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
 
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr,
-)
+  const provider = new Web3.providers.WebsocketProvider(
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
+
+  farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
+
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
+//--------
 
 // Validate the agreement
 exports.validate = async (req) => {
@@ -419,7 +443,7 @@ exports.updateAgreement = async (req) => {
 
   const { id } = req.params
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS('agritect-private-key') //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
 
   // Checking Header for password
   const password = req.headers['password']
@@ -526,8 +550,8 @@ exports.updateAgreement = async (req) => {
         ? req.body.end_date
         : agreement.end_date
 
-      const Tran = 'https://mumbai.polygonscan.com/tx'
-      const agreement_nftId = agreement.agreement_nft_id
+      const Tran = process.env.POLYGON_TRAN_URL;
+      const agreement_nftId = agreement.agreement_nft_id;
 
       const gasLimit = await marketplaceContract.methods
         .updateAgreementData(
@@ -748,8 +772,8 @@ exports.validateFarmers = async (req) => {
         if (
           !item.phone ||
           !/^\d+$/.test(item.phone) ||
-          item.phone?.length < 10 ||
-          item.phone?.length > 10
+          item.phone.length < 10 ||
+          item.phone.length > 10
         ) {
           phoneError = true
           errors.phone =
@@ -1608,6 +1632,7 @@ exports.validateFarms = async (req) => {
           logger.log("info", `validation successful`);
         }
       }
+      response.data = data;
     }
   }
   return response
@@ -1682,6 +1707,82 @@ exports.stagedFarms = async (req) => {
   return response
 }
 
+//delete staged Data working...
+
+exports.deleteStagedData = async (req) => {
+  // const { fileName, entityType } = req.body
+  const { file: fileName, type: entityType } = req.params;
+
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  // Checking Header for password
+  const password = req.headers["password"];
+  const envPassword = process.env.MASTER_PASSWORD; // get the password from the environment variable
+
+  if (!password || password != envPassword) {
+    response.error = `Invalid password`;
+    response.httpStatus = 401;
+    return response;
+  }
+
+  try {
+    //Find this file in staged table and delete this file
+    let fileExist;
+    if (entityType == "Farmers") {
+      fileExist = await StageFarmer.findOne({ file_name: fileName });
+    } else if (entityType == "Farms") {
+      fileExist = await StageFarm.findOne({ file_name: fileName });
+    } else if (entityType == "Contracts") {
+      fileExist = await StageAgreement.findOne({ file_name: fileName });
+    }
+
+    if (fileExist && entityType == "Farmers") {
+      //delete
+      const res = await StageFarmer.deleteMany({ file_name: fileName });
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else if (fileExist && entityType == "Farms") {
+      //delete
+      const res = await StageFarm.deleteMany({ file_name: fileName });
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else if (fileExist && entityType == "Contracts") {
+      //delete
+      const res = await StageAgreement.deleteMany({ file_name: fileName });
+
+      if (res.acknowledged) {
+        response.message = "delete successfully";
+        response.httpStatus = 200;
+      } else {
+        response.message = "try deleting again";
+        response.httpStatus = 500;
+      }
+    } else {
+      response.message = "file not found";
+      response.httpStatus = 404;
+    }
+  } catch (error) {
+    response.message = "failed operation";
+    response.httpStatus = 500;
+  }
+  return response;
+};
+
 exports.getStagedFarms = async (req) => {
   // General response format
   let response = {
@@ -1739,7 +1840,7 @@ exports.createFarm = async (req) => {
   const envPassword = process.env.MASTER_PASSWORD // get the password from the environment variable
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS('agritect-private-key')
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   if (!password || password != envPassword) {
     response.error = `Invalid password`
@@ -1747,9 +1848,9 @@ exports.createFarm = async (req) => {
     return response
   }
 
-  const data = req.body
-  const farmer = await Farmer.findOne({ farmer_id: data.farmer_id })
-  console.log('farmer', farmer)
+  const data = req.body;
+  const farmer = await Farmer.findOne({ farmer_id: data.farmer_id });
+
   // status setting stage table
   data.map(async (farm) => {
     await StageFarm.updateOne(
@@ -1798,8 +1899,9 @@ exports.createFarm = async (req) => {
   )
 
   // BlockChain Start
-  const mintPromises = []
-  const Tran = 'https://mumbai.polygonscan.com/tx'
+  const mintPromises = [];
+  const Tran = process.env.POLYGON_TRAN_URL;
+
   for (let index = 0; index < updatedData.length; index++) {
     const farm = updatedData[index]
     farm.farm_nft_id = ''
@@ -1979,7 +2081,6 @@ exports.updateFarm = async (req) => {
   const userLogged = req.user;
   const userId = userLogged._id;
 
-  console.log("req", req.body);
   // General response format
   let response = {
     error: null,
@@ -1990,7 +2091,7 @@ exports.updateFarm = async (req) => {
 
   const { id } = req.params
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS('agritect-private-key')
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // Checking Header for password
   const password = req.headers['password']
@@ -2244,7 +2345,7 @@ exports.updateFarm = async (req) => {
 
       await farm.save()
 
-      const Tran = 'https://mumbai.polygonscan.com/tx'
+      const Tran = process.env.POLYGON_TRAN_URL;
 
       //BLOCKCHAIN TRANSACTION-------
       const gasLimit = await farmNFTContract.methods
@@ -2468,6 +2569,11 @@ exports.getAgreementsForAdmin = async (req) => {
     httpStatus: null,
     data: null,
   };
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const skip = (page - 1) * limit;
+
   // // Grouping farm... for Admin to show in their active/close Tab
   try {
     let match = {
@@ -2481,6 +2587,7 @@ exports.getAgreementsForAdmin = async (req) => {
       searchQuery["$or"] = [
         { farmer_name: { $regex: new RegExp(searchString, "i") } },
         { crop: { $regex: new RegExp(searchString, "i") } },
+        { agreement_nft_id: { $regex: new RegExp(searchString, "i") } },
       ];
     }
 
@@ -2539,6 +2646,12 @@ exports.getAgreementsForAdmin = async (req) => {
           '_id.crop': 1,
         },
       },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
 
     match = {
@@ -2550,6 +2663,7 @@ exports.getAgreementsForAdmin = async (req) => {
       searchQuery["$or"] = [
         { farmer_name: { $regex: new RegExp(searchString, "i") } },
         { crop: { $regex: new RegExp(searchString, "i") } },
+        { agreement_nft_id: { $regex: new RegExp(searchString, "i") } },
       ];
     }
 
@@ -2602,16 +2716,35 @@ exports.getAgreementsForAdmin = async (req) => {
       {
         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
       },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
 
     response.httpStatus = 200
     response.data = {
       active: activeContractswithCustomerData,
       close: closeContractswithCustomerData,
+      totalPagesForActive:
+        activeContractswithCustomerData[0].metadata.length > 0
+          ? Math.ceil(
+              activeContractswithCustomerData[0].metadata[0].total / limit
+            )
+          : 0,
+      totalPagesForClosed:
+        closeContractswithCustomerData[0].metadata.length > 0
+          ? Math.ceil(
+              closeContractswithCustomerData[0].metadata[0].total / limit
+            )
+          : 0,
     };
     logger.log("info", "data fetch successful");
   } catch (error) {
     response.httpStatus = 400;
+    console.log("ERR", error);
     response.error = "failed operation";
     errorLog(req, error);
   }
@@ -2623,7 +2756,7 @@ exports.closeAgreement = async (req) => {
   const { id } = req.params // Agreement Id agreement to Update
 
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS('agritect-private-key')
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY");
 
   // General response format
   let response = {
@@ -2675,7 +2808,7 @@ exports.closeAgreement = async (req) => {
 
     // IPFS END------------------------------------
 
-    const Tran = 'https://mumbai.polygonscan.com/tx'
+    const Tran = process.env.POLYGON_TRAN_URL;
 
     //Blockchain Transaction ---------------------
     const gasLimit = await marketplaceContract.methods
@@ -2850,7 +2983,6 @@ exports.getAudit = async (req) => {
       response.httpStatus = 200;
       logger.log("info", "Data fetch is successful");
     } else if (req.params.table == "agreement" && page && limit) {
-      console.log("agreement query ...");
       // let auditQuery = Audit.find({ table_name: "agreement" }).select("-__v");
       // let totalDocuments = await Audit.countDocuments(auditQuery);
 
@@ -2909,176 +3041,8 @@ exports.getAudit = async (req) => {
   return response
 }
 
-exports.getOrder = async (req) => {
-  // General response format
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  }
-
-  try {
-    // Parse search parameters from request query
-    const { orderId } = req.query
-
-    // Build search query
-    const searchQuery = {}
-    if (orderId) {
-      searchQuery.order_id = orderId
-    }
-
-    // Count the total number of documents
-    const totalDocuments = await Payment.countDocuments(searchQuery)
-
-    // Parse pagination parameters from request query
-    const { page = 1, limit = 10 } = req.query
-
-    // Find all Payment Done that match the search query and apply pagination
-    const payments = await Payment.find(searchQuery)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-
-    // Creating RazorPay Instance
-    const instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_SECRET_KEY,
-    })
-
-    const orderList = []
-
-    //wait for promise to complete..
-    await Promise.all(
-      payments.map(async (payment, index) => {
-        const payDetail = await instance.payments.fetch(
-          payment.razorpay_payment_id,
-        )
-
-        const {
-          order_id,
-          amount,
-          status,
-          method,
-          email,
-          contact,
-          created_at,
-          captured,
-        } = payDetail
-
-        const order = await Order.findOne({ razorpay_order_id: order_id })
-
-        // const orderId = order?._id;
-        const orderId = order ? order._id : null
-        const orderItems = await OrderItem.find({ order_id: orderId }).populate(
-          {
-            path: 'agreement_id',
-            select: 'agreement_nft_id -_id',
-          },
-        )
-
-        let orderItemsList = []
-        orderItems.forEach((item, index) => {
-          if (item.agreement_id) {
-            orderItemsList.push(item.agreement_id.agreement_nft_id)
-          }
-          // orderItemsList.push(item.agreement_id?.agreement_nft_id);
-        })
-
-        orderList.push({
-          razorpay_order_id: order_id,
-          orderId,
-          email,
-          contact,
-          amount: amount / 100,
-          status,
-          captured,
-          method,
-          created_at: new Date(created_at * 1000).toLocaleString(),
-          orderItemsList,
-          unit: orderItems.length,
-        })
-      }),
-    )
-
-    //return response
-    response.data = {
-      totalPages: Math.ceil(totalDocuments / limit),
-      data: orderList,
-    };
-    response.httpStatus = 200;
-    logger.log("info", "Data fetch is successful");
-  } catch (error) {
-    response.httpStatus = 400;
-    response.error = `failed operation ${error}`;
-    errorLog(req, error);
-  }
-
-  return response;
-};
-
-exports.getOrderNew = async (req) => {
-  let response = {
-    error: null,
-    message: null,
-    httpStatus: null,
-    data: null,
-  };
-
-  const { email, phone, order_id, page, limit } = req.query;
-  const skip = (page - 1) * limit;
-
-  try {
-    let orders;
-    let query = {};
-
-    if (email) {
-      const user = await User.findOne({ email: email });
-      if (!user) {
-        return res.status(404).send("User not found.");
-      }
-      query.customer_id = user._id;
-    }
-
-    if (phone) {
-      const user = await User.findOne({ phone: phone });
-      if (!user) {
-        return res.status(404).send("User not found.");
-      }
-      query.customer_id = user._id;
-    }
-
-    if (order_id) {
-      query._id = order_id;
-    }
-
-    orders = await Order.find(query)
-      .populate("customer_id", "name email phone")
-      .select("_id razorpay_order_id amount currency created_at")
-      .sort("-created_at")
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    for (let i = 0; i < orders.length; i++) {
-      const payment = await Payment.findOne({ order_id: orders[i]._id });
-      if (payment) {
-        orders[i].payment_status = payment.payment_status;
-      } else {
-        orders[i].payment_status = false;
-      }
-    }
-
-    response.data = orders;
-    response.httpStatus = 200;
-  } catch (error) {
-    console.error(error);
-    response.error = "Server error";
-    response.httpStatus = 500;
-  }
-  return response;
-};
-
-// exports.getOrderNewq = async (req) => {
+//Using Razorpay API
+// exports.getOrderOld = async (req) => {
 //   // General response format
 //   let response = {
 //     error: null,
@@ -3089,7 +3053,7 @@ exports.getOrderNew = async (req) => {
 
 //   try {
 //     // Parse search parameters from request query
-//     const { orderId, email } = req.query;
+//     const { orderId } = req.query;
 
 //     // Build search query
 //     const searchQuery = {};
@@ -3097,44 +3061,82 @@ exports.getOrderNew = async (req) => {
 //       searchQuery.order_id = orderId;
 //     }
 
+//     // Count the total number of documents
+//     const totalDocuments = await Payment.countDocuments(searchQuery);
+
 //     // Parse pagination parameters from request query
 //     const { page = 1, limit = 10 } = req.query;
 
-//     // Fetch orders using Razorpay API
+//     // Find all Payment Done that match the search query and apply pagination
+//     const payments = await Payment.find(searchQuery)
+//       .sort({ createdAt: -1 })
+//       .skip((page - 1) * limit)
+//       .limit(limit);
+
+//     // Creating RazorPay Instance
 //     const instance = new Razorpay({
 //       key_id: process.env.RAZORPAY_KEY_ID,
 //       key_secret: process.env.RAZORPAY_SECRET_KEY,
 //     });
 
-//     const orders = await instance.payments.fetch({
-//       from: (page - 1) * limit,
-//       to: page * limit - 1,
-//       count: limit,
-//       search: {
-//         email,
-//       },
-//     });
-
 //     const orderList = [];
 
-//     orders.items.forEach((order) => {
-//       orderList.push({
-//         razorpay_order_id: order.id,
-//         email: order.email,
-//         contact: order.contact,
-//         amount: order.amount / 100,
-//         status: order.status,
-//         captured: order.captured,
-//         method: order.method,
-//         created_at: new Date(order.created_at * 1000).toLocaleString(),
-//         orderItemsList: [],
-//         unit: 0,
-//       });
-//     });
+//     //wait for promise to complete..
+//     await Promise.all(
+//       payments.map(async (payment, index) => {
+//         const payDetail = await instance.payments.fetch(
+//           payment.razorpay_payment_id
+//         );
+
+//         const {
+//           order_id,
+//           amount,
+//           status,
+//           method,
+//           email,
+//           contact,
+//           created_at,
+//           captured,
+//         } = payDetail;
+
+//         const order = await Order.findOne({ razorpay_order_id: order_id });
+
+//         // const orderId = order?._id;
+//         const orderId = order ? order._id : null;
+//         const orderItems = await OrderItem.find({ order_id: orderId }).populate(
+//           {
+//             path: "agreement_id",
+//             select: "agreement_nft_id -_id",
+//           }
+//         );
+
+//         let orderItemsList = [];
+//         orderItems.forEach((item, index) => {
+//           if (item.agreement_id) {
+//             orderItemsList.push(item.agreement_id.agreement_nft_id);
+//           }
+//           // orderItemsList.push(item.agreement_id?.agreement_nft_id);
+//         });
+
+//         orderList.push({
+//           razorpay_order_id: order_id,
+//           orderId,
+//           email,
+//           contact,
+//           amount: amount / 100,
+//           status,
+//           captured,
+//           method,
+//           created_at: new Date(created_at * 1000).toLocaleString(),
+//           orderItemsList,
+//           unit: orderItems.length,
+//         });
+//       })
+//     );
 
 //     //return response
 //     response.data = {
-//       totalPages: Math.ceil(orders.count / limit),
+//       totalPages: Math.ceil(totalDocuments / limit),
 //       data: orderList,
 //     };
 //     response.httpStatus = 200;
@@ -3147,3 +3149,113 @@ exports.getOrderNew = async (req) => {
 
 //   return response;
 // };
+
+// Return order History
+exports.getOrder = async (req) => {
+  let response = {
+    error: null,
+    message: null,
+    httpStatus: null,
+    data: null,
+  };
+
+  const { email, phone, orderId, page, limit } = req.query;
+  const skip = (page - 1) * limit;
+
+  // Creating RazorPay Instance
+  // const instance = new Razorpay({
+  //   key_id: process.env.RAZORPAY_KEY_ID,
+  //   key_secret: process.env.RAZORPAY_SECRET_KEY,
+  // });
+
+  try {
+    let orders;
+    let query = {};
+
+    if (email) {
+      const user = await User.findOne({ email: email });
+      if (user) {
+        query.customer_id = user._id;
+      }
+    }
+
+    if (phone) {
+      const user = await User.findOne({ phone: phone });
+      if (user) {
+        query.customer_id = user._id;
+      }
+    }
+
+    if (orderId) {
+      query._id = orderId;
+    }
+
+    orders = await Order.find(query)
+      .populate("customer_id", "name email phone")
+      .select("razorpay_order_id amount createdAt")
+      .sort("-createdAt")
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const orderIds = orders.map((order) => order._id);
+
+    const payments = await Payment.find({ order_id: { $in: orderIds } });
+
+    // console.log("Payments", typeof payments, payments);
+    // Creating RazorPay Instance
+
+    const result = await Promise.all(
+      orders.map(async (order) => {
+        const orderObj = order.toObject();
+
+        const orderItem = await OrderItem.find({
+          order_id: orderObj._id,
+        }).populate({
+          path: "agreement_id",
+          select: "agreement_nft_id -_id",
+        });
+
+        const itemList = [];
+        orderItem.map((item) => {
+          //console.log("item", item.agreement_id);
+          if (item.agreement_id) {
+            itemList.push(item.agreement_id.agreement_nft_id);
+          }
+        });
+
+        // console.log("orderItem : ", orderItem);
+
+        const paymentStatus = await Payment.findOne({
+          razorpay_order_id: orderObj.razorpay_order_id,
+        });
+        // console.log("paymentStatus :", paymentStatus);
+        return {
+          ...orderObj,
+          unit: orderItem.length,
+          itemList,
+          status:
+            paymentStatus && paymentStatus.payment_status
+              ? paymentStatus.payment_status
+              : false,
+          createdAt: order.createdAt.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          }),
+        };
+      })
+    );
+
+    orders = result;
+
+    const count = await Order.countDocuments(query);
+
+    response.data = {
+      totalPages: Math.ceil(count / limit),
+      data: orders,
+    };
+    response.httpStatus = 200;
+  } catch (error) {
+    response.error = `Server error`;
+    response.httpStatus = 500;
+  }
+  return response;
+};

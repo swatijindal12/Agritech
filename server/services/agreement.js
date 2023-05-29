@@ -1,6 +1,5 @@
 const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
-const User = require("../models/users");
 
 const StageAgreement = require("../models/stageAgreement");
 const epocTimeConv = require("../utils/epocTimeConv");
@@ -12,17 +11,19 @@ const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const stageAgreement = require("../models/stageAgreement");
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
-const getEnvVariable = require("../config/privateketAWS");
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
-// Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName);
-  // return
-  return privateKeyValue[`${keyName}`];
-}
+let pinata = "";
+
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+})();
 
 // Importing for Blockchain
 // const Private_Key = process.env.PRIVATE_KEY;
@@ -30,13 +31,39 @@ const adminAddr = process.env.ADMIN_ADDR;
 const farmNFTAddr = process.env.FARM_NFT_ADDR;
 const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 
-const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
-const web3 = new Web3(provider);
-const farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
+// const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
+// const web3 = new Web3(provider);
+
+//--------
+let web3;
+let marketplaceContract;
+let farmNFTContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
+  const provider = new Web3.providers.WebsocketProvider(
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
+
+  farmNFTContract = new web3.eth.Contract(farmNFTContractABI, farmNFTAddr);
+
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
+
+//--------
 
 exports.getFarmById = async (req) => {
   const { id } = req.params;
@@ -211,7 +238,7 @@ exports.createAgreement = async (req) => {
   const password = req.headers["password"];
   const envPassword = process.env.MASTER_PASSWORD; // get the password
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
 
   if (!password || password != envPassword) {
     response.error = `Invalid password`;
@@ -230,7 +257,6 @@ exports.createAgreement = async (req) => {
     const farm = await Farm.findOne({ farm_id: data.farm_id });
     // const agreement = await Agreement.findOne({ _id: data._id })
 
-    // console.log(agreement)
     // // Read the req.body and add ipfs_url to json data
     const updatedData = await Promise.all(
       data.map(async (contract) => {
@@ -279,7 +305,7 @@ exports.createAgreement = async (req) => {
 
     // Blockchain Integration
     const mintPromises = [];
-    const Tran = "https://mumbai.polygonscan.com/tx";
+    const Tran = process.env.POLYGON_TRAN_URL;
     for (let index = 0; index < updatedData.length; index++) {
       const contract = updatedData[index];
       contract.agreement_nft_id = "";
@@ -400,7 +426,6 @@ exports.createAgreement = async (req) => {
   return response;
 };
 
-// Marketplace both customer & admin
 // exports.getAgreements = async (req) => {
 //   const searchString = req.query.search;
 //   // General response format
@@ -461,6 +486,8 @@ exports.createAgreement = async (req) => {
 
 //   return response;
 // };
+
+// Marketplace both customer & admin
 
 exports.getAgreements = async (req) => {
   const searchString = req.query.search;
@@ -541,71 +568,3 @@ exports.getAgreements = async (req) => {
 
   return response;
 };
-
-//Without Pagination
-// exports.getAgreements = async (req) => {
-//   const searchString = req.query.search;
-//   // General response format
-//   let response = {
-//     error: null,
-//     message: null,
-//     httpStatus: null,
-//     data: null,
-//   };
-
-//   try {
-//     //
-//     let match = { sold_status: false };
-
-//     let searchQuery = {};
-//     if (searchString) {
-//       searchQuery["$or"] = [
-//         { farmer_name: { $regex: new RegExp(searchString, "i") } },
-//         { crop: { $regex: new RegExp(searchString, "i") } },
-//       ];
-//     }
-
-//     match = { $and: [match, searchQuery] };
-
-//     const result = await Agreement.aggregate([
-//       { $match: match },
-//       {
-//         $group: {
-//           _id: {
-//             crop: "$crop",
-//             start_date: "$start_date",
-//             end_date: "$end_date",
-//             price: "$price",
-//             area: "$area",
-//             farm_id: "$farm_id",
-//           },
-//           address: { $first: "$address" },
-//           farmer_name: { $first: "$farmer_name" },
-//           agreements: { $push: "$_id" },
-//           ipfs_url: { $push: "$ipfs_url" },
-//           tx_hash: { $push: "$tx_hash" },
-//           agreement_nft_id: { $push: "$agreement_nft_id" },
-//           unit_available: { $sum: 1 },
-//         },
-//       },
-//       {
-//         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
-//       },
-//       {
-//         $sort: {
-//           "_id.start_date": 1,
-//           "_id.crop": 1,
-//         },
-//       },
-//     ]);
-
-//     response.data = result;
-//     response.httpStatus = 200;
-//     logger.log("info", "Data fetch is successful");
-//   } catch (err) {
-//     response.error = "failed operation";
-//     errorLog(req, err);
-//   }
-
-//   return response;
-// };

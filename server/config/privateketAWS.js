@@ -11,16 +11,16 @@ const getSSMParameter = async (ssm, parameter) => {
     return response.Parameters;
   } catch (err) {
     console.log(err);
-    errorLog(req, err);
+    //errorLog(req, err);
     throw err;
   }
 };
 
 const getParamaterValueFromAwsParameters = async (parameters) => {
   AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
+    accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+    secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+    region: `${process.env.AWS_REGION}`,
   });
 
   const ssm = new AWS.SSM();

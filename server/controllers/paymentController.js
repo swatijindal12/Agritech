@@ -29,7 +29,7 @@ exports.createOrder = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation 2 ${error}`,
+        error: `failed operation ${error}`,
         message: null,
         httpStatus: 400,
         data: null,

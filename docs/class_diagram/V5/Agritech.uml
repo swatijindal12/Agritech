@@ -1,0 +1,111 @@
+@startuml
+skinparam linetype polyline
+skinparam linetype ortho
+skinparam groupInheritance 1
+
+
+interface IAgreementNFT{
+*createAgreement(farmerAddr: address,tokenURI : string)
+*closeAgreement(buyerAddr: address, agreementNFTId: uint256)
+*updateAgreement(agreementNFTId: uint256, updateTokenURI: string)
+
+}
+
+class OwnableUpgradeable{
+~owner: address
+------------
+*constructor(): void
+*onlyOwner(): modifier
+}
+
+class ERC721EnumerableUpgradeable{
+~mapping(address => mapping(uint256 => uint256))  _ownedTokens: uint256
+~mapping(uint256 => uint256)  _ownedTokensIndex: uint256
+~mapping(uint256 => uint256)  _allTokensIndex:uint256
+--------
+*totalSupply() : uint256
+*tokenOfOwnerByIndex(owner: address, index: uint256) : uint256
+*tokenByIndex(index: uint256) :uint256
+}
+
+class ERC721URIStorageUpgradeable{
+~mapping(uint256 -> string) _tokenURIs : string
+~mapping(uint256 -> address) _owners : address
+~mapping(address => uint256) _balances : uint256
+~mapping(uint256 => address) _tokenApprovals: address
+~mapping(address => mapping(address => bool)) _operatorApprovals: bool
+-----
+*approve(spender:address, tokens: uint256): bool
+*safeTransferFrom(from:address, to: address, tokenId: uint256)
+*transferFrom(from: address, to: address, tokenId: uint256)
+*balanceOf(owner: address): uint256
+*ownerOf(tokenId:uint256): address
+*tokenURI(tokenId: uint256): string
+}
+
+class FarmNFT{
+*name : string
+*symbol : string
+~_tokenIdCounter : uint256
+~mapping(address => uint256[]) : FarmList
+* event Mint(minterAddr: address, tokenId: uint256, tokenURI: string)
+* event UpdateFarm(farmId: uint256, updatedTokenURI: string)
+--
+*initialize()
+*mint(farmerAddr: address, tokenURI: string): onlyOwner
+*updateFarm(farmId: uint256, _updateTokenUri: string): onlyOwner
+*getFarmList(farmerAddr: address) : uint256[]
+}
+
+
+class AgreementNFT{
+
+*name : string
+*symbol : string
+*agreementTokenId : uint256
+*event CreateAgreement(tokenId: uint256, tokenURI: string)
+----------
+*initialize()
+*createAgreement(farmerAddr: address,tokenURI : string)
+*updateAgreement(agreementNFTId: uint256, updateTokenURI: string) 
+}
+
+class Marketplace{
+~ IAgreementNFT agreementNFT
+~ IERC721 farmNFT
+*struct AgreementInfo{
+farmerAddr: address, buyerAddr: address, farmNFTId: uint256, agreementNFTtId:uint256, price: uint256, stratDate: uint256, endDate: uint256, razorTransId: string}
+~mapping(address-> uint256[]) AgreementList: uint256[]
+*mapping(uint256 => AgreementInfo) : AgreementDetails
+*event Sell(tokenId: uint256, sellerAddr: address, price: uint256)
+*event Buy(buyerAddr: address, agreementNFTId: uint256)
+*event ClosedContractNFT(farmNFTId: uint256)
+*event UpdateAgreementData(agreementNFTId: uint256, price: uint256 , updatedIPFSUrl: string)
+-----------
+*initialize(farmNFT_: address, agreementNFT_: address)
+*putContractOnSell(farmerAddr_: address, farmNFTId_: uint256, price_: uint256, startDate_:uint256, endDate_:uint256, agreementNftUri_: string): onlyOwner
+*updateAgreementData(agreementNftId: uint256, price_: uint256, startDate_: uint256, endDate_: uint256, updateTokenURI: string): onlyOwner
+*buyContract(buyerAddr: address, agreementNFTId_[] : uint256, transactionId[]: string, updateTokenURI[]: string)
+*closeContractNFT(agreementNFTId_: uint256)
+*getSellDetailByTokenId(agreementNFTId[]: uint256) : AgreementInfo[]
+*getAcceptedContractList(buyerAddr: address) : uint256[]
+
+}
+ 
+@enduml
+
+@startuml
+FarmNFT -right-> ERC721URIStorageUpgradeable
+AgreementNFT -> ERC721URIStorageUpgradeable
+
+OwnableUpgradeable <- Marketplace
+OwnableUpgradeable <- FarmNFT
+OwnableUpgradeable <- AgreementNFT
+FarmNFT <|-- Marketplace
+IAgreementNFT <|-- Marketplace
+
+
+ERC721EnumerableUpgradeable <- AgreementNFT
+ERC721EnumerableUpgradeable<|-- FarmNFT
+
+@enduml

@@ -6,21 +6,54 @@ const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
 const crypto = require("crypto");
 const Farm = require("../models/farms");
-const getEnvVariable = require("../config/privateketAWS");
+const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const emailTransporter = require("../utils/emailTransporter");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 
-// Calling function to get the privateKey from aws params storage
-async function getPrivateKeyAWS(keyName) {
-  const privateKeyValue = await getEnvVariable(keyName);
-  // return
-  return privateKeyValue[`${keyName}`];
-}
-
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+
+let pinata = "";
+let instance = "";
+
+// Initialize the pinata and instance object RazorPay using an asynchronous IIFE
+// Creating RazorPay Instance
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+  instance = new Razorpay({
+    key_id: `${await getKeyFromAWS("RAZORPAY_KEY_ID")}`,
+    key_secret: await getKeyFromAWS("RAZORPAY_SECRET_KEY"),
+  });
+})();
+
+// web3 object here
+let web3;
+let marketplaceContract;
+const newProvider = async () => {
+  const ALCHEMY_KEY = await getKeyFromAWS("ALCHEMY_KEY");
+  const provider = new Web3.providers.WebsocketProvider(
+    `${process.env.ALCHEMY_CONN_URL}/${ALCHEMY_KEY}`,
+    {
+      reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false,
+      },
+    }
+  );
+  web3 = new Web3(provider);
+  marketplaceContract = new web3.eth.Contract(
+    marketplaceContractABI,
+    marketplaceAddr
+  );
+};
+
+newProvider();
 
 //Import Blockchain
 const marketplaceContractABI = require("../web3/marketPlaceABI");
@@ -28,22 +61,10 @@ const marketplaceAddr = process.env.MARKETPLACE_ADDR;
 // const Private_Key = process.env.PRIVATE_KEY;
 const adminAddr = process.env.ADMIN_ADDR;
 
-const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
-const web3 = new Web3(provider);
-
-const marketplaceContract = new web3.eth.Contract(
-  marketplaceContractABI,
-  marketplaceAddr
-);
-
-// Creating RazorPay Instance
-const instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET_KEY,
-});
+// const provider = new Web3.providers.WebsocketProvider(process.env.RPC_URL);
+// const web3 = new Web3(provider);
 
 exports.getKeyId = async (req) => {
-  console.log("getKeyId services ");
   // General response format
   let response = {
     error: null,
@@ -78,7 +99,6 @@ exports.createOrder = async (req) => {
     };
 
     const order = await instance.orders.create(options);
-    // console.log("Order :- ", order);
 
     // Inserting orderDetail in Order table
     const orderCreated = await Order.create({
@@ -120,7 +140,8 @@ exports.createOrder = async (req) => {
     response.data = order;
     logger.log("info", "Order created successful");
   } catch (error) {
-    response.message = `Failed operation ${error}`;
+    console.log("error", error);
+    response.message = `Failed operation 2${error}`;
     response.httpStatus = 500;
     errorLog(req, error);
   }
@@ -134,7 +155,8 @@ exports.paymentVerification = async (req) => {
 
   // console.log("filterUser", filterUser);
   // Getting private From aws params store
-  const Private_Key = await getPrivateKeyAWS("agritect-private-key"); //
+  const Private_Key = await getKeyFromAWS("POLYGON_PRIVATE_KEY"); //
+  const RAZORPAY_SECRET_KEY = await getKeyFromAWS("RAZORPAY_SECRET_KEY");
 
   // General response format
   let response = {
@@ -150,7 +172,7 @@ exports.paymentVerification = async (req) => {
   const body = razorpay_order_id + "|" + razorpay_payment_id;
 
   const expectedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
+    .createHmac("sha256", RAZORPAY_SECRET_KEY)
     .update(body.toString())
     .digest("hex");
 
@@ -220,6 +242,8 @@ exports.paymentVerification = async (req) => {
 
             // Blockchain Transaction start ...
             const buyerAddr = process.env.BUYER_ADDR;
+            const Tran = process.env.POLYGON_TRAN_URL;
+
             // const privateKeyBuyer = filterUser[0].private_key;
             const gasLimit = await marketplaceContract.methods
               .buyContract(buyerAddr, [Agreement_nft_id], razorpay_payment_id, [
@@ -255,6 +279,8 @@ exports.paymentVerification = async (req) => {
             const transaction = await web3.eth.sendSignedTransaction(
               signedTx.rawTransaction
             );
+            single_agreement.tx_hash = `${Tran}/${transaction.transactionHash}`;
+            await single_agreement.save();
 
             console.log(await web3.eth.getBlockNumber());
             web3.eth.getBlockNumber().then((latestBlock) => {
@@ -310,6 +336,7 @@ exports.paymentVerification = async (req) => {
         }
       })
       .catch((err) => {
+        console.log("ERROR", err);
         response.message = `failed operation ${err}`;
         response.httpStatus = 500;
         errorLog(req, err);

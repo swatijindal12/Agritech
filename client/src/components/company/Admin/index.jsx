@@ -73,9 +73,9 @@ const Admin = () => {
   return (
     <Container>
       <CardContainer>
-        {navigationData?.map(item => {
+        {navigationData?.map((item, index )=> {
           return (
-            <Card color={item.color}>
+            <Card color={item.color} key={index}>
               <CardTopContainer>Manage {item.name}</CardTopContainer>
               <CardBottomContainer>
                 <BottomContainer

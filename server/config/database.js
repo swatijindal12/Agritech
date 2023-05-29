@@ -18,7 +18,7 @@ const deleteUnverifiedUsers = async () => {
 setInterval(deleteUnverifiedUsers, 120 * 1000); // 2 minute
 
 // Connection using mongoose string
-const connectDatabase = () => {
+/*const connectDatabase = () => {
   if (process.env.NODE_ENV == "production ") {
     mongoose
       .connect(process.env.DB_PROD_URI, {
@@ -46,6 +46,23 @@ const connectDatabase = () => {
         );
       });
   }
+};*/
+const connectDatabase = () => {
+  mongoose
+    .connect(process.env.DB_PROD_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then((con) => {
+      logger.log(
+        "info",
+        `MongoDB Database connected with host ${con.connection.host}`
+      );
+      console.log(
+        `MongoDB Database connected with host ${con.connection.host}`
+      );
+    })
+    .catch((err) => consolg.log("error: ", err));
 };
 
 // To remove Deprecation Warning

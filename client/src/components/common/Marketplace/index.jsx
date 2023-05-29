@@ -26,7 +26,7 @@ const CardsContainer = styled.div`
 
 const InputContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 0;
     margin: 0 auto 1rem;
   }
@@ -48,6 +48,8 @@ const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: auto;
+  padding-bottom: 3rem;
 `;
 
 const MarketPlace = () => {
@@ -74,11 +76,17 @@ const MarketPlace = () => {
     setNewAddedIds(tempArr);
   };
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList(currentPage);
+    }
+  };
+
   const getList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=5`,
+        `${process.env.REACT_APP_BASE_URL}/marketplace/agreements?search=${searchText}&page=${page}&limit=6`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -86,10 +94,10 @@ const MarketPlace = () => {
         }
       )
       .then(res => {
-        console.log("res", res.data)
+        console.log("res", res.data);
         setLoading(false);
         setContract(res.data.data.data);
-        setTotalPage(res.data.data.totalPages)
+        setTotalPage(res.data.data.totalPages);
       })
       .catch(err => {
         setLoading(false);
@@ -105,6 +113,7 @@ const MarketPlace = () => {
           placeholder="Search by Name and Crop"
           onChange={e => setSearchText(e.target.value)}
           value={searchText}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}

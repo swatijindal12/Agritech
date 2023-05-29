@@ -7,6 +7,8 @@ import ActiveCard from "./ActiveCard";
 import ClosedCard from "./ClosedCard";
 import EmptyIcon from "../../../assets/empty-box.svg";
 import Button from "../../common/Button";
+import Pagination from "../../common/Pagination";
+import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
   padding: 1rem;
@@ -49,7 +51,7 @@ const CardsContainer = styled.div`
 
 const InputContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 0;
     margin: 0 auto 1rem;
   }
@@ -67,25 +69,48 @@ const Input = styled.input`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
+  padding-bottom: 3rem;
+`;
+
 const Contracts = () => {
   const [currentPage, setCurrentpage] = useState("active");
   const [active, setActive] = useState([]);
   const [closed, setClosed] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  let [searchText, setSearchText] = useState("");
+  const [totalPage, setTotalPage] = useState(2);
+  const [currentPageNum, setCurrentPageNum] = useState(1);
+
   const user = useSelector(store => store.auth.user);
 
   useEffect(() => {
-    getList();
-    setSearchText("");
-  }, [currentPage]);
+    getList(currentPageNum);
+  }, [currentPage, currentPageNum]);
 
-  const getList = () => {
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      setCurrentPageNum(1);
+      getList(currentPageNum);
+    }
+  };
+
+  const location = useLocation();
+  const NFTIdSearch = new URLSearchParams(location.search).get("search");
+
+  const getList = page => {
     setLoading(true);
+    if (NFTIdSearch) {
+      searchText = NFTIdSearch;
+    }
     axios
       .get(
         user?.data.role === "admin"
-          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}`
+          ? `${process.env.REACT_APP_BASE_URL}/admin/agreement?search=${searchText}&page=${page}&limit=6`
           : `${process.env.REACT_APP_BASE_URL}/marketplace/agreement?search=${searchText}`,
         {
           headers: {
@@ -95,9 +120,19 @@ const Contracts = () => {
       )
       .then(res => {
         setLoading(false);
-        // console.log("response is ", res);
-        setActive(res.data.data.active);
-        setClosed(res.data.data.close);
+        if (user?.data.role === "admin") {
+          setActive(res.data.data.active[0].data);
+          setClosed(res.data.data.close[0].data);
+        } else {
+          setActive(res.data.data.active);
+          setClosed(res.data.data.close);
+        }
+
+        if (currentPage === "active") {
+          setTotalPage(res.data.data.totalPagesForActive);
+        } else if (currentPage === "closed") {
+          setTotalPage(res.data.data.totalPagesForClosed);
+        }
       })
       .catch(err => {
         setLoading(false);
@@ -114,11 +149,15 @@ const Contracts = () => {
             placeholder="Search by Name and Crop"
             onChange={e => setSearchText(e.target.value)}
             value={searchText}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
             margin="0 1rem"
-            onClick={getList}
+            onClick={() => {
+              setCurrentPageNum(1);
+              getList(1);
+            }}
             disabled={loading}
           />
         </InputContainer>
@@ -152,6 +191,14 @@ const Contracts = () => {
               return <ClosedCard data={item} key={item.agreements[0]} />;
             })}
       </CardsContainer>
+      <PaginationContainer>
+        <Pagination
+          currentPage={currentPageNum}
+          totalCount={totalPage}
+          pageSize={1}
+          onPageChange={page => setCurrentPageNum(page)}
+        />
+      </PaginationContainer>
     </Container>
   );
 };

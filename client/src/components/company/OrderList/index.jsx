@@ -7,6 +7,7 @@ import Flexbox from "../../common/Flexbox";
 import Button from "../../common/Button";
 import Lottie from "lottie-react";
 import LoadingLottie from "../../../assets/lottie/loader.json";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   padding: 1rem;
@@ -50,16 +51,15 @@ const Table = styled.table`
   }
 `;
 
-const UrlTd = styled.td`
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-`;
-
 const PaginationContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem 1rem 5rem 1rem;
+  min-height: auto;
+  @media screen and (max-width: 990px) {
+    padding: 1rem 1rem 1rem 1rem;
+  }
 `;
 
 const TopContainer = styled(Flexbox)`
@@ -70,7 +70,7 @@ const TopContainer = styled(Flexbox)`
 
 const InputContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 1rem;
     margin: 0 auto 1rem;
   }
@@ -94,21 +94,38 @@ const OrderList = () => {
   const [tableHeading, setTableHeading] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(2);
+  const [searchEmailText, setSearchEmailText] = useState("");
+  const [searchPhoneText, setSearchPhoneText] = useState("");
   const [searchText, setSearchText] = useState("");
-
   const user = useSelector(store => store.auth.user);
-  const selectedType = JSON.parse(
-    localStorage.getItem("current-new-upload-data")
-  );
 
   useEffect(() => {
     getOrderList(currentPage);
   }, [currentPage]);
+
+  const setEmailOrPhone = () => {
+    if (!isNaN(searchText)) {
+      setSearchPhoneText(searchText);
+    } else if (searchText.length !== 10) {
+      setSearchEmailText(searchText);
+    }
+  };
+
+  useEffect(() => {
+    setEmailOrPhone();
+  });
+
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getOrderList(currentPage);
+    }
+  };
+
   const getOrderList = page => {
     setLoading(true);
     axios
       .get(
-        `${process.env.REACT_APP_BASE_URL}/admin/order?page=${page}&limit=8&orderId=${searchText}`,
+        `${process.env.REACT_APP_BASE_URL}/admin/order?page=${page}&limit=8&email=${searchEmailText}&phone=${searchPhoneText}`,
         {
           headers: {
             Authorization: "Bearer " + user?.data.token,
@@ -116,16 +133,39 @@ const OrderList = () => {
         }
       )
       .then(res => {
-        let data = res.data.data.data;
+        // console.log("DATA IS", res.data.data.data);
+        let data = res.data.data.data.map(item => {
+          return {
+            ...item,
+            order_Id: item._id, // Change the field name here
+            Contract_NFT_ID: item.itemList, // Change the field name here
+            Payment_status: item.status,
+          };
+        });
+
         setLoading(false);
-        // console.log("here the response is ", res.data);
         if (data.length > 0) {
           setList(data);
           setTotalPage(res.data.data.totalPages);
           let tempArr = [];
-          for (const key in data[0]) {
+          for (const key in data[0].customer_id) {
+            if (key === "_id") {
+              continue;
+            }
             tempArr.push(key);
           }
+          for (const key in data[0]) {
+            if (
+              key === "customer_id" ||
+              key === "_id" ||
+              key === "itemList" ||
+              key === "status"
+            ) {
+              continue;
+            }
+            tempArr.push(key);
+          }
+
           setTableHeading(tempArr);
         }
       })
@@ -133,6 +173,18 @@ const OrderList = () => {
         setLoading(false);
         // console.log("error in fetching list ", err);
       });
+  };
+
+  const redirectHandler = NFTId => {
+    window.location.href = `http://agritrustfrontend.s3-website-ap-northeast-1.amazonaws.com/contracts-admin?search=${NFTId}`;
+    axios.get(
+      `${process.env.REACT_APP_BASE_URL}/admin/agreement?page=1&limit=8&search=${NFTId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + user?.data.token,
+        },
+      }
+    );
   };
 
   return (
@@ -143,8 +195,9 @@ const OrderList = () => {
           <InputContainer margin="0 2rem">
             <Input
               type="text"
-              placeholder="Search by order id"
+              placeholder="Search by email, phone"
               onChange={e => setSearchText(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
             <Button
               text={loading ? "...LOADING" : "SEARCH"}
@@ -171,22 +224,64 @@ const OrderList = () => {
                   return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
+
               {list?.map((row, index) => {
                 return (
                   <tr key={index}>
                     {tableHeading?.map(item => {
-                      if (item === "orderItemsList") {
+                      if (item === "name") {
                         return (
                           <td key={`${index}-${item}`}>
-                            {row[item].join(", ")}
+                            {row.customer_id.name}
+                          </td>
+                        );
+                      }
+                      if (item === "phone") {
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row.customer_id.phone}
+                          </td>
+                        );
+                      }
+                      if (item === "email") {
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row.customer_id.email}
+                          </td>
+                        );
+                      }
+
+                      if (item === "Contract_NFT_ID") {
+                        return (
+                          <td>
+                            {row[item].map((item, index) => (
+                              <Link
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "none",
+                                }}
+                                onClick={() => {
+                                  redirectHandler(item);
+                                }}
+                                key={index}
+                              >
+                                <span key={index}>
+                                  {(index ? ", " : "") + item}
+                                </span>
+                              </Link>
+                            ))}
                           </td>
                         );
                       }
                       if (row[item] === true)
-                        return <td key={`${index}-${item}`}>1</td>;
+                        return <td key={`${index}-${item}`}>Done</td>;
+                      else if (row[item] === 0)
+                        return <td key={`${index}-${item}`}>0</td>;
                       else
                         return (
-                          <td key={`${index}-${item}`}>{row[item] || 0}</td>
+                          <td key={`${index}-${item}`}>
+                            {row[item] || "Not Done"}
+                          </td>
                         );
                     })}
                   </tr>

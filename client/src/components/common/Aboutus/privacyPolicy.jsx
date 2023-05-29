@@ -5,7 +5,7 @@ import BackButton from "../../../assets/back-button.svg";
 import Flexbox from "../Flexbox";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 5rem 1rem;
   overflow-x: hidden;
 `;
 

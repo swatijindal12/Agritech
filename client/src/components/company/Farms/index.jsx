@@ -10,7 +10,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 3rem 1rem;
+  min-height: auto;
 `;
 
 const FilterContainer = styled.div`
@@ -40,7 +41,7 @@ const InputContainer = styled(Flexbox)`
 
 const SearchContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 1rem;
     margin: 0 auto 1rem;
     flex-direction: row;
@@ -116,6 +117,13 @@ const Farms = () => {
     setShowFilter(false);
   };
 
+  // search handle by enter press
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   return (
     <Container>
       <Flexbox justify="space-between">
@@ -125,6 +133,7 @@ const Farms = () => {
             type="text"
             placeholder="Search by name, pin"
             onChange={e => setSearchText(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
@@ -152,6 +161,7 @@ const Farms = () => {
           type="text"
           placeholder="Search by name, pin"
           onChange={e => setSearchText(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}

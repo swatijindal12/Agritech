@@ -4,11 +4,11 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IAgreementNFT is IERC721 {
     function createAgreement(
-        address farmerAddr,
-        string memory _tokenURI
+        address farmerAddr_,
+        string memory tokenURI_
     ) external returns (uint256);
 
-    function closeAgreement(address _buyerAddr, uint256 _agreementId) external;
- 
-    function updateAgreement(uint256 agreementNFTId, string memory updateTokenURI) external;
+    function updateAgreement(uint256 agreementNFTId_, string memory updateTokenURI_) external;
+
+    function changeOwnership(address newOwner_) external;
 }

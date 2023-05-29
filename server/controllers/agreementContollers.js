@@ -11,7 +11,7 @@ exports.createAgreement = async (req, res, next) => {
     .catch((error) => {
       errorLog(req, error);
       res.status(400).json({
-        error: `failed operation controller ${error}`,
+        error: `failed operation`,
         message: null,
         httpStatus: 400,
         data: null,

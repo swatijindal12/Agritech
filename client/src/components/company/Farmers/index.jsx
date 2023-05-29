@@ -10,7 +10,8 @@ import Button from "../../common/Button";
 import axios from "axios";
 
 const Container = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 3rem 1rem;
+  min-height: auto;
 `;
 
 const FilterContainer = styled.div`
@@ -40,7 +41,7 @@ const InputContainer = styled(Flexbox)`
 
 const SearchContainer = styled(Flexbox)`
   @media screen and (max-width: 990px) {
-    width: 100vw;
+    width: 100%;
     padding: 1rem;
     margin: 0 auto 1rem;
     flex-direction: row;
@@ -88,6 +89,12 @@ const Farmers = () => {
     setNewAddedIds(tempArr);
   };
 
+  const handleKeyPress = event => {
+    if (event.key === "Enter") {
+      getList();
+    }
+  };
+
   const getList = () => {
     setLoading(true);
     let queryString = "";
@@ -95,11 +102,14 @@ const Farmers = () => {
       queryString += `sortOrder=${selectedFilter.rating}`;
     }
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}&search=${searchText}`, {
-        headers: {
-          Authorization: "Bearer " + user?.data.token,
-        },
-      })
+      .get(
+        `${process.env.REACT_APP_BASE_URL}/admin/farmers?${queryString}&search=${searchText}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user?.data.token,
+          },
+        }
+      )
       .then(res => {
         // console.log("response is ", res);
         setLoading(false);
@@ -122,6 +132,7 @@ const Farmers = () => {
             type="text"
             placeholder="Search by name, pin, phone"
             onChange={e => setSearchText(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <Button
             text={loading ? "...LOADING" : "SEARCH"}
@@ -153,6 +164,7 @@ const Farmers = () => {
           type="text"
           placeholder="Search by name, pin"
           onChange={e => setSearchText(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         <Button
           text={loading ? "...LOADING" : "SEARCH"}

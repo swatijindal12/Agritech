@@ -102,7 +102,7 @@ const StatusImage = styled.img`
 `;
 
 const UploadText = styled.div`
-  width: 100vw;
+  width: 100%;
   height: 70vh;
   display: flex;
   justify-content: center;

@@ -9,10 +9,13 @@ import ApproveList from "./ApproveList";
 import Popup from "./Popup";
 import CheckIcon from "../../../assets/green-check.svg";
 import VerificationPopup from "../VerificationPopup";
+import TransactionFee from "../../../utils/estimateBlockchainPrice";
+import Lottie from "lottie-react";
+import LoadingLottie from "../../../assets/lottie/loader.json";
 
 const Container = styled.div`
   padding: 1rem;
-  height: calc(100vh - 4rem);
+  height: auto;
 `;
 
 const Selector = styled.div`
@@ -34,6 +37,7 @@ const ArrowImage = styled.img`
 const TableContainer = styled.div`
   max-width: 100vw;
   overflow-x: auto;
+  min-height: auto;
 `;
 
 const Table = styled.table`
@@ -90,6 +94,32 @@ const ImagePreview = styled.img`
   height: 5rem;
 `;
 
+const Message = styled.p`
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #adc178;
+  margin-bottom: 1rem;
+`;
+
+const LoaderContainer = styled.div`
+  position: fixed;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+`;
+
+const InnerContianer = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+`;
 const Approve = ({ setBackgroundColor }) => {
   const [showList, setShowList] = useState(false);
   const [list, setList] = useState([]);
@@ -99,11 +129,27 @@ const Approve = ({ setBackgroundColor }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [showVerificationError, setShowVerificationError] = useState(false);
+  const [txPrice, setTxPrice] = useState();
+  const [maticPrice, setMaticPrice] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const user = useSelector(store => store.auth.user);
   const selectedType = JSON.parse(
     localStorage.getItem("current-new-upload-data")
   );
+
+  useEffect(() => {
+    async function getGasPrice() {
+      if (selectedType.name === "Farms") {
+        const gasPrice = await TransactionFee(332738);
+        setTxPrice(gasPrice);
+      } else if (selectedType.name === "Contracts") {
+        const gasPrice = await TransactionFee(472726);
+        setTxPrice(gasPrice);
+      }
+    }
+    getGasPrice();
+  }, []);
 
   useEffect(() => {
     let tempArr = [];
@@ -133,6 +179,22 @@ const Approve = ({ setBackgroundColor }) => {
       });
   }, []);
 
+  useEffect(() => {
+    axios
+      .get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=inr"
+      )
+      .then(res => {
+        setMaticPrice(res.data["matic-network"].inr);
+      })
+      .catch(error => {
+        console.error(error);
+        setShowVerificationError(
+          "Try after sometime to get estimated transaction price in INR"
+        );
+      });
+  }, []);
+
   const handleUploadClick = adminPassword => {
     axios
       .post(
@@ -154,7 +216,7 @@ const Approve = ({ setBackgroundColor }) => {
             JSON.stringify(selectedItem)
           );
           window.location.href = selectedType?.redirection_url;
-          console.log("posted Succssfully ", res.data);
+          console.log("posted Successfully ", res.data);
         }
       });
     setSelectedItem(null);
@@ -178,6 +240,21 @@ const Approve = ({ setBackgroundColor }) => {
           setError={setShowVerificationError}
           selectedEntity={selectedType.name}
           selectedModelType="Approve"
+          warning={
+            selectedType.name === "Farms"
+              ? `Approx cost of creating farm will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
+              : selectedType.name === "Contracts"
+              ? `Approx cost of creating contract will be ${txPrice.toFixed(
+                  3
+                )} matic or Rs.${(txPrice * maticPrice).toFixed(
+                  2
+                )} Are you sure you want to proceed?`
+              : false
+          }
         />
       )}
       <Container>
@@ -209,17 +286,17 @@ const Approve = ({ setBackgroundColor }) => {
           <TableContainer>
             <Table>
               <tr>
-                {tableHeading.map(item => {
-                  return <th>{item.toUpperCase()}</th>;
+                {tableHeading.map((item, index) => {
+                  return <th key={index}>{item.toUpperCase()}</th>;
                 })}
               </tr>
-              {selectedItem?.map(row => {
+              {selectedItem?.map((row, index) => {
                 return (
-                  <tr>
+                  <tr key={index}>
                     {tableHeading.map((item, tdIndex) => {
                       if (tdIndex === 0) {
                         return (
-                          <td>
+                          <td key={`${index}-${item}`}>
                             <StatusImage src={CheckIcon} />
                           </td>
                         );
@@ -228,15 +305,26 @@ const Approve = ({ setBackgroundColor }) => {
                         return row[item].includes(".jpg") ||
                           row[item].includes(".png") ||
                           row[item].includes(".jpeg") ? (
-                          <UrlTd onClick={() => window.open(row[item])}>
+                          <UrlTd
+                            onClick={() => window.open(row[item])}
+                            key={`${index}-${item}`}
+                          >
                             <ImagePreview src={row[item]} />
                           </UrlTd>
                         ) : (
-                          <UrlTd onClick={() => window.open(row[item])}>
+                          <UrlTd
+                            onClick={() => window.open(row[item])}
+                            key={`${index}-${item}`}
+                          >
                             {item}
                           </UrlTd>
                         );
-                      } else return <td>{row[item].toString()}</td>;
+                      } else
+                        return (
+                          <td key={`${index}-${item}`}>
+                            {row[item].toString()}
+                          </td>
+                        );
                     })}
                   </tr>
                 );
