@@ -2,15 +2,16 @@ const Farmer = require("../models/farmers");
 const Farm = require("../models/farms");
 
 const StageAgreement = require("../models/stageAgreement");
+const TestAgreement = require("../models/testAgreement");
 const epocTimeConv = require("../utils/epocTimeConv");
 const Agreement = require("../models/agreements");
 const Web3 = require("web3");
 const marketplaceContractABI = require("../web3/marketPlaceABI");
 const farmNFTContractABI = require("../web3/farmContractABI");
-const csvToJson = require("../utils/csvToJson");
+const ENVIRONMENT = process.env.NODE_ENV.trim();
+
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
-const stageAgreement = require("../models/stageAgreement");
 // const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const { logger } = require("../utils/logger");
@@ -161,6 +162,61 @@ exports.getAgreementsOfCustomer = async (req) => {
       },
     ]);
 
+    const activeContractsWithCustomerDataTest = await TestAgreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          customer_id: userId,
+          agreementclose_status: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
+    ]);
+
     const closeContractsWithCustomerData = await Agreement.aggregate([
       {
         $match: {
@@ -210,11 +266,73 @@ exports.getAgreementsOfCustomer = async (req) => {
       },
     ]);
 
+    const closeContractsWithCustomerDataTest = await TestAgreement.aggregate([
+      {
+        $match: {
+          sold_status: true,
+          customer_id: userId,
+          agreementclose_status: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+    ]);
+
+    if (ENVIRONMENT == "beta") {
+      const concatTestAndRealActive = activeContractsWithCustomerData.concat(
+        activeContractsWithCustomerDataTest
+      );
+      const concatTestAndRealClose = closeContractsWithCustomerData.concat(
+        closeContractsWithCustomerDataTest
+      );
+      response.data = {
+        active: concatTestAndRealActive,
+        close: concatTestAndRealClose,
+      };
+    } else {
+      response.data = {
+        active: activeContractsWithCustomerData,
+        close: closeContractsWithCustomerData,
+      };
+    }
     response.httpStatus = 200;
-    response.data = {
-      active: activeContractsWithCustomerData,
-      close: closeContractsWithCustomerData,
-    };
     logger.log("info", "Data fetch is successful");
   } catch (error) {
     response.httpStatus = 400;
@@ -226,6 +344,7 @@ exports.getAgreementsOfCustomer = async (req) => {
 };
 
 exports.createAgreement = async (req) => {
+  console.log("Inside createAgreement beta test");
   // General response format
   let response = {
     error: null,
@@ -402,16 +521,22 @@ exports.createAgreement = async (req) => {
 
     // updating in stage table and giving data to agreement collection to insert.
 
-    const agreements = await Agreement.create(updatedData, {
-      select: `-_id -stage_status -approval_status -file_name`,
-    });
+    let agreements = null;
 
+    if (ENVIRONMENT == "beta") {
+      agreements = await TestAgreement.create(updatedData, {
+        select: `-_id -stage_status -approval_status -file_name`,
+      });
+    } else {
+      agreements = await Agreement.create(updatedData, {
+        select: `-_id -stage_status -approval_status -file_name`,
+      });
+    }
     // Removing from staging stable
-    const res = await StageAgreement.deleteMany({
+    await StageAgreement.deleteMany({
       _id: { $in: data.map((contr) => contr._id) },
       stage_status: false,
     });
-    console.log("res", res);
 
     response.message = "Data Insertion successful";
     response.httpStatus = 200;
@@ -426,69 +551,7 @@ exports.createAgreement = async (req) => {
   return response;
 };
 
-// exports.getAgreements = async (req) => {
-//   const searchString = req.query.search;
-//   // General response format
-//   let response = {
-//     error: null,
-//     message: null,
-//     httpStatus: null,
-//     data: null,
-//   };
-
-//   try {
-//     //
-//     let match = { sold_status: false };
-//     if (searchString) {
-//       match.farmer_name = { $regex: new RegExp(searchString, "i") };
-//     }
-
-//     const result = await Agreement.aggregate([
-//       { $match: match },
-//       {
-//         $group: {
-//           _id: {
-//             crop: "$crop",
-//             start_date: "$start_date",
-//             end_date: "$end_date",
-//             price: "$price",
-//             area: "$area",
-//             farm_id: "$farm_id",
-//           },
-//           address: { $first: "$address" },
-//           farmer_name: { $first: "$farmer_name" },
-//           agreements: { $push: "$_id" },
-//           ipfs_url: { $push: "$ipfs_url" },
-//           tx_hash: { $push: "$tx_hash" },
-//           agreement_nft_id: { $push: "$agreement_nft_id" },
-//           unit_available: { $sum: 1 },
-//         },
-//       },
-//       {
-//         $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
-//       },
-//       {
-//         $sort: {
-//           "_id.start_date": 1,
-//           "_id.crop": 1,
-//         },
-//       },
-//     ]);
-
-//     response.data = result;
-//     response.httpStatus = 200;
-//     logger.log("info", "Data fetch is successful");
-//   } catch (err) {
-//     response.error = "failed operation";
-//     response.httpStatus = 500;
-//     errorLog(req, err);
-//   }
-
-//   return response;
-// };
-
-// Marketplace both customer & admin
-
+//market place for customer as well as buyer
 exports.getAgreements = async (req) => {
   const searchString = req.query.search;
   // General response format
@@ -504,7 +567,6 @@ exports.getAgreements = async (req) => {
   const skip = (page - 1) * limit;
 
   try {
-    //
     let match = { sold_status: false };
 
     let searchQuery = {};
@@ -517,7 +579,7 @@ exports.getAgreements = async (req) => {
 
     match = { $and: [match, searchQuery] };
 
-    const result = await Agreement.aggregate([
+    const realContractResult = await Agreement.aggregate([
       { $match: match },
       {
         $group: {
@@ -555,10 +617,64 @@ exports.getAgreements = async (req) => {
       },
     ]);
 
-    response.data = {
-      data: result[0].data,
-      totalPages: Math.ceil(result[0].metadata[0].total / limit),
-    };
+    const testContractResult = await TestAgreement.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_available: { $sum: 1 },
+        },
+      },
+      {
+        $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+      },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ]);
+
+    if (ENVIRONMENT == "beta") {
+      const combinedResult = realContractResult[0].data.concat(
+        testContractResult[0].data
+      );
+
+      response.data = {
+        data: combinedResult,
+        totalPages:
+          Math.ceil(
+            realContractResult[0].metadata[0].total / limit +
+              testContractResult[0].metadata[0].total / limit
+          ) - 1,
+      };
+    } else {
+      response.data = {
+        data: realContractResult[0].data,
+        totalPages: Math.ceil(realContractResult[0].metadata[0].total / limit),
+      };
+    }
+
     response.httpStatus = 200;
     logger.log("info", "Data fetch is successful");
   } catch (err) {

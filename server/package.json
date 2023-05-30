@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "SET NODE_ENV=production & node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "beta": "SET NODE_ENV=beta & node app.js"
   },
   "author": "agritech",
   "license": "ISC",
