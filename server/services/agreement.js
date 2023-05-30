@@ -11,10 +11,19 @@ const csvToJson = require("../utils/csvToJson");
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
 const stageAgreement = require("../models/stageAgreement");
-const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
+// const pinata = new pinataSDK({ pinataJWTKey: process.env.IPFS_BEARER_TOKEN });
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
+
+let pinata = "";
+
+// Initialize the pinata object using an asynchronous IIFE
+(async () => {
+  pinata = new pinataSDK({
+    pinataJWTKey: await getKeyFromAWS("IPFS_BEARER_TOKEN"),
+  });
+})();
 
 // Importing for Blockchain
 // const Private_Key = process.env.PRIVATE_KEY;

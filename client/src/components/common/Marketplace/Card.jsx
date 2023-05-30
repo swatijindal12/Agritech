@@ -6,6 +6,7 @@ import Button from "../Button";
 import Flexbox from "../Flexbox";
 import NFTPopup from "../../common/NFTPopup";
 import NewIcon from "../../../assets/new.svg";
+import TestIcon from "../../../assets/dummy.svg";
 
 const Container = styled.div`
   position: relative;
@@ -80,6 +81,13 @@ const PopupContent = styled.p`
 const New = styled.img`
   position: absolute;
   bottom: 1rem;
+  right: 1rem;
+  height: 1rem;
+`;
+
+const Dummy = styled.img`
+  position: absolute;
+  top: 0.8rem;
   right: 1rem;
   height: 1rem;
 `;
@@ -166,6 +174,7 @@ const Card = ({ data, highlight }) => {
             </a>
           ))}
         </Id>
+        {data?._id.price <= 100 && <Dummy src={TestIcon} alt="new tag" />}
         <Flexbox justify="space-between">
           <Name onClick={farmProfile}>{data?.farmer_name}</Name>
           <div>
