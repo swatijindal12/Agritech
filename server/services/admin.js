@@ -2959,8 +2959,8 @@ exports.getAgreementsForAdmin = async (req) => {
 
       let concatTestAndRealActive = [...realDataActive, ...testDataActive];
 
-      let realDataClose = activeContractswithCustomerData[0].data;
-      let testDataClose = activeContractswithCustomerDataTest[0].data;
+      let realDataClose = closeContractswithCustomerData[0].data;
+      let testDataClose = closeContractswithCustomerDataTest[0].data;
 
       let concatTestAndRealClose = [...realDataClose, ...testDataClose];
 
