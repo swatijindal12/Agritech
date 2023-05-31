@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Flexbox from "../../common/Flexbox";
 import NFTPopup from "../../common/NFTPopup";
+import TestIcon from "../../../assets/dummy.svg";
 
 const Container = styled.div`
+  position: relative;
   box-sizing: border-box;
   width: 48%;
   background-color: #f0ead254;
@@ -43,7 +45,7 @@ const Address = styled.p`
 const TypeBox = styled(Flexbox)`
   margin: 1rem 0;
   padding: 1rem;
-  background-color:  #dde5b654;
+  background-color: #dde5b654;
   justify-content: space-between;
 `;
 
@@ -71,6 +73,13 @@ const PopupContent = styled.p`
     max-width: 20rem;
     overflow-x: scroll;
   }
+`;
+
+const Dummy = styled.img`
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  height: 1rem;
 `;
 
 const ClosedCard = ({ data }) => {
@@ -110,6 +119,7 @@ const ClosedCard = ({ data }) => {
             </React.Fragment>
           ))}
         </Id>
+        {data?._id.price <= 100 && <Dummy src={TestIcon} alt="test tag" />}
         <Flexbox justify="space-between" margin="0.3rem 0">
           <Name>{data?.farmer_name}</Name>
           <div>

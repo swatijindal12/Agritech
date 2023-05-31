@@ -176,7 +176,8 @@ const OrderList = () => {
   };
 
   const redirectHandler = NFTId => {
-    window.location.href = `http://agritrustfrontend.s3-website-ap-northeast-1.amazonaws.com/contracts-admin?search=${NFTId}`;
+    console.log("WEB_URL", process.env.REACT_APP_WEB_URL)
+    window.location.href = `${process.env.REACT_APP_WEB_URL}?search=${NFTId}`;
     axios.get(
       `${process.env.REACT_APP_BASE_URL}/admin/agreement?page=1&limit=8&search=${NFTId}`,
       {

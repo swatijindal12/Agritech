@@ -119,15 +119,10 @@ const Contracts = () => {
         }
       )
       .then(res => {
+        console.log("RES DATA IS:", res)
         setLoading(false);
-        if (user?.data.role === "admin") {
-          setActive(res.data.data.active[0].data);
-          setClosed(res.data.data.close[0].data);
-        } else {
-          setActive(res.data.data.active);
-          setClosed(res.data.data.close);
-        }
-
+        setActive(res.data.data.active);
+        setClosed(res.data.data.close);
         if (currentPage === "active") {
           setTotalPage(res.data.data.totalPagesForActive);
         } else if (currentPage === "closed") {
