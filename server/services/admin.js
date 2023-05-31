@@ -6,6 +6,7 @@ const Audit = require("../models/audit");
 const Order = require("../models/order");
 const OrderItem = require("../models/orderItem");
 const Payment = require("../models/payment");
+const TestAgreement = require("../models/testAgreement");
 const StageAgreement = require("../models/stageAgreement");
 const StageFarmer = require("../models/stageFarmer");
 const StageFarm = require("../models/stageFarm");
@@ -17,6 +18,7 @@ const mongoose = require("mongoose");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
+const ENVIRONMENT = process.env.NODE_ENV.trim();
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -366,7 +368,70 @@ exports.getStagedAgreements = async (req) => {
   return response;
 };
 
-// Get Agreement List for admin with Pagination
+// Get Agreement List for admin with Pagination with env check
+// exports.listAgreements = async (req) => {
+//   let response = {
+//     error: null,
+//     message: null,
+//     httpStatus: null,
+//     data: null,
+//   };
+
+//   const page = parseInt(req.query.page);
+//   const limit = parseInt(req.query.limit);
+//   const skip = (page - 1) * limit;
+
+//   const searchQuery = {};
+
+//   if (req.query.search) {
+//     searchQuery["$or"] = [
+//       { farmer_name: new RegExp(req.query.search, "i") },
+//       {
+//         crop: new RegExp(req.query.search, "i"),
+//       },
+//     ];
+//   }
+
+//   try {
+//     let agreementQuery = Agreement.find(searchQuery);
+//     let totalDocuments = await Agreement.countDocuments(searchQuery);
+
+//     if (isNaN(page) && isNaN(limit)) {
+//       // Return all documents
+//       const agreements = await agreementQuery.select("-__v");
+
+//       response.data = agreements;
+//       response.httpStatus = 200;
+//       logger.log("info", "Data fetch is successful");
+//     } else {
+//       // Apply pagination
+//       const agreements = await agreementQuery
+//         .skip(skip)
+//         .limit(limit)
+//         .select("-__v ");
+//       response.httpStatus = 200;
+//       response.data = {
+//         totalPages: Math.ceil(totalDocuments / limit),
+//         data: agreements.map((agreement) => ({
+//           ...agreement._doc,
+//           createdAt: agreement.createdAt.toLocaleString("en-IN", {
+//             timeZone: "Asia/Kolkata",
+//           }),
+//           updatedAt: agreement.updatedAt.toLocaleString("en-IN", {
+//             timeZone: "Asia/Kolkata",
+//           }),
+//         })),
+//       };
+//       logger.log("info", "Data fetch is successful");
+//     }
+//   } catch (error) {
+//     (response.error = "failed operation"), (response.httpStatus = 400);
+//     errorLog(req, error);
+//   }
+//   return response;
+// };
+
+//-----
 exports.listAgreements = async (req) => {
   let response = {
     error: null,
@@ -382,12 +447,9 @@ exports.listAgreements = async (req) => {
   const searchQuery = {};
 
   if (req.query.search) {
-    const searchValue = req.query.search;
     searchQuery["$or"] = [
       { farmer_name: new RegExp(req.query.search, "i") },
-      {
-        crop: new RegExp(req.query.search, "i"),
-      },
+      { crop: new RegExp(req.query.search, "i") },
     ];
   }
 
@@ -395,23 +457,27 @@ exports.listAgreements = async (req) => {
     let agreementQuery = Agreement.find(searchQuery);
     let totalDocuments = await Agreement.countDocuments(searchQuery);
 
-    if (isNaN(page) && isNaN(limit)) {
-      // Return all documents
-      const agreements = await agreementQuery.select("-__v");
-
-      response.data = agreements;
-      response.httpStatus = 200;
-      logger.log("info", "Data fetch is successful");
-    } else {
-      // Apply pagination
-      const agreements = await agreementQuery
+    if (ENVIRONMENT == "beta") {
+      console.log("Inside beta listagreement if condition");
+      const testAgreementQuery = TestAgreement.find(searchQuery);
+      const agreementPromise = agreementQuery
         .skip(skip)
         .limit(limit)
-        .select("-__v ");
+        .select("-__v");
+      const testAgreementPromise = testAgreementQuery
+        .skip(skip)
+        .limit(limit)
+        .select("-__v");
+
+      const [agreements, testAgreements] = await Promise.all([
+        agreementPromise,
+        testAgreementPromise,
+      ]);
+
       response.httpStatus = 200;
       response.data = {
         totalPages: Math.ceil(totalDocuments / limit),
-        data: agreements.map((agreement) => ({
+        data: [...agreements, ...testAgreements].map((agreement) => ({
           ...agreement._doc,
           createdAt: agreement.createdAt.toLocaleString("en-IN", {
             timeZone: "Asia/Kolkata",
@@ -421,16 +487,44 @@ exports.listAgreements = async (req) => {
           }),
         })),
       };
-      logger.log("info", "Data fetch is successful");
+    } else {
+      if (isNaN(page) && isNaN(limit)) {
+        // Return all documents
+        const agreements = await agreementQuery.select("-__v");
+
+        response.data = agreements;
+        response.httpStatus = 200;
+      } else {
+        // Apply pagination
+        const agreements = await agreementQuery
+          .skip(skip)
+          .limit(limit)
+          .select("-__v");
+        response.httpStatus = 200;
+        response.data = {
+          totalPages: Math.ceil(totalDocuments / limit),
+          data: agreements.map((agreement) => ({
+            ...agreement._doc,
+            createdAt: agreement.createdAt.toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
+            updatedAt: agreement.updatedAt.toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
+          })),
+        };
+        logger.log("info", "Data fetch is successful");
+      }
     }
   } catch (error) {
-    (response.error = "failed operation"), (response.httpStatus = 400);
+    response.error = "failed operation";
+    response.httpStatus = 400;
     errorLog(req, error);
   }
   return response;
 };
 
-// Update Agreement Service ::
+// Update Agreement Service
 exports.updateAgreement = async (req) => {
   const userLogged = req.user;
   // General response format
@@ -646,16 +740,32 @@ exports.deleteAgreement = async (req) => {
 
   try {
     // First check agreement is their with id
-    const agreement = await Agreement.findOne({
-      _id: id,
-    });
 
+    let agreement = null;
+    if (ENVIRONMENT == "beta") {
+      agreement = await TestAgreement.findOne({
+        _id: id,
+      });
+    } else {
+      agreement = await Agreement.findOne({
+        _id: id,
+      });
+    }
     if (agreement) {
       // delete the agreement not active one
-      const checkAgreement = await Agreement.deleteOne({
-        _id: id,
-        sold_status: false,
-      });
+      let checkAgreement = "";
+      if (ENVIRONMENT == "beta") {
+        checkAgreement = await TestAgreement.deleteOne({
+          _id: id,
+          sold_status: false,
+        });
+      } else {
+        checkAgreement = await Agreement.deleteOne({
+          _id: id,
+          sold_status: false,
+        });
+      }
+      console.log("checkAgreement ", checkAgreement);
 
       if (checkAgreement.deletedCount) {
         // Update log only when deleted..
@@ -2655,6 +2765,67 @@ exports.getAgreementsForAdmin = async (req) => {
       },
     ]);
 
+    const activeContractswithCustomerDataTest = await TestAgreement.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+            customer_id: "$customer_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+      {
+        $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+      },
+      {
+        $sort: {
+          "_id.start_date": 1,
+          "_id.crop": 1,
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ]);
+
     match = {
       sold_status: true,
       agreementclose_status: true,
@@ -2725,27 +2896,119 @@ exports.getAgreementsForAdmin = async (req) => {
       },
     ]);
 
+    const closeContractswithCustomerDataTest = await TestAgreement.aggregate([
+      {
+        $match: match,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "customer_id",
+          foreignField: "_id",
+          as: "customer_data",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            crop: "$crop",
+            start_date: "$start_date",
+            end_date: "$end_date",
+            price: "$price",
+            area: "$area",
+            farm_id: "$farm_id",
+            customer_id: "$customer_id",
+          },
+          address: { $first: "$address" },
+          farmer_name: { $first: "$farmer_name" },
+          agreements: { $push: "$_id" },
+          ipfs_url: { $push: "$ipfs_url" },
+          tx_hash: { $push: "$tx_hash" },
+          agreement_nft_id: { $push: "$agreement_nft_id" },
+          unit_bought: { $sum: 1 },
+          customer_name: {
+            $first: { $arrayElemAt: ["$customer_data.name", 0] },
+          },
+          customer_email: {
+            $first: { $arrayElemAt: ["$customer_data.email", 0] },
+          },
+          customer_phone: {
+            $first: { $arrayElemAt: ["$customer_data.phone", 0] },
+          },
+          customer_address: {
+            $first: { $arrayElemAt: ["$customer_data.address", 0] },
+          },
+        },
+      },
+      {
+        $match: { farmer_name: { $exists: true } }, // only include documents with farmer_name
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ]);
+
     response.httpStatus = 200;
-    response.data = {
-      active: activeContractswithCustomerData,
-      close: closeContractswithCustomerData,
-      totalPagesForActive:
-        activeContractswithCustomerData[0].metadata.length > 0
-          ? Math.ceil(
-              activeContractswithCustomerData[0].metadata[0].total / limit
-            )
-          : 0,
-      totalPagesForClosed:
-        closeContractswithCustomerData[0].metadata.length > 0
-          ? Math.ceil(
-              closeContractswithCustomerData[0].metadata[0].total / limit
-            )
-          : 0,
-    };
+
+    if (ENVIRONMENT == "beta") {
+      let realDataActive = activeContractswithCustomerData[0].data;
+      let testDataActive = activeContractswithCustomerDataTest[0].data;
+
+      let concatTestAndRealActive = [...realDataActive, ...testDataActive];
+
+      let realDataClose = activeContractswithCustomerData[0].data;
+      let testDataClose = activeContractswithCustomerDataTest[0].data;
+
+      let concatTestAndRealClose = [...realDataClose, ...testDataClose];
+
+      const totalPagesForActive =
+        ((activeContractswithCustomerDataTest[0].metadata.length > 0
+          ? activeContractswithCustomerDataTest[0].metadata[0].total
+          : 0) +
+          (activeContractswithCustomerData[0].metadata.length > 0
+            ? activeContractswithCustomerData[0].metadata[0].total
+            : 0)) /
+        limit;
+
+      const totalPagesForClosed =
+        ((closeContractswithCustomerData[0].metadata.length > 0
+          ? closeContractswithCustomerData[0].metadata[0].total
+          : 0) +
+          (closeContractswithCustomerDataTest[0].metadata.length > 0
+            ? closeContractswithCustomerDataTest[0].metadata[0].total
+            : 0)) /
+        limit;
+      response.data = {
+        active: concatTestAndRealActive,
+        close: concatTestAndRealClose,
+        totalPagesForActive: Math.ceil(totalPagesForActive) - 1,
+        totalPagesForClosed: Math.ceil(totalPagesForClosed) - 1,
+      };
+    } else {
+      response.data = {
+        active: activeContractswithCustomerData[0].data,
+        close: closeContractswithCustomerData[0].data,
+        totalPagesForActive:
+          activeContractswithCustomerData[0].metadata.length > 0
+            ? Math.ceil(
+                activeContractswithCustomerData[0].metadata[0].total / limit
+              )
+            : 0,
+        totalPagesForClosed:
+          closeContractswithCustomerData[0].metadata.length > 0
+            ? Math.ceil(
+                closeContractswithCustomerData[0].metadata[0].total / limit
+              )
+            : 0,
+      };
+    }
+
     logger.log("info", "data fetch successful");
   } catch (error) {
     response.httpStatus = 400;
-    console.log("ERR", error);
     response.error = "failed operation";
     errorLog(req, error);
   }
@@ -3043,115 +3306,6 @@ exports.getAudit = async (req) => {
 
   return response;
 };
-
-//Using Razorpay API
-// exports.getOrderOld = async (req) => {
-//   // General response format
-//   let response = {
-//     error: null,
-//     message: null,
-//     httpStatus: null,
-//     data: null,
-//   };
-
-//   try {
-//     // Parse search parameters from request query
-//     const { orderId } = req.query;
-
-//     // Build search query
-//     const searchQuery = {};
-//     if (orderId) {
-//       searchQuery.order_id = orderId;
-//     }
-
-//     // Count the total number of documents
-//     const totalDocuments = await Payment.countDocuments(searchQuery);
-
-//     // Parse pagination parameters from request query
-//     const { page = 1, limit = 10 } = req.query;
-
-//     // Find all Payment Done that match the search query and apply pagination
-//     const payments = await Payment.find(searchQuery)
-//       .sort({ createdAt: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit);
-
-//     // Creating RazorPay Instance
-//     const instance = new Razorpay({
-//       key_id: process.env.RAZORPAY_KEY_ID,
-//       key_secret: process.env.RAZORPAY_SECRET_KEY,
-//     });
-
-//     const orderList = [];
-
-//     //wait for promise to complete..
-//     await Promise.all(
-//       payments.map(async (payment, index) => {
-//         const payDetail = await instance.payments.fetch(
-//           payment.razorpay_payment_id
-//         );
-
-//         const {
-//           order_id,
-//           amount,
-//           status,
-//           method,
-//           email,
-//           contact,
-//           created_at,
-//           captured,
-//         } = payDetail;
-
-//         const order = await Order.findOne({ razorpay_order_id: order_id });
-
-//         // const orderId = order?._id;
-//         const orderId = order ? order._id : null;
-//         const orderItems = await OrderItem.find({ order_id: orderId }).populate(
-//           {
-//             path: "agreement_id",
-//             select: "agreement_nft_id -_id",
-//           }
-//         );
-
-//         let orderItemsList = [];
-//         orderItems.forEach((item, index) => {
-//           if (item.agreement_id) {
-//             orderItemsList.push(item.agreement_id.agreement_nft_id);
-//           }
-//           // orderItemsList.push(item.agreement_id?.agreement_nft_id);
-//         });
-
-//         orderList.push({
-//           razorpay_order_id: order_id,
-//           orderId,
-//           email,
-//           contact,
-//           amount: amount / 100,
-//           status,
-//           captured,
-//           method,
-//           created_at: new Date(created_at * 1000).toLocaleString(),
-//           orderItemsList,
-//           unit: orderItems.length,
-//         });
-//       })
-//     );
-
-//     //return response
-//     response.data = {
-//       totalPages: Math.ceil(totalDocuments / limit),
-//       data: orderList,
-//     };
-//     response.httpStatus = 200;
-//     logger.log("info", "Data fetch is successful");
-//   } catch (error) {
-//     response.httpStatus = 400;
-//     response.error = `failed operation ${error}`;
-//     errorLog(req, error);
-//   }
-
-//   return response;
-// };
 
 // Return order History
 exports.getOrder = async (req) => {
