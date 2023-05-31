@@ -551,7 +551,7 @@ exports.createAgreement = async (req) => {
   return response;
 };
 
-//market place for customer as well as buyer
+//market place for admin as well as buyer
 exports.getAgreements = async (req) => {
   const searchString = req.query.search;
   // General response format
@@ -662,11 +662,10 @@ exports.getAgreements = async (req) => {
 
       response.data = {
         data: combinedResult,
-        totalPages:
-          Math.ceil(
-            realContractResult[0].metadata[0].total / limit +
-              testContractResult[0].metadata[0].total / limit
-          ) - 1,
+        totalPages: Math.ceil(
+          realContractResult[0].metadata[0].total / limit +
+            testContractResult[0].metadata[0].total / limit
+        ),
       };
     } else {
       response.data = {

@@ -2984,8 +2984,8 @@ exports.getAgreementsForAdmin = async (req) => {
       response.data = {
         active: concatTestAndRealActive,
         close: concatTestAndRealClose,
-        totalPagesForActive: Math.ceil(totalPagesForActive) - 1,
-        totalPagesForClosed: Math.ceil(totalPagesForClosed) - 1,
+        totalPagesForActive: Math.ceil(totalPagesForActive),
+        totalPagesForClosed: Math.ceil(totalPagesForClosed),
       };
     } else {
       response.data = {
