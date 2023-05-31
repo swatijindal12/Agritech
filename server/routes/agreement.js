@@ -24,7 +24,9 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth");
 
 // Route => /api/v1/marketplace/agreement
 // Create agreement (ready for sale)
-router.route("/agreement").post(createAgreement);
+router
+  .route("/agreement")
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createAgreement);
 
 router
   .route("/farm/:id")

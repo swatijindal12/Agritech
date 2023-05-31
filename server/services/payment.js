@@ -4,12 +4,14 @@ const Payment = require("../models/payment");
 const Order = require("../models/order");
 const OrderItem = require("../models/orderItem");
 const Agreement = require("../models/agreements");
+const TestAgreement = require("../models/testAgreement");
 const crypto = require("crypto");
 const Farm = require("../models/farms");
 const { getKeyFromAWS } = require("../config/awsParamsFetcher");
 const emailTransporter = require("../utils/emailTransporter");
 const { logger } = require("../utils/logger");
 const { errorLog } = require("../utils/commonError");
+const ENVIRONMENT = process.env.NODE_ENV.trim();
 
 // Importig PinataSDK For IPFS
 const pinataSDK = require("@pinata/sdk");
@@ -115,10 +117,18 @@ exports.createOrder = async (req) => {
       for (let j = 0; j < agreements[i].agreement_ids.length; j++) {
         const unit_price = agreements[i].unit_price;
 
-        // find the agreement and check for sold_status
-        const agreement = await Agreement.findOne({
-          _id: agreements[i].agreement_ids[j],
-        });
+        let agreement;
+        if (ENVIRONMENT == "beta") {
+          // find the agreement and check for sold_status
+          agreement = await TestAgreement.findOne({
+            _id: agreements[i].agreement_ids[j],
+          });
+        } else {
+          // find the agreement and check for sold_status
+          agreement = await Agreement.findOne({
+            _id: agreements[i].agreement_ids[j],
+          });
+        }
 
         if (agreement && agreement.sold_status) {
           response.error = `Some contract are already bought, add contract again to cart by removing #${agreement.agreement_nft_id}`;
@@ -191,13 +201,24 @@ exports.paymentVerification = async (req) => {
           const order_items = await OrderItem.find({ order_id: id });
 
           for (let i = 0; i < order_items.length; i++) {
-            await Agreement.updateOne(
-              { _id: order_items[i].agreement_id },
-              { sold_status: true, customer_id: userId } // change Made
-            );
-            let single_agreement = await Agreement.findOne({
-              _id: order_items[i].agreement_id,
-            });
+            let single_agreement = "";
+            if (ENVIRONMENT == "beta") {
+              await TestAgreement.updateOne(
+                { _id: order_items[i].agreement_id },
+                { sold_status: true, customer_id: userId } // change Made
+              );
+              single_agreement = await TestAgreement.findOne({
+                _id: order_items[i].agreement_id,
+              });
+            } else {
+              await Agreement.updateOne(
+                { _id: order_items[i].agreement_id },
+                { sold_status: true, customer_id: userId } // change Made
+              );
+              single_agreement = await Agreement.findOne({
+                _id: order_items[i].agreement_id,
+              });
+            }
 
             const Agreement_nft_id = single_agreement.agreement_nft_id;
             //Finding associated Farm

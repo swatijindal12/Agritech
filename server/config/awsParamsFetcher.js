@@ -1,4 +1,4 @@
-const getEnvVariable = require("./privateketAWS");
+const getEnvVariable = require("./privatekeyAWS");
 const NodeCache = require("node-cache");
 const nodeCache = new NodeCache();
 
