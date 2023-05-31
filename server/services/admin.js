@@ -3032,8 +3032,17 @@ exports.closeAgreement = async (req) => {
 
   try {
     // Update ageementClose status to true :-
-    await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
-    let agreementClose = await Agreement.findOne({ _id: id });
+    let agreementClose = null;
+    if (ENVIRONMENT == "beta") {
+      await TestAgreement.updateOne(
+        { _id: id },
+        { agreementclose_status: true }
+      );
+      agreementClose = await TestAgreement.findOne({ _id: id });
+    } else {
+      await Agreement.updateOne({ _id: id }, { agreementclose_status: true });
+      agreementClose = await Agreement.findOne({ _id: id });
+    }
     const farm = await Farm.findOne({ farm_id: agreementClose.farm_id });
 
     const {
