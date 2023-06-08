@@ -104,13 +104,13 @@ const Footer = () => {
             );
           })}
           <CopyRight>
-            &copy;{new Date().getFullYear()} SOUL Societie for Organic Farming R
+            &copy;{new Date().getFullYear()} SOUL Society for Organic Farming R
             & E Pvt. Ltd. All rights reserved.
           </CopyRight>
         </WebInnerContainer>{" "}
       </FooterContainer>{" "}
       <InnerContainer>
-        <Design>Designed & Developed by Hale.</Design>
+        <Design>Designed & Developed by Hale HIT Labs.</Design>
       </InnerContainer>
     </MainContainer>
   );
