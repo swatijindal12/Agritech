@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  front:
+    build: 
+      context: './client'
+      dockerfile: Dockerfile.dev
+
+    ports:
+      - 3000:3000
+    container_name: agritrust-frontend-container
+    volumes:
+      - ./client:/app
+    depends_on:
+      - backend
+
+  backend:
+    build: 
+      context: './server'
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8000:8000
+    container_name: agritrust-backend-container
+
+    volumes:
+      - ./server:/app
+ 
+
