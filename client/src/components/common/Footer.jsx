@@ -6,10 +6,11 @@ import { footerItems } from "../../metaData/footerItem";
 const MainContainer = styled.div`
   background-color: #f0ead2;
   position: ${props => (props.user ? "inherit" : "fixed")}; //fixed;
-  height: 4rem;
+  height: 5rem;
   bottom: 0;
   width: 100%;
   right: 0;
+  padding-bottom: 1rem;
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;
@@ -62,13 +63,15 @@ const CopyRight = styled.div`
 const InnerContainer = styled.div`
   display: flex;
   justify-content: center;
+  bottom: 0;
   margin-top: 0.5rem;
 `;
 
 const Design = styled.p`
   color: #6c584c;
-  margin-top: -0.8rem;
-  margin-bottom: 0.8rem;
+  margin-top: -0.2rem;
+  padding-bottom: 0.5rem;
+  /* margin-bottom: 1rem; */
 `;
 const Footer = () => {
   const [currentFooterItem, setCurrentFooterItem] = useState(null);
