@@ -3,21 +3,23 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { footerItems } from "../../metaData/footerItem";
 
-const FooterContainer = styled.footer`
+const MainContainer = styled.div`
   background-color: #f0ead2;
+  position: ${props => (props.user ? "inherit" : "fixed")}; //fixed;
   height: 4rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   bottom: 0;
   width: 100%;
-  position: ${props => (props.user ? "inherit" : "fixed")}; //fixed;
   right: 0;
   @media only screen and (max-width: 990px) {
     height: auto;
     text-align: left;
     position: ${props => (props.user ? "static" : "relative")};
   }
+`;
+const FooterContainer = styled.footer`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const WebInnerContainer = styled.div`
@@ -57,6 +59,17 @@ const CopyRight = styled.div`
   }
 `;
 
+const InnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+`;
+
+const Design = styled.p`
+  color: #6c584c;
+  margin-top: -0.8rem;
+  margin-bottom: 0.8rem;
+`;
 const Footer = () => {
   const [currentFooterItem, setCurrentFooterItem] = useState(null);
   const user = useSelector(store => store.auth.user);
@@ -70,28 +83,33 @@ const Footer = () => {
   };
 
   return (
-    <FooterContainer user={user}>
-      <WebInnerContainer>
-        {currentFooterItem?.map(footerItem => {
-          return (
-            <FooterItem
-              onClick={() => handleFooterClick(footerItem)}
-              key={footerItem.title}
-              highlight={
-                window.location.pathname === footerItem.url ||
-                window.location.pathname.includes(footerItem.url)
-              }
-            >
-              {footerItem.title}
-            </FooterItem>
-          );
-        })}
-        <CopyRight>
-          &copy;{new Date().getFullYear()} SOUL Societie for Organic Farming R &
-          E Pvt. Ltd. All rights reserved.
-        </CopyRight>
-      </WebInnerContainer>
-    </FooterContainer>
+    <MainContainer user={user}>
+      <FooterContainer user={user}>
+        <WebInnerContainer>
+          {currentFooterItem?.map(footerItem => {
+            return (
+              <FooterItem
+                onClick={() => handleFooterClick(footerItem)}
+                key={footerItem.title}
+                highlight={
+                  window.location.pathname === footerItem.url ||
+                  window.location.pathname.includes(footerItem.url)
+                }
+              >
+                {footerItem.title}
+              </FooterItem>
+            );
+          })}
+          <CopyRight>
+            &copy;{new Date().getFullYear()} SOUL Societie for Organic Farming R
+            & E Pvt. Ltd. All rights reserved.
+          </CopyRight>
+        </WebInnerContainer>{" "}
+      </FooterContainer>{" "}
+      <InnerContainer>
+        <Design>Designed & Developed by Hale.</Design>
+      </InnerContainer>
+    </MainContainer>
   );
 };
 
