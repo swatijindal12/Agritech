@@ -73,6 +73,12 @@ const Design = styled.p`
   padding-bottom: 0.5rem;
   /* margin-bottom: 1rem; */
 `;
+
+const DesignTag = styled.a`
+  color: #6c584c;
+  text-decoration: none;
+`;
+
 const Footer = () => {
   const [currentFooterItem, setCurrentFooterItem] = useState(null);
   const user = useSelector(store => store.auth.user);
@@ -110,7 +116,13 @@ const Footer = () => {
         </WebInnerContainer>{" "}
       </FooterContainer>{" "}
       <InnerContainer>
-        <Design>Designed & Developed by Hale HIT Labs.</Design>
+        <Design>
+          Designed & Developed by{" "}
+          <DesignTag href="https://halehitlabs.com/" target="_blank">
+            Hale HIT Labs
+          </DesignTag>
+          .
+        </Design>
       </InnerContainer>
     </MainContainer>
   );
