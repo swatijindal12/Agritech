@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  react-app:
+    build: 
+      context: ./
+      dockerfile: ./client/docker-setup/react/development/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    env_file:
+      - ./client/.env.local
+
+  # node-app:
+  #   build: 
+  #     context: .
+  #     dockerfile: ./
+  #   volumes:
+  #     - ./:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  #   command: npm run dev
+  
