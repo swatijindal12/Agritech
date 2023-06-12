@@ -77,6 +77,7 @@ const Design = styled.p`
 const DesignTag = styled.a`
   color: #6c584c;
   text-decoration: none;
+  border-bottom: 1px solid #6c584c;
 `;
 
 const Footer = () => {
